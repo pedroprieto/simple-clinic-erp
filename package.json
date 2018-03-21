@@ -1,0 +1,23 @@
+{
+  "name": "simple-clinic-erp",
+  "version": "1.0.0",
+  "description": "ERP for clinic management",
+  "main": "index.js",
+  "scripts": {
+    "test": "NODE_ENV=test mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedroprieto/simple-clinic-erp.git"
+  },
+  "keywords": [
+    "ERP",
+    "clinic"
+  ],
+  "author": "Pedro Prieto",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/pedroprieto/simple-clinic-erp/issues"
+  },
+  "homepage": "https://github.com/pedroprieto/simple-clinic-erp#readme"
+}
