@@ -5,12 +5,12 @@ module.exports = function(router) {
   router.get('patients','/patients', (ctx, next) => {
 
     var patientlist = Patient.find().then(function(patients) {
-      ctx.body = 'Hello Other' + patients ;
+      ctx.body = patients ;
+      return next();
     });
 
     return patientlist;
 
-    // ctx.router available
   });
 
   router.post('/patients', (ctx,next) => {
@@ -21,6 +21,7 @@ module.exports = function(router) {
       return Patient.find();
     }).then(function(plist) {
       ctx.body = 'Hello Post' + plist;
+      return next();
     });
   });
 }

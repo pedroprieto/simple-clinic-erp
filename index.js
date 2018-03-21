@@ -8,13 +8,23 @@ const app = new Koa();
 app.use(bodyParser());
 var router = new Router();
 
+
+
 require('./resources/patients')(router);
 
+
 router.get('/', (ctx, next) => {
-  ctx.body = 'Hello World' + router.url('patients');
+  ctx.body = {"name": "ey"};
+  return next();
   // ctx.router available
 });
 
+
+// Content type
+router.use((ctx, next) => {
+  ctx.type = 'application/vnd.collection+json; charset=utf-8';
+  next();
+});
 
 app
   .use(router.routes())
