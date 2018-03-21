@@ -22,6 +22,8 @@
   "homepage": "https://github.com/pedroprieto/simple-clinic-erp#readme",
   "dependencies": {
     "koa": "^2.5.0",
-    "koa-router": "^7.4.0"
+    "koa-bodyparser": "^4.2.0",
+    "koa-router": "^7.4.0",
+    "mongoose": "^5.0.11"
   }
 }
