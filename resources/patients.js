@@ -5,7 +5,13 @@ module.exports = function(router) {
   router.get('patients','/patients', (ctx, next) => {
 
     var patientlist = Patient.find().then(function(patients) {
-      ctx.body = patients ;
+      var collection = { };
+      //TODO
+      collection.items = patients;
+      collection.links = [];
+      collection.links.push( {prompt: 'Raíz', href: ctx.request.origin + router.url("root"), rel: "root" });
+      collection.links.push( {prompt: 'Pacientes', href: ctx.request.origin + router.url("patients"), rel: "collection" });
+      ctx.body = {collection: collection};
       return next();
     });
 

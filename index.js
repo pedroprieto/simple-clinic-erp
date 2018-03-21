@@ -13,7 +13,7 @@ var router = new Router();
 require('./resources/patients')(router);
 
 
-router.get('/', (ctx, next) => {
+router.get('root', '/', (ctx, next) => {
   ctx.body = {"name": "ey"};
   return next();
   // ctx.router available
