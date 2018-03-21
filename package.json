@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/pedroprieto/simple-clinic-erp/issues"
   },
-  "homepage": "https://github.com/pedroprieto/simple-clinic-erp#readme"
+  "homepage": "https://github.com/pedroprieto/simple-clinic-erp#readme",
+  "dependencies": {
+    "express": "^4.16.3"
+  }
 }
