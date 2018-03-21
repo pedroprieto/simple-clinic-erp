@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/pedroprieto/simple-clinic-erp#readme",
   "dependencies": {
-    "express": "^4.16.3"
+    "koa": "^2.5.0",
+    "koa-router": "^7.4.0"
   }
 }

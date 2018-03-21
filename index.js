@@ -1,6 +1,21 @@
-const express = require('express');
-const app = express();
+const Koa = require('koa');
+var Router = require('koa-router');
 
-app.get('/', (req, res) => res.send('Hello World!'));
+const app = new Koa();
+var router = new Router();
 
-app.listen(3000, () => console.log('Example app listening on port 3000!'));
+router.get('/', (ctx, next) => {
+  ctx.body = 'Hello World' + router.url('other');
+  // ctx.router available
+});
+
+router.get('patients','/patients', (ctx, next) => {
+  ctx.body = 'Hello Other';
+  // ctx.router available
+});
+
+app
+  .use(router.routes())
+  .use(router.allowedMethods());
+
+app.listen(3000);
