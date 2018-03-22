@@ -11,6 +11,7 @@ var router = new Router();
 
 
 require('./resources/patients')(router);
+require('./resources/appointments')(router);
 
 
 router.get('root', '/', (ctx, next) => {
