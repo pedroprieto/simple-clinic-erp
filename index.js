@@ -10,15 +10,9 @@ var router = new Router();
 
 
 
+require('./resources/root')(router);
 require('./resources/patients')(router);
 require('./resources/appointments')(router);
-
-
-router.get('root', '/', (ctx, next) => {
-  ctx.body = {"name": "ey"};
-  return next();
-  // ctx.router available
-});
 
 
 // Content type

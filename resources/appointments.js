@@ -5,7 +5,7 @@ var Moment = require('moment');
 
 module.exports = function(router) {
   // Current week
-  router.get('appointment','/appointments', (ctx, next) => {
+  router.get('appointments','/appointments', (ctx, next) => {
 
     var queryweek = ctx.query.isoweekdate;
 
@@ -29,9 +29,9 @@ module.exports = function(router) {
     collection.items.push( {name: "isoweekdate", value: isoweekdate, prompt: "ISO Week Date"});
 
     collection.links = [];
-    collection.links.push( {prompt: 'Current week', href: ctx.request.origin + router.url("appointment", {query: {isoweekdate: cur_isoweekdate}}), rel: "current" });
-    collection.links.push( {prompt: 'Next week', href: ctx.request.origin + router.url("appointment", {query: {isoweekdate: nextisoweekdate}}), rel: "next" });
-    collection.links.push( {prompt: 'Previous week', href: ctx.request.origin + router.url("appointment", {query: {isoweekdate: previousisoweekdate}}), rel: "previous" });
+    collection.links.push( {prompt: 'Current week', href: ctx.request.origin + router.url("appointments", {query: {isoweekdate: cur_isoweekdate}}), rel: "current" });
+    collection.links.push( {prompt: 'Next week', href: ctx.request.origin + router.url("appointments", {query: {isoweekdate: nextisoweekdate}}), rel: "next" });
+    collection.links.push( {prompt: 'Previous week', href: ctx.request.origin + router.url("appointments", {query: {isoweekdate: previousisoweekdate}}), rel: "previous" });
     collection.links.push( {prompt: 'Raíz', href: ctx.request.origin + router.url("root"), rel: "root" });
     collection.links.push( {prompt: 'Pacientes', href: ctx.request.origin + router.url("patients"), rel: "collection" });
     ctx.body = {collection: collection};
