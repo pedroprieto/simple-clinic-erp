@@ -4,7 +4,8 @@ var bodyParser = require('koa-bodyparser');
 const locale = require('koa-locale'); //  detect the locale
 const i18n = require('koa-i18n');
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/clinic-erp');
+var db_config = require('./config/db.js');
+mongoose.connect(process.env.NODE_ENV!='test'? db_config.db.uri : db_config.db.testuri);
 
 const app = new Koa();
 // Required!
@@ -54,4 +55,12 @@ app.use(async (ctx, next) => {
   ctx.type = 'application/vnd.collection+json; charset=utf-8';
   next();
 });
-app.listen(3000);
+
+// Export server for testing
+var server = module.exports = app.listen(3000);
+
+// When the server is shut down, close mongoose connection
+server.on('close', (e) => {
+  mongoose.connection.close();
+  console.log('closing');
+})

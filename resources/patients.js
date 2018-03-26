@@ -61,7 +61,7 @@ module.exports = function(router) {
       collection.links = [];
       collection.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
       collection.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
-      ctx.body = {collection: collection};
+      ctx.body = collection;
       return next();
     });
 
