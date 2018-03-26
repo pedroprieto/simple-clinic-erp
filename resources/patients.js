@@ -2,15 +2,65 @@
 var Patient = require('../models/patient');
 
 module.exports = function(router) {
-  router.get('patients','/patients', (ctx, next) => {
+
+  function renderCollectionPatients(ctx, patientList) {
+    var col = {};
+    col.version = "1.0";
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["patients"]).href;
+
+	  // Collection title
+    col.title = ctx.getLinkCJFormat(router.routesList["patients"]).prompt;
+
+	  // Collection Links
+
+	  // Items
+	  col.items = patientList.map(function(p) {
+
+	    // Item data
+	    var item = p.toObject({transform: Patient.tx_cj});
+
+      // i18n
+      item.prompt = ctx.i18n.__(item.prompt);
+
+	    // Item href
+      item.href = ctx.getLinkCJFormat(router.routesList["patient"], {patient: p._id});
+
+	    // Item links
+
+	    return item;
+	  });
+
+	  // If no items
+	  if (patientList.length == 0) {
+	    var item = {};
+	    item.data = [];
+	    var d = {};
+	    d.name = "message";
+	    d.prompt = ctx.i18n.__("No hay pacientes");
+	    item.data.push(d);
+	    col.items.push(item);
+	  }
+
+	  // Queries
+
+	  // Template
+
+	  // Return collection object
+	  return {collection: col};
+
+  }
+
+
+  // GET Patient list
+  router.get(router.routesList["patients"].name, router.routesList["patients"].href, (ctx, next) => {
 
     var patientlist = Patient.find().then(function(patients) {
-      var collection = { };
-      //TODO
-      collection.items = patients;
+      var collection = renderCollectionPatients(ctx, patients);
       collection.links = [];
-      collection.links.push( {prompt: 'Raíz', href: ctx.request.origin + router.url("root"), rel: "root" });
-      collection.links.push( {prompt: 'Pacientes', href: ctx.request.origin + router.url("patients"), rel: "collection" });
+      collection.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
+      collection.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
       ctx.body = {collection: collection};
       return next();
     });
@@ -19,15 +69,4 @@ module.exports = function(router) {
 
   });
 
-  router.post('/patients', (ctx,next) => {
-    var data = ctx.request.body;
-    console.log(data);
-    var p = new Patient(data);
-    return p.save().then(function(r) {
-      return Patient.find();
-    }).then(function(plist) {
-      ctx.body = 'Hello Post' + plist;
-      return next();
-    });
-  });
 }
