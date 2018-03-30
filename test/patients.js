@@ -3,6 +3,7 @@ var Patient = require('../models/patient');
 var request = require('supertest');
 var app = require('../index');
 var routesList = require('../routesList');
+var testdata = require('./data/testdata');
 
 describe('Patients resource', function() {
   // Close server after tests
@@ -13,21 +14,8 @@ describe('Patients resource', function() {
 
   it('Create patient', async function() {
 
-    var patient_test = {
-	    template: {
-	      data: [
-		      {name: "givenName", value: "Patient name 1"},
-		      {name: "familyName", value: "Family Name patient 1"},
-		      {name: "taxID", value: "123456789k"},
-		      {name: "birthDate", value: "2018-01-24"},
-		      {name: "telephone", value: "666666666"},
-		      {name: "address", value: "Test address st"},
-		      {name: "email", value: "patient1@email.com"},
-		      {name: "diagnosis", value: "Main diagnosis description."},
-		      {name: "description", value: "Patient 1 additional notes"}
-	      ]
-	    }
-    };
+    var patient_test = testdata.patient_test_template_1;
+
     var response = await request(app.server)
         .post(routesList['patients'].href)
         .set('Accept', 'application/json')
