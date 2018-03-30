@@ -56,8 +56,11 @@ app.use(async (ctx, next) => {
   next();
 });
 
-// Export server for testing
-var server = module.exports = app.listen(3000);
+// Start server and export for testing
+var server = module.exports.server = app.listen(3000);
+
+// export app for testing
+module.exports.app = app;
 
 // When the server is shut down, close mongoose connection
 server.on('close', (e) => {
