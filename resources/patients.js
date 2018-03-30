@@ -48,9 +48,10 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
+	  col.template = Patient.template();
 
 	  // Return collection object
-	  return {collection: col};
+    return col;
 
   }
 
@@ -64,11 +65,11 @@ module.exports = function(router) {
   router.get(router.routesList["patients"].name, router.routesList["patients"].href, (ctx, next) => {
 
     var patientlist = Patient.find().then(function(patients) {
-      var collection = renderCollectionPatients(ctx, patients);
-      collection.links = [];
-      collection.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
-      collection.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
-      ctx.body = collection;
+      var col= renderCollectionPatients(ctx, patients);
+      col.links = [];
+      col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
+      col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+      ctx.body = {collection: col};
       return next();
     });
 
@@ -81,16 +82,15 @@ module.exports = function(router) {
 
 	  var patients = [];
 	  patients.push(patient);
-    var collection = renderCollectionPatients(ctx, patients);
-    collection.links = [];
-    collection.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
-    collection.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
-    ctx.body = collection;
+    var col = renderCollectionPatients(ctx, patients);
+    col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    ctx.body = {collection: col};
     return next();
   });
 
   router.post(router.routesList["patients"].href, (ctx,next) => {
-	  
 	  if ((ctx.request.body.template === undefined) || (ctx.request.body.template.data === undefined) || (!Array.isArray(ctx.request.body.template.data))) {
       ctx.status = 400;
       var col = {};

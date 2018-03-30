@@ -1,69 +1,54 @@
-var mongoose = require('mongoose');
+var basemodel = require('./basemodel');
 
-var patientSchema = mongoose.Schema({
-  givenName: String,
-  familyName: String,
-  taxID: String,
-  birthDate: Date,
-  telephone: String,
-  address: String,
-  email: String,
-  diagnosis: String,
-  description: String
-});
-
-
-// Data types
-patientSchema.statics.datatypes = {
-  givenName: "text",
-  familyName: "text",
-  taxID: "text",
-  birthDate: "date",
-  telephone: "tel",
-  address: "text",
-  email: "email",
-  diagnosis: "textarea",
-  description: "textarea"
-};
-
-// Prompt messages
-patientSchema.statics.prompts = {
-  givenName: "Nombre",
-  familyName: "Apellidos",
-  taxID: "NIF",
-  birthDate: "Fecha de nacimiento",
-  telephone: "Teléfono",
-  address: "Dirección",
-  email: "Email",
-  diagnosis: "Diagnóstico principal",
-  description: "Observaciones"
-};
-
-
-// Static function to convert data to Collection + JSON format
-// Used by method toObject()
-patientSchema.statics.tx_cj = function (doc, ret, options) {
-  var data = [];
-
-  // Delete _id and __v fields
-  delete ret._id;
-  delete ret.__v;
-
-  for(var p in ret) {
-
-	  data.push({
-      name : p,
-      value : ret[p],
-      prompt :  patientSchema.statics.prompts[p],
-      type: patientSchema.statics.datatypes[p]
-	  });
+var patientSchema = {
+  givenName: {
+    type: String,
+    promptCJ: "Nombre",
+    htmlType: "text"
+  },
+  familyName: {
+    type: String,
+    promptCJ: "Apellidos",
+    htmlType: "text"
+  },
+  taxID: {
+    type: String,
+    promptCJ: "NIF",
+    htmlType: "text"
+  },
+  birthDate: {
+    type: Date,
+    promptCJ: "Fecha de nacimiento",
+    htmlType: "date"
+  },
+  telephone: {
+    type: String,
+    promptCJ: "Teléfono",
+    htmlType: "tel"
+  },
+  address: {
+    type: String,
+    promptCJ: "Dirección",
+    htmlType: "text"
+  },
+  email: {
+    type: String,
+    promptCJ: "Email",
+    htmlType: "email"
+  },
+  diagnosis: {
+    type: String,
+    promptCJ: "Diagnóstico principal",
+    htmlType: "textarea"
+  },
+  description: {
+    type: String,
+    promptCJ: "Observaciones",
+    htmlType: "textarea"
   }
-
-  return data;
-
 };
 
 
-var Patient = mongoose.model('Patient', patientSchema);
+var Patient = basemodel('Patient', patientSchema);
 
 module.exports = Patient;
