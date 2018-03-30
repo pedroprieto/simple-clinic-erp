@@ -45,6 +45,29 @@ require('./resources/root')(router);
 require('./resources/patients')(router);
 require('./resources/appointments')(router);
 
+// Error processing
+app.use(async (ctx, next) => {
+  try {
+    await next();
+  } catch (err) {
+    ctx.status = err.status || 500;
+    // Show info if error is not 500
+    if (err.expose) {
+      if (!(ctx.body && ctx.body.collection)) {
+        ctx.body = {};
+        ctx.body.collection = {};
+        ctx.body.colllection.version = "1.0";
+      }
+      var err_col = {};
+      err_col.title = ctx.i18n.__("Error");
+      err_col.code = err.status;
+      err_col.message = ctx.i18n.__(err.message);
+
+      ctx.body.collection.error = err_col;
+    }
+    ctx.app.emit('error', err, ctx);
+  }
+});
 
 app
   .use(router.routes())
