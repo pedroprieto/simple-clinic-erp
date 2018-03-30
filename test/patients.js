@@ -12,7 +12,7 @@ describe('Patients resource', function() {
     done();
   });
 
-  it('Create patient', async function() {
+  it('Patient CRUD test', async function() {
 
     var patient_test = testdata.patient_test_template_1;
 
@@ -37,6 +37,27 @@ describe('Patients resource', function() {
         .set('Accept', 'application/json')
         .expect(200);
     response3.body.collection.should.have.property('items').with.lengthOf(1);
+
+    // UPDATE item
+    var newname = "New name";
+    patient_test.template.data[0].value = newname;
+    var response4 = await request('')
+        .put(url_created_patient)
+        .set('Accept', 'application/json')
+	      .send(patient_test)
+        .expect(200);
+    var c = response4.body.collection;
+    c.should.have.property('items').with.lengthOf(1);
+    c.items[0].data[0].value.should.equal(newname);
+
+    // Remove item
+    var response5 = await request('')
+        .delete(url_created_patient)
+        .set('Accept', 'application/json')
+        .expect(200);
+    var col = response5.body.collection;
+    col.should.have.property('items').with.lengthOf(1);
+    col.items[0].data[0].name.should.equal('message');
 
   });
 });
