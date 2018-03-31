@@ -44,6 +44,7 @@ app.context.getLinkCJFormat = function(link, ...params) {
 require('./resources/root')(router);
 require('./resources/patients')(router);
 require('./resources/doctors')(router);
+require('./resources/doctorSchedule')(router);
 require('./resources/appointments')(router);
 
 // Error processing

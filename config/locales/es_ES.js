@@ -18,5 +18,10 @@
 	"No hay médicos": "No hay médicos",
 	"Médicos": "Médicos",
 	"Recurso no encontrado": "Recurso no encontrado",
-	"Médico": "Médico"
+	"Médico": "Médico",
+	"Horario del médico": "Horario del médico",
+	"No hay horario para el médico": "No hay horario para el médico",
+	"Día de la semana": "Día de la semana",
+	"Desde": "Desde",
+	"Hasta": "Hasta"
 }

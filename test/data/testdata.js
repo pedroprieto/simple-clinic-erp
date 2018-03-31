@@ -25,5 +25,23 @@ module.exports = {
 		    {name: "email", value: "doctor@email.com"}
 	    ]
 	  }
+  },
+  doctor_opening_hour_1: {
+    template: {
+      data: [
+        {name: "dayOfWeek", value: "Lunes"},
+        {name: "opens", value: "10:00"},
+        {name: "closes", value: "14:00"}
+      ]
+    }
+  },
+  doctor_opening_hour_2: {
+    template: {
+      data: [
+        {name: "dayOfWeek", value: "Martes"},
+        {name: "opens", value: "11:00"},
+        {name: "closes", value: "14:00"}
+      ]
+    }
   }
 }

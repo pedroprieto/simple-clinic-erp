@@ -32,7 +32,7 @@ module.exports = function(router) {
 	    // Item links
       item.links = [];
       // Doctor schedule link
-      item.links.push = ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: p._id}).href;
+      item.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: p._id}));
 
 	    return item;
 	  });
