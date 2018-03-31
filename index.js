@@ -43,6 +43,7 @@ app.context.getLinkCJFormat = function(link, ...params) {
 // Resources
 require('./resources/root')(router);
 require('./resources/patients')(router);
+require('./resources/doctors')(router);
 require('./resources/appointments')(router);
 
 // Error processing
@@ -56,7 +57,7 @@ app.use(async (ctx, next) => {
       if (!(ctx.body && ctx.body.collection)) {
         ctx.body = {};
         ctx.body.collection = {};
-        ctx.body.colllection.version = "1.0";
+        ctx.body.collection.version = "1.0";
       }
       var err_col = {};
       err_col.title = ctx.i18n.__("Error");

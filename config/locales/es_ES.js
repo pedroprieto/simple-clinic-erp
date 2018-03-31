@@ -14,5 +14,9 @@
 	"Diagnóstico principal": "Diagnóstico principal",
 	"Observaciones": "Observaciones",
 	"Error": "Error",
-	"Los datos no están en formato CJ": "Los datos no están en formato CJ"
+	"Los datos no están en formato CJ": "Los datos no están en formato CJ",
+	"No hay médicos": "No hay médicos",
+	"Médicos": "Médicos",
+	"Recurso no encontrado": "Recurso no encontrado",
+	"Médico": "Médico"
 }

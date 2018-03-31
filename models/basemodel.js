@@ -13,12 +13,14 @@ module.exports = function(schema_name, schema_skel) {
     delete ret.__v;
 
     for(var p in ret) {
-	    data.push({
-        name : p,
-        value : ret[p],
-        prompt :  doc.schema.obj[p].promptCJ,
-        type: doc.schema.obj[p].htmlType
-	    });
+	    if (p.substring(0,1) != '_') {
+	      data.push({
+          name : p,
+          value : ret[p],
+          prompt :  doc.schema.obj[p].promptCJ,
+          type: doc.schema.obj[p].htmlType
+	      });
+      }
     }
     return data;
   };
