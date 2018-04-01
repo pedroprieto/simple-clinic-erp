@@ -45,6 +45,7 @@ require('./resources/root')(router);
 require('./resources/patients')(router);
 require('./resources/doctors')(router);
 require('./resources/doctorSchedule')(router);
+require('./resources/rooms')(router);
 require('./resources/appointments')(router);
 
 // Error processing

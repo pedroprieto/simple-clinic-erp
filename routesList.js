@@ -21,7 +21,7 @@ module.exports = {
     name: "doctors",
     href: "/doctors",
     rel: "collection",
-    prompt: "Médico"
+    prompt: "Médicos"
   },
   doctor: {
     name: "doctor",
@@ -40,5 +40,17 @@ module.exports = {
     href: "/doctors/:doctor/schedule/:openingHour",
     rel: "collection",
     prompt: "Franja del horario"
-  }
+  },
+  rooms: {
+    name: "rooms",
+    href: "/rooms",
+    rel: "collection",
+    prompt: "Salas"
+  },
+  room: {
+    name: "room",
+    href: "/rooms/:room",
+    rel: "collection",
+    prompt: "Sala"
+  },
 };

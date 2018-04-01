@@ -43,5 +43,13 @@ module.exports = {
         {name: "closes", value: "14:00"}
       ]
     }
+  },
+  room_test_template_1: {
+    template: {
+      data: [
+        {name: "name", value: "Room number 1"},
+        {name: "capacity", value: 1}
+      ]
+    }
   }
 }

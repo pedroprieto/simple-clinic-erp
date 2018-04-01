@@ -23,5 +23,8 @@
 	"No hay horario para el médico": "No hay horario para el médico",
 	"Día de la semana": "Día de la semana",
 	"Desde": "Desde",
-	"Hasta": "Hasta"
+	"Hasta": "Hasta",
+	"No hay salas": "No hay salas",
+	"Salas": "Salas",
+	"Plazas disponibles": "Plazas disponibles"
 }
