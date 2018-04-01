@@ -128,9 +128,9 @@ module.exports = function(router) {
   router.post(router.routesList["doctorSchedule"].href, async (ctx,next) => {
     var openingHourData= await parseTemplate(ctx);
     var p = new OpeningHour(openingHourData);
+    var psaved = await p.save();
     ctx.doctor._schedule.push(p._id);
     var dsaved = await ctx.doctor.save();
-    var psaved = await p.save();
     var doctorPopulated = await ctx.doctor.populate('_schedule').execPopulate();
     var col= renderCollectionOpeningHours(ctx, doctorPopulated._schedule);
     ctx.body = {collection: col};
