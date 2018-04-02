@@ -1,4 +1,5 @@
-var basemodel = require('./basemodel');
+var baseschema = require('./baseschema');
+var mongoose = require('mongoose');
 
 var patientSchema = {
   givenName: {
@@ -49,6 +50,7 @@ var patientSchema = {
 };
 
 
-var Patient = basemodel('Patient', patientSchema);
+var PatientSchema = baseschema(patientSchema);
+var Patient = mongoose.model('Patient', PatientSchema);
 
 module.exports = Patient;

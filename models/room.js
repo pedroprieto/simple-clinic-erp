@@ -1,4 +1,4 @@
-var basemodel = require('./basemodel');
+var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
 
 var roomSchema = {
@@ -16,6 +16,7 @@ var roomSchema = {
 };
 
 
-var Room = basemodel('Room', roomSchema);
+var RoomSchema = baseschema(roomSchema);
+var Room = mongoose.model('Room', RoomSchema);
 
 module.exports = Room;

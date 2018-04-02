@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-module.exports = function(schema_name, schema_skel) {
+module.exports = function(schema_skel) {
   var schema = mongoose.Schema(schema_skel);
 
   // Static function to convert data to Collection + JSON format
@@ -55,7 +55,6 @@ module.exports = function(schema_name, schema_skel) {
     return template;
   }
 
-  var model = mongoose.model(schema_name, schema);
-  return model;
+  return schema;
 
 }

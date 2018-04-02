@@ -1,4 +1,5 @@
-var basemodel = require('./basemodel');
+var baseschema = require('./baseschema');
+var mongoose = require('mongoose');
 
 var openingHourSchema = {
   dayOfWeek: {
@@ -24,6 +25,7 @@ var openingHourSchema = {
   }};
 
 
-var OpeningHour = basemodel('OpeningHour', openingHourSchema);
+var OpeningHourSchema = baseschema(openingHourSchema);
+var OpeningHour = mongoose.model('OpeningHour', OpeningHourSchema);
 
 module.exports = OpeningHour;

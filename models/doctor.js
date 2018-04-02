@@ -1,4 +1,4 @@
-var basemodel = require('./basemodel');
+var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
 
 var doctorSchema = {
@@ -44,6 +44,7 @@ var doctorSchema = {
 };
 
 
-var Doctor = basemodel('Doctor', doctorSchema);
+var DoctorSchema = baseschema(doctorSchema);
+var Doctor = mongoose.model('Doctor', DoctorSchema);
 
 module.exports = Doctor;
