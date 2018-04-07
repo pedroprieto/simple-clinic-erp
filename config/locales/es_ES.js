@@ -26,5 +26,9 @@
 	"Hasta": "Hasta",
 	"No hay salas": "No hay salas",
 	"Salas": "Salas",
-	"Plazas disponibles": "Plazas disponibles"
+	"Plazas disponibles": "Plazas disponibles",
+	"Tipos de sesión": "Tipos de sesión",
+	"Duración": "Duración",
+	"Precio": "Precio",
+	"Sala": "Sala"
 }

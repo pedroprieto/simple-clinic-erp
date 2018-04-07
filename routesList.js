@@ -53,4 +53,16 @@ module.exports = {
     rel: "collection",
     prompt: "Sala"
   },
+  medicalProcedures: {
+    name: "medicalProcedures",
+    href: "/medicalprocedures",
+    rel: "collection",
+    prompt: "Tipos de sesión"
+  },
+  medicalProcedure: {
+    name: "medicalProcedure",
+    href: "/medicalprocedures/:medicalprocedure",
+    rel: "collection",
+    prompt: "Tipo de sesión"
+  }
 };

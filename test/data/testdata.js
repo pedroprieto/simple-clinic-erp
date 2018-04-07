@@ -51,5 +51,14 @@ module.exports = {
         {name: "capacity", value: 1}
       ]
     }
+  },
+  medicalProcedure_test_template_1: {
+    template: {
+      data: [
+        {name: "name", value: "Medical Procedure #1"},
+        {name: "duration", value: "00:45"},
+        {name: "price", value: 25}
+      ]
+    }
   }
 }
