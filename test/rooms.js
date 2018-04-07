@@ -35,7 +35,7 @@ describe('Rooms resource', function() {
     var newname = "New name";
     var newcapacity = 5;
     room_test.template.data[0].value = newname;
-    room_test.template.data[1].value = 5;
+    room_test.template.data[1].value = newcapacity;
     var response4 = await request('')
         .put(url_created_room)
         .set('Accept', 'application/json')
