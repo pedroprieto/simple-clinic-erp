@@ -47,7 +47,7 @@ require('./resources/doctors')(router);
 require('./resources/doctorSchedule')(router);
 require('./resources/rooms')(router);
 require('./resources/medicalProcedures')(router);
-require('./resources/appointments')(router);
+require('./resources/consultation')(router);
 
 // Error processing
 app.use(async (ctx, next) => {

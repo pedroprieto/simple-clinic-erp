@@ -45,6 +45,11 @@ var doctorSchema = {
 
 
 var DoctorSchema = baseschema(doctorSchema);
+
+DoctorSchema.virtual('fullName').get(function () {
+  return this.givenName + ' ' + this.familyName;
+});
+
 var Doctor = mongoose.model('Doctor', DoctorSchema);
 
 module.exports = Doctor;

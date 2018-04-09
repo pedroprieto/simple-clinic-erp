@@ -60,5 +60,12 @@ module.exports = {
         {name: "price", value: 25}
       ]
     }
+  },
+  consultation_test_template_1: {
+    template: {
+      data: [
+        {name: "date", value: "2018-04-09"}
+      ]
+    }
   }
 }

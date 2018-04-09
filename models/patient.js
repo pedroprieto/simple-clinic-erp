@@ -51,6 +51,10 @@ var patientSchema = {
 
 
 var PatientSchema = baseschema(patientSchema);
+PatientSchema.virtual('fullName').get(function () {
+  return this.givenName + ' ' + this.familyName;
+});
+
 var Patient = mongoose.model('Patient', PatientSchema);
 
 module.exports = Patient;

@@ -30,5 +30,9 @@
 	"Tipos de sesión": "Tipos de sesión",
 	"Duración": "Duración",
 	"Precio": "Precio",
-	"Sala": "Sala"
+	"Sala": "Sala",
+	"No hay consultas": "No hay consultas",
+	"Consultas": "Consultas",
+	"Fecha": "Fecha",
+	"Tipo de sesión": "Tipo de sesión"
 }
