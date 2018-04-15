@@ -9,7 +9,6 @@ module.exports = function(router) {
     collection.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     collection.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     collection.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
-    collection.links.push(ctx.getLinkCJFormat(router.routesList["consultations"]));
     ctx.body = {collection: collection};
     return next();
   });

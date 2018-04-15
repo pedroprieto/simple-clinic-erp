@@ -18,7 +18,6 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"]));
 
 	  // Items
 	  col.items = doctorList.map(function(p) {
@@ -34,6 +33,8 @@ module.exports = function(router) {
       item.links = [];
       // Doctor schedule link
       item.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: p._id}));
+      // Doctor consultations
+      item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
 
 	    return item;
 	  });

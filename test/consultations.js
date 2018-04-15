@@ -17,25 +17,29 @@ describe('Consultations resource', function() {
     var room_test = testdata.room_test_template_1;
     var patient_test = testdata.patient_test_template_1;
     var doctor_test = testdata.doctor_test_template_1;
+    var response;
 
     // GET consultation list to get template. Check 'related' object to see available doctors, patients and medicalProcedures
-    response = await request(app.server)
-      .get(routesList['consultations'].href)
-      .set('Accept', 'application/json')
-      .expect(200);
-    // Expect empty related doctors array
-    response.body.collection.related.should.have.property('doctors').with.lengthOf(0);
-    // Expect empty related patients array
-    response.body.collection.related.should.have.property('patients').with.lengthOf(0);
-    // Expect empty related medicalProcedures array
-    response.body.collection.related.should.have.property('medicalProcedures').with.lengthOf(0);
+    // response = await request(app.server)
+    //   .get(routesList['consultations'].href)
+    //   .set('Accept', 'application/json')
+    //   .expect(200);
+    // // Expect empty related doctors array
+    // response.body.collection.related.should.have.property('doctors').with.lengthOf(0);
+    // // Expect empty related patients array
+    // response.body.collection.related.should.have.property('patients').with.lengthOf(0);
+    // // Expect empty related medicalProcedures array
+    // response.body.collection.related.should.have.property('medicalProcedures').with.lengthOf(0);
 
     // Create doctor
-    var response = await request(app.server)
+    response = await request(app.server)
         .post(routesList['doctors'].href)
         .set('Accept', 'application/json')
 	      .send(doctor_test)
         .expect(201);
+
+    // Store link to doctor consultations
+    var consultations_url = response.body.collection.items[0].links[1].href;
 
     // Create patient
     response = await request(app.server)
@@ -75,30 +79,22 @@ describe('Consultations resource', function() {
       .expect(201);
 
     // GET consultation list to get template. Check 'related' object to see available doctors, patients and medicalProcedures
-    response = await request(app.server)
-      .get(routesList['consultations'].href)
+    response = await request('')
+      .get(consultations_url)
       .set('Accept', 'application/json')
       .expect(200);
     // Check template data length
-    response.body.collection.template.should.have.property('data').with.lengthOf(4);
+    response.body.collection.template.should.have.property('data').with.lengthOf(3);
     // Store 'suggest' field for patient
     var patient_suggest = response.body.collection.template.data[1].suggest;
     // Store 'suggest' field for medicalProcedure
     var medicalProcedure_suggest = response.body.collection.template.data[2].suggest;
-    // Store 'suggest' field for doctor
-    var doctor_suggest = response.body.collection.template.data[3].suggest;
 
-    response.body.collection.template.should.have.property('data').with.lengthOf(4);
-    // Expect one doctor available
-    response.body.collection.related.should.have.property(doctor_suggest.related).with.lengthOf(1);
     // Expect one patient available
     response.body.collection.related.should.have.property(patient_suggest.related).with.lengthOf(1);
     // Expect one medicalProcedures available
     response.body.collection.related.should.have.property(medicalProcedure_suggest.related).with.lengthOf(1);
 
-    // Store doctor id
-    var doctor_id = response.body.collection.related[doctor_suggest.related][0][doctor_suggest.value];
-    var doctor_name = response.body.collection.related[doctor_suggest.related][0][doctor_suggest.text];
     // Store patient id
     var patient_id = response.body.collection.related[patient_suggest.related][0][patient_suggest.value];
     var patient_name = response.body.collection.related[patient_suggest.related][0][patient_suggest.text];
@@ -107,13 +103,12 @@ describe('Consultations resource', function() {
     var medicalProcedure_name = response.body.collection.related[medicalProcedure_suggest.related][0][medicalProcedure_suggest.text];
 
     // Associate doctor, patient and medicalProcedure to consultation template
-    consultation_test.template.data.push({name: 'doctor', value: doctor_id});
     consultation_test.template.data.push({name: 'patient', value: patient_id});
     consultation_test.template.data.push({name: 'medicalProcedure', value: medicalProcedure_id});
 
     // Create consultation
-    response = await request(app.server)
-        .post(routesList['consultations'].href)
+    response = await request('')
+        .post(consultations_url)
         .set('Accept', 'application/json')
 	      .send(consultation_test)
         .expect(201);
@@ -127,24 +122,19 @@ describe('Consultations resource', function() {
     var item = response.body.collection.items[0];
     item.href.should.equal(url_created_consultation);
 
-
-    // Check item 'doctor' data
-    response.body.collection.items[0].data[1].value.should.equal(doctor_id);
-    response.body.collection.items[0].data[1].text.should.equal(doctor_name);
-
     // Check item 'patient' data
-    response.body.collection.items[0].data[2].value.should.equal(patient_id);
-    response.body.collection.items[0].data[2].text.should.equal(patient_name);
+    response.body.collection.items[0].data[1].value.should.equal(patient_id);
+    response.body.collection.items[0].data[1].text.should.equal(patient_name);
 
     // Check item 'medicalProcedure' data
-    response.body.collection.items[0].data[3].value.should.equal(medicalProcedure_id);
-    response.body.collection.items[0].data[3].text.should.equal(medicalProcedure_name);
+    response.body.collection.items[0].data[2].value.should.equal(medicalProcedure_id);
+    response.body.collection.items[0].data[2].text.should.equal(medicalProcedure_name);
 
     // GET consultation list and check item length
-    response = await request(app.server)
-        .get(routesList['consultations'].href)
-        .set('Accept', 'application/json')
-        .expect(200);
+    response = await request('')
+      .get(consultations_url)
+      .set('Accept', 'application/json')
+      .expect(200);
     response.body.collection.should.have.property('items').with.lengthOf(1);
 
     // UPDATE item

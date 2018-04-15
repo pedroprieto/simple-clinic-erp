@@ -18,7 +18,6 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"]));
 
 	  // Items
 	  col.items = openingHourList.map(function(p) {

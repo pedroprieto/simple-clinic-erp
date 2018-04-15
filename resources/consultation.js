@@ -12,17 +12,16 @@ module.exports = function(router) {
     col.version = "1.0";
 
 	  // Collection href
-    col.href= ctx.getLinkCJFormat(router.routesList["consultations"]).href;
+    col.href= ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultations"]).prompt;
+    col.title = ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).prompt;
 
 	  // Collection Links
     col.links = [];
     col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"]));
 
 	  // Items
 	  // Item data
@@ -55,7 +54,7 @@ module.exports = function(router) {
       }
 
 	    // Item href
-      item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: p._id}).href;
+      item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: p._id}).href;
 
 	    // Item links
 
@@ -83,13 +82,13 @@ module.exports = function(router) {
     // Related
     col.related = {};
 
-    var doctor_list = await Doctor.find();
-    col.related.doctors = doctor_list.map(function (doc) {
-      var d = {};
-      d._id = doc._id;
-      d.fullName = doc.fullName;
-      return d;
-    });
+    // var doctor_list = await Doctor.find();
+    // col.related.doctors = doctor_list.map(function (doc) {
+    //   var d = {};
+    //   d._id = doc._id;
+    //   d.fullName = doc.fullName;
+    //   return d;
+    // });
 
     var patient_list = await Patient.find();
     col.related.patients= patient_list.map(function (doc) {
@@ -142,9 +141,9 @@ module.exports = function(router) {
     var consultations = await Consultation.find({date: { $gt: displayed_date.clone().startOf('isoWeek'), $lt: displayed_date.clone().endOf('isoWeek') }}).populate(['patient', 'doctor', 'medicalProcedure']).exec();
     var col= await renderCollectionConsultations(ctx, consultations);
 
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{query: {isoweekdate: cur_isoweekdate}} ));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{query: {isoweekdate: nextisoweekdate}} ));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{query: {isoweekdate: previousisoweekdate}} ));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: cur_isoweekdate}} ));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: nextisoweekdate}} ));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: previousisoweekdate}} ));
 
     ctx.body = {collection: col};
     return next();
@@ -204,7 +203,7 @@ module.exports = function(router) {
   // POST
   router.post(router.routesList["consultations"].href, async (ctx,next) => {
     var consultationData = await parseTemplate(ctx);
-    var associated_doctor = await Doctor.findById(consultationData.doctor);
+    var associated_doctor = await Doctor.findById(ctx.doctor._id);
     var associated_patient = await Patient.findById(consultationData.patient);
     var associated_medicalProcedure= await MedicalProcedure.findById(consultationData.medicalProcedure);
     //TODO
@@ -220,7 +219,7 @@ module.exports = function(router) {
       var col= await renderCollectionConsultations(ctx, consultations);
       ctx.body = {collection: col};
       ctx.status = 201;
-      ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: psaved._id}).href);
+      ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href);
       return next();
     }
   });

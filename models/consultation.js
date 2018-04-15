@@ -44,18 +44,19 @@ ConsultationSchema.statics.template_suggest = function (item) {
       var v = (typeof item !== 'undefined') ? item[p].value : '';
       var el;
       if (p === 'doctor') {
-	      el = {
-		      name : p,
-		      value: v,
-          text: ((typeof item !== 'undefined') ? item[p].text : ''),
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType,
-          suggest: {
-            related: 'doctors',
-            value: '_id',
-            text: 'fullName'
-          }
-	      };
+	      // el = {
+		    //   name : p,
+		    //   value: v,
+        //   text: ((typeof item !== 'undefined') ? item[p].text : ''),
+        //   prompt :  this.schema.obj[p].promptCJ,
+        //   type: this.schema.obj[p].htmlType,
+        //   suggest: {
+        //     related: 'doctors',
+        //     value: '_id',
+        //     text: 'fullName'
+        //   }
+	      // };
+        continue;
       } else if (p === 'patient') {
 	      el = {
 		      name : p,

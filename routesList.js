@@ -67,13 +67,13 @@ module.exports = {
   },
   consultations: {
     name: "consultations",
-    href: "/api/consultations",
+    href: "/api/doctors/:doctor/consultations",
     rel: "collection",
     prompt: "Consultas"
   },
   consultation: {
     name: "consultation",
-    href: "/api/consultations/:consultation",
+    href: "/api/doctors/:doctor/consultations/:consultation",
     rel: "collection",
     prompt: "Consulta"
   }
