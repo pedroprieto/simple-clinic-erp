@@ -1,79 +1,79 @@
 module.exports = {
   root: {
     name: "root",
-    href: "/",
+    href: "/api",
     rel: "collection",
     prompt: "Raíz"
   },
   patients: {
     name: "patients",
-    href: "/patients",
+    href: "/api/patients",
     rel: "collection",
     prompt: "Pacientes"
   },
   patient: {
     name: "patient",
-    href: "/patients/:patient",
+    href: "/api/patients/:patient",
     rel: "collection",
     prompt: "Paciente"
   },
   doctors: {
     name: "doctors",
-    href: "/doctors",
+    href: "/api/doctors",
     rel: "collection",
     prompt: "Médicos"
   },
   doctor: {
     name: "doctor",
-    href: "/doctors/:doctor",
+    href: "/api/doctors/:doctor",
     rel: "collection",
     prompt: "Médico"
   },
   doctorSchedule: {
     name: "doctorSchedule",
-    href: "/doctors/:doctor/schedule",
+    href: "/api/doctors/:doctor/schedule",
     rel: "collection",
     prompt: "Horario del médico"
   },
   doctorScheduleOpeningHour: {
     name: "doctorScheduleOpeningHour",
-    href: "/doctors/:doctor/schedule/:openingHour",
+    href: "/api/doctors/:doctor/schedule/:openingHour",
     rel: "collection",
     prompt: "Franja del horario"
   },
   rooms: {
     name: "rooms",
-    href: "/rooms",
+    href: "/api/rooms",
     rel: "collection",
     prompt: "Salas"
   },
   room: {
     name: "room",
-    href: "/rooms/:room",
+    href: "/api/rooms/:room",
     rel: "collection",
     prompt: "Sala"
   },
   medicalProcedures: {
     name: "medicalProcedures",
-    href: "/medicalprocedures",
+    href: "/api/medicalprocedures",
     rel: "collection",
     prompt: "Tipos de sesión"
   },
   medicalProcedure: {
     name: "medicalProcedure",
-    href: "/medicalprocedures/:medicalprocedure",
+    href: "/api/medicalprocedures/:medicalprocedure",
     rel: "collection",
     prompt: "Tipo de sesión"
   },
   consultations: {
     name: "consultations",
-    href: "/consultations",
+    href: "/api/consultations",
     rel: "collection",
     prompt: "Consultas"
   },
   consultation: {
     name: "consultation",
-    href: "/consultations/:consultation",
+    href: "/api/consultations/:consultation",
     rel: "collection",
     prompt: "Consulta"
   }
