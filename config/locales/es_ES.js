@@ -34,5 +34,6 @@
 	"No hay consultas": "No hay consultas",
 	"Consultas": "Consultas",
 	"Fecha": "Fecha",
-	"Tipo de sesión": "Tipo de sesión"
+	"Tipo de sesión": "Tipo de sesión",
+	"Citas": "Citas"
 }

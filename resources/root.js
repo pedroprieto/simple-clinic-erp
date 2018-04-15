@@ -1,5 +1,5 @@
 module.exports = function(router) {
-  router.get('root', '/', (ctx, next) => {
+  router.get(router.routesList["root"].name, router.routesList["root"].href, async (ctx, next) => {
     var collection = { };
 
     // Items

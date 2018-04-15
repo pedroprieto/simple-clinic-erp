@@ -3,6 +3,7 @@ var Consultation = require('../models/consultation');
 var Patient = require('../models/patient');
 var Doctor = require('../models/doctor');
 var MedicalProcedure = require('../models/medicalprocedure');
+var Moment = require('moment');
 
 module.exports = function(router) {
 
@@ -117,8 +118,32 @@ module.exports = function(router) {
 
   // GET Consultation list
   router.get(router.routesList["consultations"].name, router.routesList["consultations"].href, async (ctx, next) => {
-    var consultations = await Consultation.find().populate(['patient', 'doctor', 'medicalProcedure']).exec();
+
+    // Get selected ISO week in query. Current week if invalid or no query
+    var queryweek = ctx.query.isoweekdate;
+
+    var cur_date = Moment();
+    var displayed_date = Moment(queryweek);
+
+
+    if (!displayed_date.isValid()) {
+      // TODO: fix link
+      return ctx.redirect('/consultations');
+    }
+
+    var cur_isoweekdate = cur_date.format('GGGG[-W]WW');
+    var isoweekdate = displayed_date.clone().format('GGGG[-W]WW');
+    var nextisoweekdate = displayed_date.clone().add(1,'w').format('GGGG[-W]WW');
+    var previousisoweekdate= displayed_date.clone().subtract(1,'w').format('GGGG[-W]WW');
+
+    // Get consultations from specified week
+    var consultations = await Consultation.find({date: { $gt: displayed_date.clone().startOf('isoWeek'), $lt: displayed_date.clone().endOf('isoWeek') }}).populate(['patient', 'doctor', 'medicalProcedure']).exec();
     var col= await renderCollectionConsultations(ctx, consultations);
+
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{query: {isoweekdate: cur_isoweekdate}} ));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{query: {isoweekdate: nextisoweekdate}} ));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{query: {isoweekdate: previousisoweekdate}} ));
+
     ctx.body = {collection: col};
     return next();
 
