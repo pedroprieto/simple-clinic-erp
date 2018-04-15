@@ -17,6 +17,8 @@ module.exports = function(router) {
     col.links = [];
     col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"]));
 
 	  // Items
 	  col.items = patientList.map(function(p) {
