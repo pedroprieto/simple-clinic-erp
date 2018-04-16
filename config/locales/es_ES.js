@@ -38,5 +38,7 @@
 	"Citas": "Citas",
 	"Tipos de bonos de consultas": "Tipos de bonos de consultas",
 	"Número de consultas": "Número de consultas",
-	"No hay bonos": "No hay bonos"
+	"No hay bonos": "No hay bonos",
+	"Bonos del paciente": "Bonos del paciente",
+	"No hay bonos para este paciente": "No hay bonos para este paciente"
 }

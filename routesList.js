@@ -17,6 +17,18 @@ module.exports = {
     rel: "collection",
     prompt: "Paciente"
   },
+  patientVouchers: {
+    name: "patientVouchers",
+    href: "/api/patients/:patient/vouchers",
+    rel: "collection",
+    prompt: "Bonos del paciente"
+  },
+  patientVoucher: {
+    name: "patientVoucher",
+    href: "/api/patients/:patient/vouchers/:patientVoucher",
+    rel: "collection",
+    prompt: "Bono del paciente"
+  },
   doctors: {
     name: "doctors",
     href: "/api/doctors",

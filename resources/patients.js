@@ -30,6 +30,9 @@ module.exports = function(router) {
       item.href = ctx.getLinkCJFormat(router.routesList["patient"], {patient: p._id}).href;
 
 	    // Item links
+      // Patient Vouchers
+      item.links = [];
+      item.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: p._id}));
 
 	    return item;
 	  });
@@ -57,8 +60,8 @@ module.exports = function(router) {
   }
 
   // Parameter patient
-  router.param('patient', (id, ctx, next) => {
-    ctx.patient = id;
+  router.param('patient', async (id, ctx, next) => {
+    ctx.patient = await Patient.findOne({_id: id});
     return next();
   });
 
