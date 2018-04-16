@@ -76,5 +76,17 @@ module.exports = {
     href: "/api/doctors/:doctor/consultations/:consultation",
     rel: "collection",
     prompt: "Consulta"
+  },
+  consultationVoucherTypes: {
+    name: "consultationVoucherTypes",
+    href: "/api/consultationVoucherTypes",
+    rel: "collection",
+    prompt: "Tipos de bonos de consultas"
+  },
+  consultationVoucherType: {
+    name: "consultationVoucherType",
+    href: "/api/consultationVoucherTypes/:consultationVoucherType",
+    rel: "collection",
+    prompt: "Tipo de bono de consultas"
   }
 };

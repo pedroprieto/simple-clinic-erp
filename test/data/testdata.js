@@ -67,5 +67,14 @@ module.exports = {
         {name: "date", value: "2018-04-09"}
       ]
     }
-  }
+  },
+  consultationVoucherType_test_template_1: {
+    template: {
+      data: [
+        {name: "name", value: "Voucher #1"},
+        {name: "numberOfConsultations", value: 5},
+        {name: "price", value: 45}
+      ]
+    }
+  },
 }

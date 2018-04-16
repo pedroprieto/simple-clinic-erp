@@ -35,5 +35,8 @@
 	"Consultas": "Consultas",
 	"Fecha": "Fecha",
 	"Tipo de sesión": "Tipo de sesión",
-	"Citas": "Citas"
+	"Citas": "Citas",
+	"Tipos de bonos de consultas": "Tipos de bonos de consultas",
+	"Número de consultas": "Número de consultas",
+	"No hay bonos": "No hay bonos"
 }
