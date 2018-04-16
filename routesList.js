@@ -100,5 +100,36 @@ module.exports = {
     href: "/api/consultationVoucherTypes/:consultationVoucherType",
     rel: "collection",
     prompt: "Tipo de bono de consultas"
+  },
+  consultationAssignInvoice: {
+    name: "consultationAssignInvoice",
+    href: "/api/doctors/:doctor/consultations/:consultation/consultationAssignInvoice",
+    rel: "collection",
+    prompt: "Asignar factura"
+  },
+  consultationAssignVoucher: {
+    name: "consultationAssignVoucher",
+    href: "/api/doctors/:doctor/consultations/:consultation/consultationAssignVoucher",
+    rel: "collection",
+    prompt: "Asociar a bono"
+  },
+  //TODO
+  invoices: {
+    name: "invoices",
+    href: "/api/invoices",
+    rel: "collection",
+    prompt: "Facturas"
+  },
+  patientConsultations: {
+    name: "patientConsultations",
+    href: "/api/patients/:patient/consultations",
+    rel: "collection",
+    prompt: "Lista de consultas del paciente"
+  },
+  patientInvoices: {
+    name: "patient",
+    href: "/api/patients/:patient/invoices",
+    rel: "collection",
+    prompt: "Lista de facturas del paciente"
   }
 };

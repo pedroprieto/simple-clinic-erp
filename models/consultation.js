@@ -28,6 +28,29 @@ var consultationSchema = {
     required: true,
     promptCJ: "Médico",
     htmlType: "select"
+  },
+  invoiced: {
+    type: Boolean,
+    promptCJ: "Facturada",
+    required: true,
+    htmlType: "checkbox",
+    default: false
+  },
+  invoiceDate: {
+    type: Date,
+    promptCJ: "Fecha de factura",
+    htmlType: "date"
+  },
+  invoiceNumber: {
+    type: Number,
+    promptCJ: "Número de factura",
+    htmlType: "number"
+  },
+  _associatedVoucher: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PatientVoucher',
+    promptCJ: "Bono asociado",
+    htmlType: "select"
   }
 };
 

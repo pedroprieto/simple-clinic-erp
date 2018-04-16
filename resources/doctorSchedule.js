@@ -49,7 +49,13 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = OpeningHour.template();
+	  col.template = OpeningHour.template_suggest();
+
+    // Related
+    col.related = {};
+    col.related.dayOfWeekList = OpeningHour.schema.obj['dayOfWeek'].enum.map(function(el) {
+      return { name: el}
+    });
 
 	  // Return collection object
     return col;

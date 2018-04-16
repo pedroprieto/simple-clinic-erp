@@ -84,7 +84,7 @@ describe('Consultations resource', function() {
       .set('Accept', 'application/json')
       .expect(200);
     // Check template data length
-    response.body.collection.template.should.have.property('data').with.lengthOf(3);
+    response.body.collection.template.should.have.property('data').with.lengthOf(6);
     // Store 'suggest' field for patient
     var patient_suggest = response.body.collection.template.data[1].suggest;
     // Store 'suggest' field for medicalProcedure
@@ -123,12 +123,14 @@ describe('Consultations resource', function() {
     item.href.should.equal(url_created_consultation);
 
     // Check item 'patient' data
-    response.body.collection.items[0].data[1].value.should.equal(patient_id);
-    response.body.collection.items[0].data[1].text.should.equal(patient_name);
+    var pat = response.body.collection.items[0].data.filter(function(el) {return el.name=='patient';})[0];
+    pat.value.should.equal(patient_id);
+    pat.text.should.equal(patient_name);
 
     // Check item 'medicalProcedure' data
-    response.body.collection.items[0].data[2].value.should.equal(medicalProcedure_id);
-    response.body.collection.items[0].data[2].text.should.equal(medicalProcedure_name);
+    var mP = response.body.collection.items[0].data.filter(function(el) {return el.name=='medicalProcedure';})[0];
+    mP.value.should.equal(medicalProcedure_id);
+    mP.text.should.equal(medicalProcedure_name);
 
     // GET consultation list and check item length
     response = await request('')
@@ -147,7 +149,7 @@ describe('Consultations resource', function() {
         .expect(200);
     var c = response.body.collection;
     c.should.have.property('items').with.lengthOf(1);
-    var consultation_date = Moment(c.items[0].data[0].value).format();
+    var consultation_date = Moment(c.items[0].data.filter(function(el) {return el.name == 'date'})[0].value).format();
     consultation_date.should.equal(newdate);
 
     // Remove item

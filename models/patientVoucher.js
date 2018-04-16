@@ -14,6 +14,22 @@ var patientVoucherSchema = {
     ref: 'Patient',
     promptCJ: "Paciente",
     htmlType: "select"
+  },
+  remainingConsultations: {
+    type: Number,
+    promptCJ: "Sesiones restantes",
+    htmlType: "Number"
+  },
+  invoiceDate: {
+    type: Date,
+    promptCJ: "Fecha de factura",
+    htmlType: "date",
+    default: Date.now()
+  },
+  invoiceNumber: {
+    type: Number,
+    promptCJ: "Número de factura",
+    htmlType: "number"
   }
 };
 

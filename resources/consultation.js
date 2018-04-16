@@ -4,6 +4,8 @@ var Patient = require('../models/patient');
 var Doctor = require('../models/doctor');
 var MedicalProcedure = require('../models/medicalprocedure');
 var Moment = require('moment');
+var PatientVoucher = require('../models/patientVoucher');
+var Invoice = require('../models/invoice');
 
 module.exports = function(router) {
 
@@ -57,6 +59,11 @@ module.exports = function(router) {
       item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: p._id}).href;
 
 	    // Item links
+      item.links = [];
+      if (!p.invoiced && !p._assignedVoucher) {
+        item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {doctor: ctx.doctor._id, consultation: p._id}));
+        item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {doctor: ctx.doctor._id, consultation: p._id}));
+      }
 
 	    return item;
 	  });
@@ -112,8 +119,8 @@ module.exports = function(router) {
   }
 
   // Parameter consultation
-  router.param('consultation', (id, ctx, next) => {
-    ctx.consultation = id;
+  router.param('consultation', async (id, ctx, next) => {
+    ctx.consultation = await Consultation.findOne({_id: id}).populate(['patient', 'medicalProcedure', 'doctor', '_associatedVoucher']).exec();
     return next();
   });
 
@@ -222,5 +229,146 @@ module.exports = function(router) {
       ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href);
       return next();
     }
+  });
+
+
+  // Consultation assign Invoice
+  router.get(router.routesList["consultationAssignInvoice"].name, router.routesList["consultationAssignInvoice"].href, async (ctx, next) => {
+
+    if (ctx.consultation._associatedVoucher) {
+      ctx.throw(400, 'La consulta tiene un bono asociado. No se puede crear la factura.');
+    }
+
+    if (ctx.consultation.invoiced) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede crear la factura.');
+    }
+
+    var col = {};
+    col.version = "1.0";
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).href;
+
+	  // Collection title
+    col.title = ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).prompt;
+
+	  // Collection Links
+    col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+
+    // Collection template
+    col.template = {data: []};
+    col.template.data.push({prompt: 'Fecha de factura', name: 'invoiceDate', value: Moment().format('YYYY-MM-DD'), type: 'date'});
+
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
+  // Post assigned Invoice
+  router.post(router.routesList["consultationAssignInvoice"].href, async (ctx, next) => {
+
+    console.log(ctx.consultation.invoiced);
+    if (ctx.consultation._associatedVoucher) {
+      ctx.throw(400, 'La consulta tiene un bono asociado. No se puede crear la factura.');
+    }
+
+    if (ctx.consultation.invoiced) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede crear la factura.');
+    }
+
+    var data = await parseTemplate(ctx);
+    console.log(data);
+    ctx.consultation.invoiceDate = data.invoiceDate;
+    ctx.consultation.invoiced = true;
+    // TODO: asignar número de factura
+    await ctx.consultation.save();
+    ctx.status = 200;
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: ctx.consultation._id}).href);
+    return next();
+
+  });
+
+
+  // Consultation assign Voucher
+  router.get(router.routesList["consultationAssignVoucher"].name, router.routesList["consultationAssignVoucher"].href, async (ctx, next) => {
+
+    if (ctx.consultation._associatedVoucher) {
+      ctx.throw(400, 'La consulta ya tiene un bono asociado. No se puede asociar a otro.');
+    }
+
+    if (ctx.consultation.invoiced) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede asociar a un bono.');
+    }
+
+    var col = {};
+    col.version = "1.0";
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).href;
+
+	  // Collection title
+    col.title = ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).prompt;
+
+	  // Collection Links
+    col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+
+    // Collection template
+    col.template = {data: []};
+    col.template.data.push({
+      prompt: 'Bono asociado',
+      name: 'associatedVoucher',
+      value: Date.now(),
+      type: 'select',
+      suggest: {
+        related: 'voucherList',
+        value: '_id',
+        //TODO
+        text: '_id'
+      }
+    });
+
+
+    // Collection related
+    col.related = {};
+
+    var voucher_list = await PatientVoucher.find({patient: ctx.consultation.patient._id});
+    col.related.voucherList = voucher_list.map(function (doc) {
+      var d = {};
+      d._id = doc._id;
+      // TODO
+      return d;
+    });
+
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
+  // Post assigned Voucher
+  router.post(router.routesList["consultationAssignVoucher"].href, async (ctx, next) => {
+
+    if (ctx.consultation._associatedVoucher) {
+      ctx.throw(400, 'La consulta ya tiene un bono asociado. No se puede asociar a otro.');
+    }
+
+    if (ctx.consultation.invoiced) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede asociar a un bono.');
+    }
+
+    var data = await parseTemplate(ctx);
+    console.log(data);
+    ctx.consultation._associatedVoucher = data.associatedVoucher;
+    // TODO: asignar número de factura
+    await ctx.consultation.save();
+    ctx.status = 200;
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: ctx.consultation._id}).href);
+    return next();
+
   });
 }

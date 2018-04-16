@@ -126,9 +126,10 @@ describe('Patient vouchers resource', function() {
     // response.body.collection.items[0].data[0].text.should.equal(patient_name);
 
     // Check item 'consultationVoucherType' data
-    response.body.collection.items[0].should.have.property('data').with.lengthOf(2);
-    response.body.collection.items[0].data[0].value.should.equal(consultationVoucherType_id);
-    response.body.collection.items[0].data[0].text.should.equal(consultationVoucherType_name);
+    response.body.collection.items[0].should.have.property('data').with.lengthOf(3);
+    var cVT = response.body.collection.items[0].data.filter(function(el) {return el.name=='consultationVoucherType';})[0];
+    cVT.value.should.equal(consultationVoucherType_id);
+    cVT.text.should.equal(consultationVoucherType_name);
 
     // GET consultation list and check item length
     response = await request('')

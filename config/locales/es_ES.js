@@ -40,5 +40,15 @@
 	"Número de consultas": "Número de consultas",
 	"No hay bonos": "No hay bonos",
 	"Bonos del paciente": "Bonos del paciente",
-	"No hay bonos para este paciente": "No hay bonos para este paciente"
+	"No hay bonos para este paciente": "No hay bonos para este paciente",
+	"Pagada": "Pagada",
+	"Fecha de factura": "Fecha de factura",
+	"Facturada": "Facturada",
+	"Número de factura": "Número de factura",
+	"Asignar factura": "Asignar factura",
+	"Asociar a bono": "Asociar a bono",
+	"La consulta ya tiene una factura asociada. No se puede asociar a un bono.": "La consulta ya tiene una factura asociada. No se puede asociar a un bono.",
+	"La consulta ya tiene una factura asociada. No se puede crear la factura.": "La consulta ya tiene una factura asociada. No se puede crear la factura.",
+	"Bono asociado": "Bono asociado",
+	"La consulta ya tiene un bono asociado. No se puede asociar a otro.": "La consulta ya tiene un bono asociado. No se puede asociar a otro."
 }

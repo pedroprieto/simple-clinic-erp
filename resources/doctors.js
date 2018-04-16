@@ -18,6 +18,9 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["medicalProcedures"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["consultationVoucherTypes"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["rooms"]));
 
 	  // Items
 	  col.items = doctorList.map(function(p) {
@@ -63,7 +66,7 @@ module.exports = function(router) {
 
   // Parameter doctor
   router.param('doctor', async (id, ctx, next) => {
-    ctx.doctor = await Doctor.findOne({_id: id});
+    ctx.doctor = await Doctor.findOne({_id: id}).populate('_schedule').exec();
     if (!ctx.doctor) {
       ctx.throw(404,'Recurso no encontrado');
     }
