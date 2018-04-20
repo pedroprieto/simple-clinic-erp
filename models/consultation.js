@@ -56,76 +56,121 @@ var consultationSchema = {
 
 var ConsultationSchema = baseschema(consultationSchema);
 
-// Static function to generate template
-// I do not use schema.statics.tx_cj because I want to change populated property
-ConsultationSchema.statics.template_suggest = function (item) {
-  var template = {};
-  template.data = [];
 
-  for (var p in this.schema.paths) {
-	  if (p.substring(0,1) != '_') {
-      var v = (typeof item !== 'undefined') ? item[p].value : '';
-      var el;
-      if (p === 'doctor') {
-	      // el = {
-		    //   name : p,
-		    //   value: v,
-        //   text: ((typeof item !== 'undefined') ? item[p].text : ''),
-        //   prompt :  this.schema.obj[p].promptCJ,
-        //   type: this.schema.obj[p].htmlType,
-        //   suggest: {
-        //     related: 'doctors',
-        //     value: '_id',
-        //     text: 'fullName'
-        //   }
-	      // };
-        continue;
-      } else if (p === 'patient') {
-	      el = {
-		      name : p,
-		      value: v,
-          text: ((typeof item !== 'undefined') ? item[p].text : ''),
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType,
-          suggest: {
-            related: 'patients',
-            value: '_id',
-            text: 'fullName'
-          }
-	      };
-      } else if (p === 'medicalProcedure') {
-	      el = {
-		      name : p,
-		      value: v,
-          text: ((typeof item !== 'undefined') ? item[p].text : ''),
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType,
-          suggest: {
-            related: 'medicalProcedures',
-            value: '_id',
-            text: 'name'
-          }
-	      };
-      } else {
-	      el = {
-		      name : p,
-		      value: v,
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType
-	      };
+// Delete consultation by id
+ConsultationSchema.statics.delById = async function (id) {
+  return await this.findByIdAndRemove(id);
+}
+
+// Update consultation by id
+ConsultationSchema.statics.updateById = async function (id, data) {
+  return await Consultation.findByIdAndUpdate(id, data);
+}
+
+// Get populated consultation by id
+ConsultationSchema.statics.findById = async function (id) {
+  var res = await this.aggregate([
+	  {
+	    $match: {
+        _id: mongoose.Types.ObjectId(id)
+	    }
+    },
+    {
+      $lookup: {
+        from: "patients",
+        localField: "patient",
+        foreignField: "_id",
+        as: "patients"
       }
-
-	    if (this.schema.paths[p].isRequired == true)
-		    el.required = true;
-
-	    if (typeof this.schema.paths[p].options.match !== 'undefined')
-		    el.match = this.schema.paths[p].options.match.toString().replace("/","").replace("/","");
-	    
-	    template.data.push(el);
+    },
+    {
+      $lookup: {
+        from: "doctors",
+        localField: "doctor",
+        foreignField: "_id",
+        as: "doctors"
+      }
+    },
+    {
+      $lookup: {
+        from: "medicalprocedures",
+        localField: "medicalProcedure",
+        foreignField: "_id",
+        as: "medicalProcedures"
+      }
+    },
+    { "$project":
+      {
+        "date": 1,
+        "patient": { "$arrayElemAt": [ "$patients", 0 ] },
+        "doctor": { "$arrayElemAt": [ "$doctors", 0 ] },
+        "medicalProcedure": { "$arrayElemAt": [ "$medicalProcedures", 0 ] }
+      }
+    },
+    { "$project":
+      {
+        "date": 1,
+        "patient": {$concat: ['$patient.givenName', ' ', '$patient.familyName']},
+        "doctor": {$concat: ['$doctor.givenName', ' ', '$doctor.familyName']},
+        "medicalProcedure": '$medicalProcedure.name'
+      }
     }
-  }
+  ]);
 
-  return template;
+  return res[0];
+}
+
+// Get consultation list by date range
+ConsultationSchema.statics.findInDateRange = async function (dateStart, dateEnd, doctor) {
+  var res = await this.aggregate([
+	  {
+	    $match: {
+		    doctor: doctor,
+		    date: { $gte: dateStart, $lte: dateEnd }
+	    }
+    },
+    {
+      $lookup: {
+        from: "patients",
+        localField: "patient",
+        foreignField: "_id",
+        as: "patients"
+      }
+    },
+    {
+      $lookup: {
+        from: "doctors",
+        localField: "doctor",
+        foreignField: "_id",
+        as: "doctors"
+      }
+    },
+    {
+      $lookup: {
+        from: "medicalprocedures",
+        localField: "medicalProcedure",
+        foreignField: "_id",
+        as: "medicalProcedures"
+      }
+    },
+    { "$project":
+      {
+        "date": 1,
+        "patient": { "$arrayElemAt": [ "$patients", 0 ] },
+        "doctor": { "$arrayElemAt": [ "$doctors", 0 ] },
+        "medicalProcedure": { "$arrayElemAt": [ "$medicalProcedures", 0 ] }
+      }
+    },
+    { "$project":
+      {
+        "date": 1,
+        "patient": {$concat: ['$patient.givenName', ' ', '$patient.familyName']},
+        "doctor": {$concat: ['$doctor.givenName', ' ', '$doctor.familyName']},
+        "medicalProcedure": '$medicalProcedure.name'
+      }
+    }
+  ]);
+  return res;
 }
 
 var Consultation = mongoose.model('Consultation', ConsultationSchema);

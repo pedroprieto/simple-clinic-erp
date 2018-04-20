@@ -55,5 +55,6 @@
 	"Seleccionar paciente para la consulta": "Seleccionar paciente para la consulta",
 	"Seleccionar tipo de consulta": "Seleccionar tipo de consulta",
 	"Seleccionar": "Seleccionar",
-	"Crear consulta": "Crear consulta"
+	"Crear consulta": "Crear consulta",
+	"Seleccionar fecha": "Seleccionar fecha"
 }

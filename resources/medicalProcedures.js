@@ -80,8 +80,9 @@ module.exports = function(router) {
   }
 
   // Parameter medicalProcedure
-  router.param('medicalprocedure', (id, ctx, next) => {
-    ctx.medicalProcedure = id;
+  router.param('medicalprocedure', async (id, ctx, next) => {
+    ctx.medicalProcedure = await MedicalProcedure.findOne({_id: id}).populate('room').exec();
+    // ctx.medicalProcedure = id;
     return next();
   });
 

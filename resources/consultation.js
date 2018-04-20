@@ -9,7 +9,7 @@ var Invoice = require('../models/invoice');
 
 module.exports = function(router) {
 
-  async function renderCollectionConsultations(ctx, consultationList) {
+  function renderCollectionConsultations(ctx, consultationList) {
     var col = {};
     col.version = "1.0";
 
@@ -26,34 +26,11 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
 
 	  // Items
-	  // Item data
 	  col.items = consultationList.map(function(p) {
-      var pobj = p.toObject();
       var item = {};
-      item.data = [];
 
-      for (var d in pobj) {
-	      if (d.substring(0,1) != '_') {
-          var dat = {};
-          dat.name = d;
-          dat.prompt = p.schema.obj[d].promptCJ;
-          dat.type = p.schema.obj[d].htmlType;
-          // TODO: required
-          if (d==='patient') {
-            dat.value = pobj[d]._id;
-            dat.text= p[d].fullName;
-          } else if (d==='doctor') {
-            dat.value = pobj[d]._id;
-            dat.text = p[d].fullName;
-          } else if (d==='medicalProcedure') {
-            dat.value = pobj[d]._id;
-            dat.text= pobj[d].name;
-          } else {
-            dat.value = pobj[d];
-          }
-          item.data.push(dat);
-        }
-      }
+	    // Item data
+      item.data = Consultation.objToCJ(p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: p._id}).href;
@@ -83,45 +60,16 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  // col.template = Consultation.template_suggest();
     col.template = {data: []};
     col.template.data.push(
       {
-        prompt: "Fecha",
+        prompt: "Seleccionar fecha",
         name: "date",
         value: "",
         type: 'date',
         required: true
       }
     );
-
-
-    // Related
-    col.related = {};
-
-    // var doctor_list = await Doctor.find();
-    // col.related.doctors = doctor_list.map(function (doc) {
-    //   var d = {};
-    //   d._id = doc._id;
-    //   d.fullName = doc.fullName;
-    //   return d;
-    // });
-
-    var patient_list = await Patient.find();
-    col.related.patients= patient_list.map(function (doc) {
-      var d = {};
-      d._id = doc._id;
-      d.fullName = doc.fullName;
-      return d;
-    });
-
-    var medicalProcedure_list = await MedicalProcedure.find();
-    col.related.medicalProcedures = medicalProcedure_list.map(function (doc) {
-      var d = {};
-      d._id = doc._id;
-      d.name = doc.name;
-      return d;
-    });
 
 	  // Return collection object
     return col;
@@ -130,7 +78,7 @@ module.exports = function(router) {
 
   // Parameter consultation
   router.param('consultation', async (id, ctx, next) => {
-    ctx.consultation = await Consultation.findOne({_id: id}).populate(['patient', 'medicalProcedure', 'doctor', '_associatedVoucher']).exec();
+    ctx.consultation = await Consultation.findById(id);
     return next();
   });
 
@@ -149,10 +97,8 @@ module.exports = function(router) {
     var cur_date = Moment();
     var displayed_date = Moment(queryweek);
 
-
     if (!displayed_date.isValid()) {
-      // TODO: fix link
-      return ctx.redirect('/consultations');
+      return ctx.redirect(router.routesList["consultations"].href);
     }
 
     var cur_isoweekdate = cur_date.format('GGGG[-W]WW');
@@ -161,7 +107,7 @@ module.exports = function(router) {
     var previousisoweekdate= displayed_date.clone().subtract(1,'w').format('GGGG[-W]WW');
 
     // Get consultations from specified week
-    var consultations = await Consultation.find({date: { $gt: displayed_date.clone().startOf('isoWeek'), $lt: displayed_date.clone().endOf('isoWeek') }}).populate(['patient', 'doctor', 'medicalProcedure']).exec();
+    var consultations = await Consultation.findInDateRange(displayed_date.clone().startOf('isoWeek').toDate(), displayed_date.clone().endOf('isoWeek').toDate(), ctx.doctor._id);
     var col= await renderCollectionConsultations(ctx, consultations);
 
     col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: cur_isoweekdate}} ));
@@ -175,9 +121,8 @@ module.exports = function(router) {
 
   // GET item
   router.get(router.routesList["consultation"].name, router.routesList["consultation"].href, async (ctx, next) => {
-    var consultation = await Consultation.findOne({_id: ctx.consultation}).populate(['patient', 'doctor', 'medicalProcedure']).exec();
 	  var consultations = [];
-	  consultations.push(consultation);
+	  consultations.push(ctx.consultation);
     var col = await renderCollectionConsultations(ctx, consultations);
     ctx.body = {collection: col};
     return next();
@@ -185,20 +130,15 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["consultation"].name, router.routesList["consultation"].href, async (ctx, next) => {
-    var doc = await Consultation.findByIdAndRemove(ctx.consultation);
-    var consultations = await Consultation.find();
-    var col= await renderCollectionConsultations(ctx, consultations);
-    ctx.body = {collection: col};
+    var doc = await Consultation.delById (ctx.consultation._id);
+    ctx.status = 200;
     return next();
 
   });
 
   // Aux function for PUT and POST
-  async function parseTemplate(ctx) {
+  function parseTemplate(ctx) {
 	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
-      var consultations = await Consultation.find();
-      var col= await renderCollectionConsultations(ctx, consultations);
-      ctx.body = {collection: col};
       ctx.throw(400, 'Los datos no están en formato CJ');
 	  }
 
@@ -215,11 +155,9 @@ module.exports = function(router) {
 
   // PUT item
   router.put(router.routesList["consultation"].name, router.routesList["consultation"].href, async (ctx, next) => {
-    var consultationData = await parseTemplate(ctx);
-    await Consultation.findByIdAndUpdate(ctx.consultation, consultationData);
-    var consultations = await Consultation.find();
-    var col= await renderCollectionConsultations(ctx, consultations);
-    ctx.body = {collection: col};
+    var consultationData = parseTemplate(ctx);
+    var aa = await Consultation.updateById(ctx.consultation._id, consultationData);
+    ctx.status = 200;
     return next();
   });
 
@@ -338,7 +276,46 @@ module.exports = function(router) {
 
   // Template to create consultation
   router.get(router.routesList["consultations_create"].name, router.routesList["consultations_create"].href, async (ctx,next) => {
+    var col = {};
+    col.version = "1.0";
 
+	  // Collection href
+    col.href = ctx.getLinkCJFormat(router.routesList["consultations_create"], {doctor: ctx.doctor._id, date: ctx.date, patient: ctx.patient._id, medicalprocedure: ctx.medicalProcedure._id}).href;
+
+	  // Template
+    col.template = {data: []};
+    col.template.data.push(
+      {
+        prompt: "Crear consulta",
+        name: "confirm",
+        value: true,
+        type: 'text',
+        required: true
+      }
+    );
+
+	  // Return collection object
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
+
+  // POST: create consultation
+  router.post(router.routesList["consultations_create"].href, async (ctx,next) => {
+
+    var data = {};
+    data.date = ctx.date;
+    data.doctor = ctx.doctor._id;
+    data.patient = ctx.patient._id;
+    data.medicalProcedure = ctx.medicalProcedure._id;
+    var p = new Consultation(data);
+    var psaved = await p.save();
+    ctx.status = 201;
+    // console.log(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href;
+
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href);
+    return next();
 
   });
 
@@ -359,9 +336,7 @@ module.exports = function(router) {
 	  } , {});
 
     
-    console.log(consultationData.date);
     ctx.status = 201;
-    console.log(ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: consultationData.date}).href);
     ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: consultationData.date}).href);
     return next();
     // var consultationData = await parseTemplate(ctx);
@@ -425,7 +400,6 @@ module.exports = function(router) {
   // Post assigned Invoice
   router.post(router.routesList["consultationAssignInvoice"].href, async (ctx, next) => {
 
-    console.log(ctx.consultation.invoiced);
     if (ctx.consultation._associatedVoucher) {
       ctx.throw(400, 'La consulta tiene un bono asociado. No se puede crear la factura.');
     }
@@ -435,7 +409,6 @@ module.exports = function(router) {
     }
 
     var data = await parseTemplate(ctx);
-    console.log(data);
     ctx.consultation.invoiceDate = data.invoiceDate;
     ctx.consultation.invoiced = true;
     // TODO: asignar número de factura
@@ -517,7 +490,6 @@ module.exports = function(router) {
     }
 
     var data = await parseTemplate(ctx);
-    console.log(data);
     ctx.consultation._associatedVoucher = data.associatedVoucher;
     // TODO: asignar número de factura
     await ctx.consultation.save();

@@ -3,6 +3,36 @@ var mongoose = require('mongoose');
 module.exports = function(schema_skel) {
   var schema = mongoose.Schema(schema_skel);
 
+
+  // Get Prompt from schema definition
+  schema.statics.getPrompt = function (prop) {
+    return this.schema.obj[prop].promptCJ;
+  };
+
+  // Get HTML Type from schema definition
+  schema.statics.getType = function (prop) {
+    return this.schema.obj[prop].htmlType;
+  };
+
+
+  // Static function to convert plain JS object to Collection + JSON data format
+  // Used with output from aggretation framework (plain object)
+  // Assumed: object with desired properties + _id
+  schema.statics.objToCJ = function (obj) {
+    var data = [];
+    for (var prop in obj) {
+      if (prop === "_id")
+        continue;
+      var dat = {};
+      dat.name = prop;
+      dat.value = obj[prop];
+      dat.prompt = this.getPrompt(prop);
+      dat.type= this.getType(prop);
+      data.push(dat);
+    }
+    return data;
+  }
+
   // Static function to convert data to Collection + JSON format
   // Used by method toObject()
   schema.statics.tx_cj = function (doc, ret, options) {
