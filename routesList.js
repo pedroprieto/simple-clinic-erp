@@ -83,9 +83,27 @@ module.exports = {
     rel: "collection",
     prompt: "Consultas"
   },
+  consultations_select_patient: {
+    name: "consultations_select_patient",
+    href: "/api/doctors/:doctor/consultations/select/:date",
+    rel: "collection",
+    prompt: "Seleccionar paciente"
+  },
+  consultations_select_medProc: {
+    name: "consultations_select_medProc",
+    href: "/api/doctors/:doctor/consultations/select/:date/:patient",
+    rel: "collection",
+    prompt: "Seleccionar"
+  },
+  consultations_create: {
+    name: "consultations_create",
+    href: "/api/doctors/:doctor/consultations/select/:date/:patient/:medicalprocedure",
+    rel: "collection",
+    prompt: "Crear consulta"
+  },
   consultation: {
     name: "consultation",
-    href: "/api/doctors/:doctor/consultations/:consultation",
+    href: "/api/doctors/:doctor/consultations/item/:consultation",
     rel: "collection",
     prompt: "Consulta"
   },

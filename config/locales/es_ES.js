@@ -50,5 +50,10 @@
 	"La consulta ya tiene una factura asociada. No se puede asociar a un bono.": "La consulta ya tiene una factura asociada. No se puede asociar a un bono.",
 	"La consulta ya tiene una factura asociada. No se puede crear la factura.": "La consulta ya tiene una factura asociada. No se puede crear la factura.",
 	"Bono asociado": "Bono asociado",
-	"La consulta ya tiene un bono asociado. No se puede asociar a otro.": "La consulta ya tiene un bono asociado. No se puede asociar a otro."
+	"La consulta ya tiene un bono asociado. No se puede asociar a otro.": "La consulta ya tiene un bono asociado. No se puede asociar a otro.",
+	"Seleccione fecha": "Seleccione fecha",
+	"Seleccionar paciente para la consulta": "Seleccionar paciente para la consulta",
+	"Seleccionar tipo de consulta": "Seleccionar tipo de consulta",
+	"Seleccionar": "Seleccionar",
+	"Crear consulta": "Crear consulta"
 }

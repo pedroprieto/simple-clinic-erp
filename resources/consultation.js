@@ -83,7 +83,17 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = Consultation.template_suggest();
+	  // col.template = Consultation.template_suggest();
+    col.template = {data: []};
+    col.template.data.push(
+      {
+        prompt: "Fecha",
+        name: "date",
+        value: "",
+        type: 'date',
+        required: true
+      }
+    );
 
 
     // Related
@@ -121,6 +131,12 @@ module.exports = function(router) {
   // Parameter consultation
   router.param('consultation', async (id, ctx, next) => {
     ctx.consultation = await Consultation.findOne({_id: id}).populate(['patient', 'medicalProcedure', 'doctor', '_associatedVoucher']).exec();
+    return next();
+  });
+
+  // Parameter date
+  router.param('date', (id, ctx, next) => {
+    ctx.date = id;
     return next();
   });
 
@@ -207,28 +223,167 @@ module.exports = function(router) {
     return next();
   });
 
+
+  // Consultations select patient
+  router.get(router.routesList["consultations_select_patient"].name, router.routesList["consultations_select_patient"].href, async (ctx,next) => {
+    var col = {};
+    col.version = "1.0";
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["patients"]).href;
+
+	  // Collection title
+    col.title = "Seleccionar paciente para la consulta";
+
+	  // Collection Links
+    col.links = [];
+    // TODO: link to create patient template
+
+	  // Items
+    var patientList = await Patient.find();
+	  col.items = patientList.map(function(p) {
+
+      var item = {};
+	    // Item data
+	    item.data = p.toObject({transform: Patient.tx_cj});
+
+	    // Item href
+      item.href = ctx.getLinkCJFormat(router.routesList["patient"], {patient: p._id}).href;
+
+	    // Item link
+      // Link to select med Proc
+      item.links = [];
+      item.links.push(ctx.getLinkCJFormat(router.routesList["consultations_select_medProc"], {doctor: ctx.doctor._id, date: ctx.date, patient: p._id}));
+
+	    return item;
+	  });
+
+	  // If no items
+	  if (patientList.length == 0) {
+	    var item = {};
+	    item.data = [];
+	    var d = {};
+	    d.name = "message";
+      d.prompt = "Mensaje";
+	    d.value= ctx.i18n.__("No hay pacientes");
+	    item.data.push(d);
+	    col.items.push(item);
+	  }
+
+	  // Queries
+
+	  // Template
+
+	  // Return collection object
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
+  router.get(router.routesList["consultations_select_medProc"].name, router.routesList["consultations_select_medProc"].href, async (ctx,next) => {
+    var col = {};
+    col.version = "1.0";
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["medicalProcedures"]).href;
+
+	  // Collection title
+    col.title = "Seleccionar tipo de consulta";
+
+	  // Collection Links
+    col.links = [];
+    // TODO: link to create medProc template
+
+	  // Items
+    var medProcList = await MedicalProcedure.find();
+	  col.items = medProcList.map(function(p) {
+
+      var item = {};
+	    // Item data
+	    item.data = p.toObject({transform: MedicalProcedure.tx_cj});
+
+	    // Item href
+      item.href = ctx.getLinkCJFormat(router.routesList["medicalProcedure"], {medicalprocedure: p._id}).href;
+
+	    // Item link
+      // Link to create consultation form
+      item.links = [];
+      item.links.push(ctx.getLinkCJFormat(router.routesList["consultations_create"], {doctor: ctx.doctor._id, date: ctx.date, patient: ctx.patient._id, medicalprocedure: p._id}));
+
+	    return item;
+	  });
+
+	  // If no items
+	  if (medProcList.length == 0) {
+	    var item = {};
+	    item.data = [];
+	    var d = {};
+	    d.name = "message";
+      d.prompt = "Mensaje";
+	    d.value= ctx.i18n.__("No hay tipos de consulta creadas");
+	    item.data.push(d);
+	    col.items.push(item);
+	  }
+
+	  // Queries
+
+	  // Template
+
+	  // Return collection object
+    ctx.body = {collection: col};
+    return next();
+
+
+  });
+
+  // Template to create consultation
+  router.get(router.routesList["consultations_create"].name, router.routesList["consultations_create"].href, async (ctx,next) => {
+
+
+  });
+
   // POST
   router.post(router.routesList["consultations"].href, async (ctx,next) => {
-    var consultationData = await parseTemplate(ctx);
-    var associated_doctor = await Doctor.findById(ctx.doctor._id);
-    var associated_patient = await Patient.findById(consultationData.patient);
-    var associated_medicalProcedure= await MedicalProcedure.findById(consultationData.medicalProcedure);
-    //TODO
-    if (typeof associated_doctor === 'undefined') {
-      ctx.throw('400', 'Error');
-    } else {
-      consultationData.doctor = associated_doctor._id;
-      consultationData.patient = associated_patient._id;
-      consultationData.medicalProcedure = associated_medicalProcedure._id;
-      var p = new Consultation(consultationData);
-      var psaved = await p.save();
-      var consultations = await Consultation.find().populate(['patient', 'doctor', 'medicalProcedure']).exec();
-      var col= await renderCollectionConsultations(ctx, consultations);
-      ctx.body = {collection: col};
-      ctx.status = 201;
-      ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href);
-      return next();
-    }
+	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
+      ctx.throw(400, 'Los datos no están en formato CJ');
+	  }
+
+    var data = ctx.request.body.template.data;
+
+    // TODO: check valid date
+
+    // Convert CJ format to JS object
+	  var consultationData = data.reduce(function(a,b){
+	    a[b.name] = b.value;
+	    return a;
+	  } , {});
+
+    
+    console.log(consultationData.date);
+    ctx.status = 201;
+    console.log(ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: consultationData.date}).href);
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: consultationData.date}).href);
+    return next();
+    // var consultationData = await parseTemplate(ctx);
+    // var associated_doctor = await Doctor.findById(ctx.doctor._id);
+    // var associated_patient = await Patient.findById(consultationData.patient);
+    // var associated_medicalProcedure= await MedicalProcedure.findById(consultationData.medicalProcedure);
+    // //TODO
+    // if (typeof associated_doctor === 'undefined') {
+    //   ctx.throw('400', 'Error');
+    // } else {
+    //   consultationData.doctor = associated_doctor._id;
+    //   consultationData.patient = associated_patient._id;
+    //   consultationData.medicalProcedure = associated_medicalProcedure._id;
+    //   var p = new Consultation(consultationData);
+    //   var psaved = await p.save();
+    //   var consultations = await Consultation.find().populate(['patient', 'doctor', 'medicalProcedure']).exec();
+    //   var col= await renderCollectionConsultations(ctx, consultations);
+    //   ctx.body = {collection: col};
+    //   ctx.status = 201;
+    //   ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href);
+    //   return next();
+    // }
   });
 
 
