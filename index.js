@@ -50,6 +50,7 @@ require('./resources/medicalProcedures')(router);
 require('./resources/consultation')(router);
 require('./resources/consultationVoucherTypes')(router);
 require('./resources/patientVouchers')(router);
+require('./resources/config')(router);
 
 // Error processing
 app.use(async (ctx, next) => {

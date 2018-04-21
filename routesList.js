@@ -14,7 +14,7 @@ module.exports = {
   patient: {
     name: "patient",
     href: "/api/patients/:patient",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Paciente"
   },
   patientVouchers: {
@@ -38,7 +38,7 @@ module.exports = {
   doctor: {
     name: "doctor",
     href: "/api/doctors/:doctor",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Médico"
   },
   doctorSchedule: {
@@ -56,25 +56,25 @@ module.exports = {
   rooms: {
     name: "rooms",
     href: "/api/rooms",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Salas"
   },
   room: {
     name: "room",
     href: "/api/rooms/:room",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Sala"
   },
   medicalProcedures: {
     name: "medicalProcedures",
     href: "/api/medicalprocedures",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Tipos de sesión"
   },
   medicalProcedure: {
     name: "medicalProcedure",
     href: "/api/medicalprocedures/:medicalprocedure",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Tipo de sesión"
   },
   consultations: {
@@ -110,13 +110,13 @@ module.exports = {
   consultationVoucherTypes: {
     name: "consultationVoucherTypes",
     href: "/api/consultationVoucherTypes",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Tipos de bonos de consultas"
   },
   consultationVoucherType: {
     name: "consultationVoucherType",
     href: "/api/consultationVoucherTypes/:consultationVoucherType",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Tipo de bono de consultas"
   },
   consultationAssignInvoice: {
@@ -149,5 +149,11 @@ module.exports = {
     href: "/api/patients/:patient/invoices",
     rel: "collection",
     prompt: "Lista de facturas del paciente"
+  },
+  config: {
+    name: "config",
+    href: "/api/config",
+    rel: "collection",
+    prompt: "Configuración"
   }
 };

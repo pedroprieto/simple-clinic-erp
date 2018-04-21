@@ -15,9 +15,12 @@ module.exports = function(router) {
 
 	  // Collection Links
     col.links = [];
-    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    doctor_link.prompt = ctx.doctor.fullName;
+    col.links.push(doctor_link);
 
 	  // Items
 	  col.items = openingHourList.map(function(p) {

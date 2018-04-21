@@ -21,9 +21,12 @@ module.exports = function(router) {
 
 	  // Collection Links
     col.links = [];
-    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    doctor_link.prompt = ctx.doctor.fullName;
+    col.links.push(doctor_link);
 
 	  // Items
 	  col.items = consultationList.map(function(p) {
@@ -110,9 +113,23 @@ module.exports = function(router) {
     var consultations = await Consultation.findInDateRange(displayed_date.clone().startOf('isoWeek').toDate(), displayed_date.clone().endOf('isoWeek').toDate(), ctx.doctor._id);
     var col= await renderCollectionConsultations(ctx, consultations);
 
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: cur_isoweekdate}} ));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: nextisoweekdate}} ));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: previousisoweekdate}} ));
+
+    // Pagination links
+    var l;
+    l = ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: cur_isoweekdate}});
+    l.rel = 'current';
+    l.prompt = 'Semana actual';
+    col.links.push(l);
+
+    l = ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: previousisoweekdate}});
+    l.rel = 'prev';
+    l.prompt = 'Semana anterior';
+    col.links.push(l);
+
+    l = ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: nextisoweekdate}});
+    l.rel = 'next';
+    l.prompt = 'Semana siguiente';
+    col.links.push(l);
 
     ctx.body = {collection: col};
     return next();
