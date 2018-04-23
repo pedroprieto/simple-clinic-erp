@@ -32,7 +32,7 @@ module.exports = function(router) {
 
 	    // Item links
       item.links = [];
-      if (!p.invoiced && !p._assignedVoucher) {
+      if (!p.invoice && !p.assignedVoucher) {
         item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: p._id}));
         item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: p._id}));
       }
@@ -368,6 +368,79 @@ module.exports = function(router) {
     ctx.status = 201;
     ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: data.date}).href);
     return next();
+  });
+
+
+  // Consultation assign Invoice
+  router.get(router.routesList["consultationAssignInvoice"].name, router.routesList["consultationAssignInvoice"].href, async (ctx, next) => {
+
+    if (ctx.consultation.associatedVoucher) {
+      ctx.throw(400, 'La consulta tiene un bono asociado. No se puede crear la factura.');
+    }
+
+    if (ctx.consultation.invoice) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede crear la factura.');
+    }
+
+    var col = {};
+    col.version = "1.0";
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).href;
+
+	  // Collection title
+    col.title = ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).prompt;
+
+	  // Collection Links
+    col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+
+    // Collection template
+    col.template = {data: []};
+    col.template.data.push({prompt: 'Fecha de factura', name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
+    col.template.data.push({prompt: 'Precio', name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number'});
+
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
+  // Post assigned Invoice
+  router.post(router.routesList["consultationAssignInvoice"].href, async (ctx, next) => {
+
+    if (ctx.consultation.associatedVoucher) {
+      ctx.throw(400, 'La consulta tiene un bono asociado. No se puede crear la factura.');
+    }
+
+    if (ctx.consultation.invoice) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede crear la factura.');
+    }
+
+    var data = await CJUtils.parseTemplate(ctx);
+    var p = new Invoice();
+    p.date = data.date;
+    p.customer = ctx.consultation.patient.fullName;
+    p.seller = ctx.consultation.doctor.fullName;
+    p.orderItems = [];
+    p.orderItems.push(
+      {
+        kind: 'Consultation',
+        price: data.price,
+        description: ctx.consultation.medicalProcedure.name,
+        item: ctx.consultation._id
+      }
+    );
+
+    var psaved = await p.save();
+    ctx.consultation.invoice = psaved._id;
+    var csaved = await ctx.consultation.save();
+    // TODO: asignar número de factura
+    ctx.status = 200;
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: ctx.consultation._id}).href);
+    return next();
+
   });
 
 

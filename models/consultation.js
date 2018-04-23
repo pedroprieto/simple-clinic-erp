@@ -29,24 +29,13 @@ var consultationSchema = {
     promptCJ: "Médico",
     htmlType: "select"
   },
-  invoiced: {
-    type: Boolean,
-    promptCJ: "Facturada",
-    required: true,
-    htmlType: "checkbox",
-    default: false
+  invoice: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Invoice',
+    promptCJ: "Factura",
+    htmlType: "select"
   },
-  invoiceDate: {
-    type: Date,
-    promptCJ: "Fecha de factura",
-    htmlType: "date"
-  },
-  invoiceNumber: {
-    type: Number,
-    promptCJ: "Número de factura",
-    htmlType: "number"
-  },
-  _associatedVoucher: {
+  associatedVoucher: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PatientVoucher',
     promptCJ: "Bono asociado",
@@ -87,7 +76,7 @@ ConsultationSchema.statics.findInDateRange = function (dateStart, dateEnd, docto
   return this.find({
     date: {$gte: dateStart, $lte: dateEnd},
     doctor: doctor
-  });
+  }).populate().exec();
 }
 
 // Get consultation list by patient

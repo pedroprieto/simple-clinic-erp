@@ -144,6 +144,12 @@ module.exports = {
     rel: "collection",
     prompt: "Facturas"
   },
+  invoice: {
+    name: "invoice",
+    href: "/api/invoices/:invoice",
+    rel: "collection",
+    prompt: "Factura"
+  },
   patientInvoices: {
     name: "patient",
     href: "/api/patients/:patient/invoices",

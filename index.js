@@ -51,6 +51,7 @@ require('./resources/consultation')(router);
 require('./resources/consultationVoucherTypes')(router);
 require('./resources/patientVouchers')(router);
 require('./resources/config')(router);
+require('./resources/invoices')(router);
 
 // Error processing
 app.use(async (ctx, next) => {
