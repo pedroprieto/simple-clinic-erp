@@ -6,6 +6,7 @@ var MedicalProcedure = require('../models/medicalprocedure');
 var Moment = require('moment');
 var PatientVoucher = require('../models/patientVoucher');
 var Invoice = require('../models/invoice');
+var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
@@ -13,36 +14,27 @@ module.exports = function(router) {
     var col = {};
     col.version = "1.0";
 
-	  // Collection href
-    col.href= ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).href;
-
-	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).prompt;
-
 	  // Collection Links
     col.links = [];
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
-    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
-    doctor_link.prompt = ctx.doctor.fullName;
-    col.links.push(doctor_link);
 
 	  // Items
 	  col.items = consultationList.map(function(p) {
       var item = {};
 
 	    // Item data
-      item.data = Consultation.objToCJ(p);
+      item.data = Consultation.objToCJ(p.consultationToCJ());
 
 	    // Item href
-      item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: p._id}).href;
+      item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: p._id}).href;
 
 	    // Item links
       item.links = [];
       if (!p.invoiced && !p._assignedVoucher) {
-        item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {doctor: ctx.doctor._id, consultation: p._id}));
-        item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {doctor: ctx.doctor._id, consultation: p._id}));
+        item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: p._id}));
+        item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: p._id}));
       }
 
 	    return item;
@@ -60,20 +52,6 @@ module.exports = function(router) {
 	    col.items.push(item);
 	  }
 
-	  // Queries
-
-	  // Template
-    col.template = {data: []};
-    col.template.data.push(
-      {
-        prompt: "Seleccionar fecha",
-        name: "date",
-        value: "",
-        type: 'date',
-        required: true
-      }
-    );
-
 	  // Return collection object
     return col;
 
@@ -81,7 +59,7 @@ module.exports = function(router) {
 
   // Parameter consultation
   router.param('consultation', async (id, ctx, next) => {
-    ctx.consultation = await Consultation.findById(id);
+    ctx.consultation = await Consultation.findOne({_id: id}).populate(['doctor', 'patient', 'medicalProcedure']).exec();
     return next();
   });
 
@@ -91,7 +69,7 @@ module.exports = function(router) {
     return next();
   });
 
-  // GET Consultation list
+  // GET Doctor consultation list
   router.get(router.routesList["consultations"].name, router.routesList["consultations"].href, async (ctx, next) => {
 
     // Get selected ISO week in query. Current week if invalid or no query
@@ -113,6 +91,16 @@ module.exports = function(router) {
     var consultations = await Consultation.findInDateRange(displayed_date.clone().startOf('isoWeek').toDate(), displayed_date.clone().endOf('isoWeek').toDate(), ctx.doctor._id);
     var col= await renderCollectionConsultations(ctx, consultations);
 
+    // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).href;
+
+	  // Collection title
+    col.title = ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).prompt;
+
+    // Doctor link
+    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    doctor_link.prompt = ctx.doctor.fullName;
+    col.links.push(doctor_link);
 
     // Pagination links
     var l;
@@ -131,48 +119,70 @@ module.exports = function(router) {
     l.prompt = 'Semana siguiente';
     col.links.push(l);
 
+	  // Template
+    col.template = {data: []};
+    col.template.data.push(
+      {
+        prompt: "Seleccionar fecha",
+        name: "date",
+        value: "",
+        type: 'date',
+        required: true
+      }
+    );
+
     ctx.body = {collection: col};
     return next();
 
   });
+
+  // Get patient consultation list
+  router.get(router.routesList["patientConsultations"].name, router.routesList["patientConsultations"].href, async (ctx, next) => {
+
+    var consultations = await Consultation.findByPatient(ctx.patient._id);
+    var col= await renderCollectionConsultations(ctx, consultations);
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: ctx.patient._id}).href;
+
+	  // Collection title
+    col.href= ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: ctx.patient._id}).prompt;
+
+	  // Patient Link
+    var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.patient._id});
+    patient_link.prompt = ctx.patient.fullName;
+    col.links.push(patient_link);
+
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
 
   // GET item
   router.get(router.routesList["consultation"].name, router.routesList["consultation"].href, async (ctx, next) => {
 	  var consultations = [];
 	  consultations.push(ctx.consultation);
     var col = await renderCollectionConsultations(ctx, consultations);
+    // TODO: improve
+    col.items[0].links.push(ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.consultation.doctor._id}));
+    col.items[0].links.push(ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.consultation.patient._id}));
     ctx.body = {collection: col};
     return next();
   });
 
   // DELETE item
   router.delete(router.routesList["consultation"].name, router.routesList["consultation"].href, async (ctx, next) => {
-    var doc = await Consultation.delById (ctx.consultation._id);
+    var doc = await Consultation.delById(ctx.consultation._id);
     ctx.status = 200;
     return next();
 
   });
 
-  // Aux function for PUT and POST
-  function parseTemplate(ctx) {
-	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
-
-    var data = ctx.request.body.template.data;
-
-    // Convert CJ format to JS object
-	  var consultationData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    return consultationData;
-  }
 
   // PUT item
   router.put(router.routesList["consultation"].name, router.routesList["consultation"].href, async (ctx, next) => {
-    var consultationData = parseTemplate(ctx);
+    var consultationData = CJUtils.parseTemplate(ctx);
     var aa = await Consultation.updateById(ctx.consultation._id, consultationData);
     ctx.status = 200;
     return next();
@@ -192,7 +202,6 @@ module.exports = function(router) {
 
 	  // Collection Links
     col.links = [];
-    // TODO: link to create patient template
 
 	  // Items
     var patientList = await Patient.find();
@@ -228,6 +237,14 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
+	  col.template = Patient.template();
+    col.template.data.push(
+      {
+		    name : 'nextStep',
+		    value: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: ctx.date}).href,
+        prompt : 'next step',
+        type: 'hidden'
+      });
 
 	  // Return collection object
     ctx.body = {collection: col};
@@ -247,7 +264,6 @@ module.exports = function(router) {
 
 	  // Collection Links
     col.links = [];
-    // TODO: link to create medProc template
 
 	  // Items
     var medProcList = await MedicalProcedure.find();
@@ -283,6 +299,14 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
+	  col.template = MedicalProcedure.template();
+    col.template.data.push(
+      {
+		    name : 'nextStep',
+		    value: ctx.getLinkCJFormat(router.routesList["consultations_select_medProc"], {doctor: ctx.doctor._id, date: ctx.date, patient: ctx.patient._id}).href,
+        prompt : 'next step',
+        type: 'hidden'
+      });
 
 	  // Return collection object
     ctx.body = {collection: col};
@@ -306,7 +330,7 @@ module.exports = function(router) {
         prompt: "Crear consulta",
         name: "confirm",
         value: true,
-        type: 'text',
+        type: 'checkbox',
         required: true
       }
     );
@@ -329,190 +353,22 @@ module.exports = function(router) {
     var p = new Consultation(data);
     var psaved = await p.save();
     ctx.status = 201;
-    // console.log(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href;
-
-    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href);
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: psaved._id}).href);
     return next();
 
   });
 
-  // POST
+  // POST select date
   router.post(router.routesList["consultations"].href, async (ctx,next) => {
-	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
+    var data = await CJUtils.parseTemplate(ctx);
 
-    var data = ctx.request.body.template.data;
+    if (! Moment(data.date).isValid())
+      ctx.throw(400, 'La fecha no es válida.');
 
-    // TODO: check valid date
-
-    // Convert CJ format to JS object
-	  var consultationData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    
     ctx.status = 201;
-    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: consultationData.date}).href);
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: data.date}).href);
     return next();
-    // var consultationData = await parseTemplate(ctx);
-    // var associated_doctor = await Doctor.findById(ctx.doctor._id);
-    // var associated_patient = await Patient.findById(consultationData.patient);
-    // var associated_medicalProcedure= await MedicalProcedure.findById(consultationData.medicalProcedure);
-    // //TODO
-    // if (typeof associated_doctor === 'undefined') {
-    //   ctx.throw('400', 'Error');
-    // } else {
-    //   consultationData.doctor = associated_doctor._id;
-    //   consultationData.patient = associated_patient._id;
-    //   consultationData.medicalProcedure = associated_medicalProcedure._id;
-    //   var p = new Consultation(consultationData);
-    //   var psaved = await p.save();
-    //   var consultations = await Consultation.find().populate(['patient', 'doctor', 'medicalProcedure']).exec();
-    //   var col= await renderCollectionConsultations(ctx, consultations);
-    //   ctx.body = {collection: col};
-    //   ctx.status = 201;
-    //   ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: psaved._id}).href);
-    //   return next();
-    // }
   });
 
 
-  // Consultation assign Invoice
-  router.get(router.routesList["consultationAssignInvoice"].name, router.routesList["consultationAssignInvoice"].href, async (ctx, next) => {
-
-    if (ctx.consultation._associatedVoucher) {
-      ctx.throw(400, 'La consulta tiene un bono asociado. No se puede crear la factura.');
-    }
-
-    if (ctx.consultation.invoiced) {
-      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede crear la factura.');
-    }
-
-    var col = {};
-    col.version = "1.0";
-
-	  // Collection href
-    col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).href;
-
-	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).prompt;
-
-	  // Collection Links
-    col.links = [];
-    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
-
-    // Collection template
-    col.template = {data: []};
-    col.template.data.push({prompt: 'Fecha de factura', name: 'invoiceDate', value: Moment().format('YYYY-MM-DD'), type: 'date'});
-
-    ctx.body = {collection: col};
-    return next();
-
-  });
-
-  // Post assigned Invoice
-  router.post(router.routesList["consultationAssignInvoice"].href, async (ctx, next) => {
-
-    if (ctx.consultation._associatedVoucher) {
-      ctx.throw(400, 'La consulta tiene un bono asociado. No se puede crear la factura.');
-    }
-
-    if (ctx.consultation.invoiced) {
-      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede crear la factura.');
-    }
-
-    var data = await parseTemplate(ctx);
-    ctx.consultation.invoiceDate = data.invoiceDate;
-    ctx.consultation.invoiced = true;
-    // TODO: asignar número de factura
-    await ctx.consultation.save();
-    ctx.status = 200;
-    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: ctx.consultation._id}).href);
-    return next();
-
-  });
-
-
-  // Consultation assign Voucher
-  router.get(router.routesList["consultationAssignVoucher"].name, router.routesList["consultationAssignVoucher"].href, async (ctx, next) => {
-
-    if (ctx.consultation._associatedVoucher) {
-      ctx.throw(400, 'La consulta ya tiene un bono asociado. No se puede asociar a otro.');
-    }
-
-    if (ctx.consultation.invoiced) {
-      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede asociar a un bono.');
-    }
-
-    var col = {};
-    col.version = "1.0";
-
-	  // Collection href
-    col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).href;
-
-	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id, doctor: ctx.doctor._id}).prompt;
-
-	  // Collection Links
-    col.links = [];
-    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
-
-    // Collection template
-    col.template = {data: []};
-    col.template.data.push({
-      prompt: 'Bono asociado',
-      name: 'associatedVoucher',
-      value: Date.now(),
-      type: 'select',
-      suggest: {
-        related: 'voucherList',
-        value: '_id',
-        //TODO
-        text: '_id'
-      }
-    });
-
-
-    // Collection related
-    col.related = {};
-
-    var voucher_list = await PatientVoucher.find({patient: ctx.consultation.patient._id});
-    col.related.voucherList = voucher_list.map(function (doc) {
-      var d = {};
-      d._id = doc._id;
-      // TODO
-      return d;
-    });
-
-    ctx.body = {collection: col};
-    return next();
-
-  });
-
-  // Post assigned Voucher
-  router.post(router.routesList["consultationAssignVoucher"].href, async (ctx, next) => {
-
-    if (ctx.consultation._associatedVoucher) {
-      ctx.throw(400, 'La consulta ya tiene un bono asociado. No se puede asociar a otro.');
-    }
-
-    if (ctx.consultation.invoiced) {
-      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede asociar a un bono.');
-    }
-
-    var data = await parseTemplate(ctx);
-    ctx.consultation._associatedVoucher = data.associatedVoucher;
-    // TODO: asignar número de factura
-    await ctx.consultation.save();
-    ctx.status = 200;
-    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {doctor: ctx.doctor._id, consultation: ctx.consultation._id}).href);
-    return next();
-
-  });
 }

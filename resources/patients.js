@@ -1,5 +1,6 @@
 // Patients resource
 var Patient = require('../models/patient');
+var Consultation = require('../models/consultation');
 var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
@@ -34,6 +35,8 @@ module.exports = function(router) {
       // Patient Vouchers
       item.links = [];
       item.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: p._id}));
+      // Patient consultations
+      item.links.push(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: p._id}));
 
 	    return item;
 	  });
@@ -114,7 +117,13 @@ module.exports = function(router) {
     var col= renderCollectionPatients(ctx, patients);
     ctx.body = {collection: col};
     ctx.status = 201;
-    ctx.set('location', ctx.getLinkCJFormat(router.routesList["patient"], {patient: psaved._id}).href);
+    // Check nextStep
+    // If patient was created during consultation creation, return to next step
+    if (patientData.nextStep) {
+      ctx.set('location', patientData.nextStep + '/' + psaved._id);
+    } else {
+      ctx.set('location', ctx.getLinkCJFormat(router.routesList["patient"], {patient: psaved._id}).href);
+    }
     return next();
   });
 }

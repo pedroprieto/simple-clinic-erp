@@ -146,7 +146,13 @@ module.exports = function(router) {
       var col= await renderCollectionMedicalProcedures(ctx, medicalProcedures);
       ctx.body = {collection: col};
       ctx.status = 201;
-      ctx.set('location', ctx.getLinkCJFormat(router.routesList["medicalProcedure"], {medicalprocedure: psaved._id}).href);
+      // Check nextStep
+      // If medicalProcedure created during consultation creation, return to next step
+      if (medicalProcedureData.nextStep) {
+        ctx.set('location', medicalProcedureData.nextStep + '/' + psaved._id);
+      } else {
+        ctx.set('location', ctx.getLinkCJFormat(router.routesList["medicalProcedure"], {medicalprocedure: psaved._id}).href);
+      }
       return next();
     }
   });

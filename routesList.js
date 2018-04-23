@@ -103,7 +103,7 @@ module.exports = {
   },
   consultation: {
     name: "consultation",
-    href: "/api/doctors/:doctor/consultations/item/:consultation",
+    href: "/api/consultations/:consultation",
     rel: "collection",
     prompt: "Consulta"
   },
@@ -121,15 +121,21 @@ module.exports = {
   },
   consultationAssignInvoice: {
     name: "consultationAssignInvoice",
-    href: "/api/doctors/:doctor/consultations/:consultation/consultationAssignInvoice",
+    href: "/api/consultations/:consultation/consultationAssignInvoice",
     rel: "collection",
     prompt: "Asignar factura"
   },
   consultationAssignVoucher: {
     name: "consultationAssignVoucher",
-    href: "/api/doctors/:doctor/consultations/:consultation/consultationAssignVoucher",
+    href: "/api/consultations/:consultation/consultationAssignVoucher",
     rel: "collection",
     prompt: "Asociar a bono"
+  },
+  patientConsultations: {
+    name: "patientConsultations",
+    href: "/api/patients/:patient/consultations",
+    rel: "collection",
+    prompt: "Lista de consultas del paciente"
   },
   //TODO
   invoices: {
@@ -137,12 +143,6 @@ module.exports = {
     href: "/api/invoices",
     rel: "collection",
     prompt: "Facturas"
-  },
-  patientConsultations: {
-    name: "patientConsultations",
-    href: "/api/patients/:patient/consultations",
-    rel: "collection",
-    prompt: "Lista de consultas del paciente"
   },
   patientInvoices: {
     name: "patient",
