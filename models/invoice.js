@@ -1,6 +1,7 @@
 var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
 
+// Invoice data should be immutable. If error, generate another invoice
 var invoiceSchema = {
   paid: {
     type: Boolean,
@@ -9,6 +10,18 @@ var invoiceSchema = {
     htmlType: "checkbox",
     default: false
   },
+  customerName: {
+    type: String,
+    promptCJ: "Cliente",
+    required: true,
+    htmlType: "text"
+  },
+  sellerName: {
+    type: String,
+    promptCJ: "Vendedor",
+    required: true,
+    htmlType: "text"
+  },
   date: {
     type: Date,
     promptCJ: "Fecha",
@@ -16,21 +29,12 @@ var invoiceSchema = {
     htmlType: "date",
     default: Date.now
   },
-  customer: {
-    type: String,
-    promptCJ: "Cliente",
-    htmlType: "text"
-  },
-  seller: {
-    type: String,
-    promptCJ: "Vendedor",
-    htmlType: "text"
-  },
   orderItems: [
     {
       kind: String,
       price: Number,
       description: String,
+      // Reference to order
       item: {
         type: mongoose.Schema.Types.ObjectId,
         refPath: 'orderItems.kind'
@@ -47,9 +51,10 @@ var InvoiceSchema = baseschema(invoiceSchema);
 InvoiceSchema.methods.invoiceToCJ = function() {
   var data = [];
   data.push({name: 'date', prompt: "Fecha", value: this.date});
-  data.push({name: 'customer', prompt: "Cliente", value: this.customer});
   data.push({name: 'paid', prompt: "Pagada", value: this.paid});
-  data.push({name: 'seller', prompt: "Vendedor", value: this.seller});
+  data.push({name: 'seller', prompt: "Vendedor", value: this.sellerName});
+  data.push({name: 'customer', prompt: "Cliente", value: this.customerName});
+
   if (Array.isArray(this.orderItems)) {
     var item = this.orderItems[0];
     data.push({name: 'price', prompt: "Precio", value: item.price});
@@ -59,7 +64,7 @@ InvoiceSchema.methods.invoiceToCJ = function() {
 };
 
 InvoiceSchema.statics.list = function () {
-  return this.find().populate('orderItems').exec();
+  return this.find().populate('orderItems.item').exec();
 }
 
 var Invoice = mongoose.model('Invoice', InvoiceSchema);

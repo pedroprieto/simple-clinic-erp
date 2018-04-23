@@ -22,31 +22,11 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
 
 	  // Items
-	  // Item data
 	  col.items = patientVoucherList.map(function(p) {
-      var pobj = p.toObject();
       var item = {};
-      item.data = [];
 
-      for (var d in pobj) {
-	      if (d.substring(0,1) != '_') {
-          var dat = {};
-          dat.name = d;
-          dat.prompt = p.schema.obj[d].promptCJ;
-          dat.type = p.schema.obj[d].htmlType;
-          // TODO: required
-          if (d==='patient') {
-            dat.value = pobj[d]._id;
-            dat.text= p[d].fullName;
-          } else if (d==='consultationVoucherType') {
-            dat.value = pobj[d]._id;
-            dat.text = p[d].name;
-          } else {
-            dat.value = pobj[d];
-          }
-          item.data.push(dat);
-        }
-      }
+	    // Item data
+      item.data = PatientVoucher.objToCJ(p.patientVoucherToCJ());
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: ctx.patient._id, patientVoucher: p._id}).href;
@@ -87,14 +67,14 @@ module.exports = function(router) {
   }
 
   // Parameter patientVoucher
-  router.param('patientVoucher', (id, ctx, next) => {
-    ctx.patientVoucher = id;
+  router.param('patientVoucher', async (id, ctx, next) => {
+    ctx.patientVoucher = await PatientVoucher.findById(id);
     return next();
   });
 
   // GET PatientVoucher list
   router.get(router.routesList["patientVouchers"].name, router.routesList["patientVouchers"].href, async (ctx, next) => {
-    var patientVouchers = await PatientVoucher.find().populate(['patient','consultationVoucherType']).exec();
+    var patientVouchers = await PatientVoucher.findByPatient(ctx.patient._id);
     var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
     ctx.body = {collection: col};
     return next();
@@ -103,9 +83,8 @@ module.exports = function(router) {
 
   // GET item
   router.get(router.routesList["patientVoucher"].name, router.routesList["patientVoucher"].href, async (ctx, next) => {
-    var patientVoucher = await PatientVoucher.findOne({_id: ctx.patientVoucher}).populate(['patient','consultationVoucherType']).exec();
 	  var patientVouchers = [];
-	  patientVouchers.push(patientVoucher);
+	  patientVouchers.push(ctx.patientVoucher);
     var col = await renderCollectionPatientVouchers(ctx, patientVouchers);
     ctx.body = {collection: col};
     return next();
@@ -113,10 +92,8 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["patientVoucher"].name, router.routesList["patientVoucher"].href, async (ctx, next) => {
-    var doc = await PatientVoucher.findByIdAndRemove(ctx.patientVoucher);
-    var patientVouchers = await PatientVoucher.find();
-    var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
-    ctx.body = {collection: col};
+    var doc = await PatientVoucher.findByIdAndRemove(ctx.patientVoucher._id);
+    ctx.status = 200;
     return next();
 
   });
@@ -124,7 +101,7 @@ module.exports = function(router) {
   // PUT item
   router.put(router.routesList["patientVoucher"].name, router.routesList["patientVoucher"].href, async (ctx, next) => {
     var patientVoucherData = await CJUtils.parseTemplate(ctx);
-    await PatientVoucher.findByIdAndUpdate(ctx.patientVoucher, patientVoucherData);
+    await PatientVoucher.updateById(ctx.patientVoucher, patientVoucherData);
     var patientVouchers = await PatientVoucher.find();
     var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
     ctx.body = {collection: col};
@@ -141,11 +118,10 @@ module.exports = function(router) {
     } else {
       patientVoucherData.patient = ctx.patient._id;
       patientVoucherData.consultationVoucherType = associated_consultationVoucherType._id;
+      patientVoucherData.numberOfSessions = associated_consultationVoucherType.numberOfConsultations;
+      patientVoucherData.price = associated_consultationVoucherType.price;
       var p = new PatientVoucher(patientVoucherData);
       var psaved = await p.save();
-      var patientVouchers = await PatientVoucher.find().populate(['patient', 'consultationVoucherType']).exec();
-      var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
-      ctx.body = {collection: col};
       ctx.status = 201;
       ctx.set('location', ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: ctx.patient._id, patientVoucher: psaved._id}).href);
       return next();

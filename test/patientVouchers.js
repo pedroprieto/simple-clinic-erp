@@ -126,10 +126,9 @@ describe('Patient vouchers resource', function() {
     // response.body.collection.items[0].data[0].text.should.equal(patient_name);
 
     // Check item 'consultationVoucherType' data
-    response.body.collection.items[0].should.have.property('data').with.lengthOf(3);
+    response.body.collection.items[0].should.have.property('data').with.lengthOf(5);
     var cVT = response.body.collection.items[0].data.filter(function(el) {return el.name=='consultationVoucherType';})[0];
-    cVT.value.should.equal(consultationVoucherType_id);
-    cVT.text.should.equal(consultationVoucherType_name);
+    cVT.value.should.equal(consultationVoucherType_name);
 
     // GET consultation list and check item length
     response = await request('')
@@ -156,6 +155,13 @@ describe('Patient vouchers resource', function() {
         .delete(url_created_patientVoucher)
         .set('Accept', 'application/json')
         .expect(200);
+
+
+    response = await request('')
+      .get(patientVouchers_url)
+      .set('Accept', 'application/json')
+      .expect(200);
+
     var col = response.body.collection;
     col.should.have.property('items').with.lengthOf(1);
     col.items[0].data[0].name.should.equal('message');
