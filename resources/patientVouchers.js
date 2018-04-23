@@ -2,6 +2,7 @@
 var PatientVoucher = require('../models/patientVoucher');
 var Patient= require('../models/patient');
 var ConsultationVoucherType = require('../models/consultationVoucherType');
+var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
@@ -120,29 +121,9 @@ module.exports = function(router) {
 
   });
 
-  // Aux function for PUT and POST
-  async function parseTemplate(ctx) {
-	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
-      var patientVouchers = await PatientVoucher.find();
-      var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
-      ctx.body = {collection: col};
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
-
-    var data = ctx.request.body.template.data;
-
-    // Convert CJ format to JS object
-	  var patientVoucherData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    return patientVoucherData;
-  }
-
   // PUT item
   router.put(router.routesList["patientVoucher"].name, router.routesList["patientVoucher"].href, async (ctx, next) => {
-    var patientVoucherData = await parseTemplate(ctx);
+    var patientVoucherData = await CJUtils.parseTemplate(ctx);
     await PatientVoucher.findByIdAndUpdate(ctx.patientVoucher, patientVoucherData);
     var patientVouchers = await PatientVoucher.find();
     var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
@@ -152,7 +133,7 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["patientVouchers"].href, async (ctx,next) => {
-    var patientVoucherData = await parseTemplate(ctx);
+    var patientVoucherData = await CJUtils.parseTemplate(ctx);
     var associated_consultationVoucherType = await ConsultationVoucherType.findById(patientVoucherData.consultationVoucherType);
     if (typeof associated_consultationVoucherType === 'undefined') {
       //TODO

@@ -1,5 +1,6 @@
 // Doctors resource
 var Doctor = require('../models/doctor');
+var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
@@ -99,29 +100,9 @@ module.exports = function(router) {
 
   });
 
-  // Aux function for PUT and POST
-  async function parseTemplate(ctx) {
-	  if ((ctx.request.body.template === undefined) || (ctx.request.body.template.data === undefined) || (!Array.isArray(ctx.request.body.template.data))) {
-      var doctors = await Doctor.find();
-      var col= renderCollectionDoctors(ctx, doctors);
-      ctx.body = {collection: col};
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
-
-    var data = ctx.request.body.template.data;
-
-    // Convert CJ format to JS object
-	  var doctorData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    return doctorData;
-  }
-
   // PUT item
   router.put(router.routesList["doctor"].name, router.routesList["doctor"].href, async (ctx, next) => {
-    var doctorData= await parseTemplate(ctx);
+    var doctorData= await CJUtils.parseTemplate(ctx);
     await ctx.doctor.update(doctorData);
     var doctors = await Doctor.find();
     var col= renderCollectionDoctors(ctx, doctors);
@@ -131,7 +112,7 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["doctors"].href, async (ctx,next) => {
-    var doctorData= await parseTemplate(ctx);
+    var doctorData= await CJUtils.parseTemplate(ctx);
     var p = new Doctor(doctorData);
     var psaved = await p.save();
     var doctors = await Doctor.find();

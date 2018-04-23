@@ -1,6 +1,7 @@
 // ConsultationVoucherTypes resource
 var ConsultationVoucherType = require('../models/consultationVoucherType');
 var MedicalProcedure = require('../models/medicalprocedure');
+var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
@@ -118,29 +119,9 @@ module.exports = function(router) {
 
   });
 
-  // Aux function for PUT and POST
-  async function parseTemplate(ctx) {
-	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
-      var consultationVoucherTypes = await ConsultationVoucherType.find();
-      var col= await renderCollectionConsultationVoucherTypes(ctx, consultationVoucherTypes);
-      ctx.body = {collection: col};
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
-
-    var data = ctx.request.body.template.data;
-
-    // Convert CJ format to JS object
-	  var consultationVoucherTypeData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    return consultationVoucherTypeData;
-  }
-
   // PUT item
   router.put(router.routesList["consultationVoucherType"].name, router.routesList["consultationVoucherType"].href, async (ctx, next) => {
-    var consultationVoucherTypeData = await parseTemplate(ctx);
+    var consultationVoucherTypeData = await CJUtils.parseTemplate(ctx);
     await ConsultationVoucherType.findByIdAndUpdate(ctx.consultationVoucherType, consultationVoucherTypeData);
     var consultationVoucherTypes = await ConsultationVoucherType.find();
     var col= await renderCollectionConsultationVoucherTypes(ctx, consultationVoucherTypes);
@@ -150,7 +131,7 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["consultationVoucherTypes"].href, async (ctx,next) => {
-    var consultationVoucherTypeData = await parseTemplate(ctx);
+    var consultationVoucherTypeData = await CJUtils.parseTemplate(ctx);
     var associated_medicalProcedure = await MedicalProcedure.findById(consultationVoucherTypeData.medicalProcedure);
     if (typeof associated_medicalProcedure === 'undefined') {
       //TODO

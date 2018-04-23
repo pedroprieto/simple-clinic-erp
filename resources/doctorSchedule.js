@@ -1,5 +1,6 @@
 // OpeningHours resource
 var OpeningHour = require('../models/openinghour');
+var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
@@ -103,29 +104,9 @@ module.exports = function(router) {
 
   });
 
-  // Aux function for PUT and POST
-  async function parseTemplate(ctx) {
-	  if ((ctx.request.body.template === undefined) || (ctx.request.body.template.data === undefined) || (!Array.isArray(ctx.request.body.template.data))) {
-      var doctorPopulated = await ctx.doctor.populate('_schedule').execPopulate();
-      var col= renderCollectionOpeningHours(ctx, doctorPopulated._schedule);
-      ctx.body = {collection: col};
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
-
-    var data = ctx.request.body.template.data;
-
-    // Convert CJ format to JS object
-	  var openingHourData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    return openingHourData;
-  }
-
   // PUT item
   router.put(router.routesList["doctorScheduleOpeningHour"].name, router.routesList["doctorScheduleOpeningHour"].href, async (ctx, next) => {
-    var openingHourData= await parseTemplate(ctx);
+    var openingHourData= await CJUtils.parseTemplate(ctx);
     await ctx.openingHour.update(openingHourData);
     var doctorPopulated = await ctx.doctor.populate('_schedule').execPopulate();
     var col= renderCollectionOpeningHours(ctx, doctorPopulated._schedule);
@@ -135,7 +116,7 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["doctorSchedule"].href, async (ctx,next) => {
-    var openingHourData= await parseTemplate(ctx);
+    var openingHourData= await CJUtils.parseTemplate(ctx);
     var p = new OpeningHour(openingHourData);
     var psaved = await p.save();
     ctx.doctor._schedule.push(p._id);

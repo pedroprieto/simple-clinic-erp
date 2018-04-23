@@ -1,5 +1,6 @@
 // Rooms resource
 var Room = require('../models/room');
+var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
@@ -94,29 +95,9 @@ module.exports = function(router) {
 
   });
 
-  // Aux function for PUT and POST
-  async function parseTemplate(ctx) {
-	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
-      var rooms = await Room.find();
-      var col= renderCollectionRooms(ctx, rooms);
-      ctx.body = {collection: col};
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
-
-    var data = ctx.request.body.template.data;
-
-    // Convert CJ format to JS object
-	  var roomData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    return roomData;
-  }
-
   // PUT item
   router.put(router.routesList["room"].name, router.routesList["room"].href, async (ctx, next) => {
-    var roomData = await parseTemplate(ctx);
+    var roomData = await CJUtils.parseTemplate(ctx);
     await Room.findByIdAndUpdate(ctx.room, roomData);
     var rooms = await Room.find();
     var col= renderCollectionRooms(ctx, rooms);
@@ -126,7 +107,7 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["rooms"].href, async (ctx,next) => {
-    var roomData = await parseTemplate(ctx);
+    var roomData = await CJUtils.parseTemplate(ctx);
     var p = new Room(roomData);
     var psaved = await p.save();
     var rooms = await Room.find();

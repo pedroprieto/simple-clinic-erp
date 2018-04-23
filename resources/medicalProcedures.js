@@ -1,6 +1,7 @@
 // MedicalProcedures resource
 var MedicalProcedure = require('../models/medicalprocedure');
 var Room = require('../models/room');
+var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
@@ -120,29 +121,9 @@ module.exports = function(router) {
 
   });
 
-  // Aux function for PUT and POST
-  async function parseTemplate(ctx) {
-	  if ((typeof ctx.request.body.template === 'undefined') || (typeof ctx.request.body.template.data === 'undefined') || (!Array.isArray(ctx.request.body.template.data))) {
-      var medicalProcedures = await MedicalProcedure.find();
-      var col= await renderCollectionMedicalProcedures(ctx, medicalProcedures);
-      ctx.body = {collection: col};
-      ctx.throw(400, 'Los datos no están en formato CJ');
-	  }
-
-    var data = ctx.request.body.template.data;
-
-    // Convert CJ format to JS object
-	  var medicalProcedureData = data.reduce(function(a,b){
-	    a[b.name] = b.value;
-	    return a;
-	  } , {});
-
-    return medicalProcedureData;
-  }
-
   // PUT item
   router.put(router.routesList["medicalProcedure"].name, router.routesList["medicalProcedure"].href, async (ctx, next) => {
-    var medicalProcedureData = await parseTemplate(ctx);
+    var medicalProcedureData = await CJUtils.parseTemplate(ctx);
     await MedicalProcedure.findByIdAndUpdate(ctx.medicalProcedure, medicalProcedureData);
     var medicalProcedures = await MedicalProcedure.find();
     var col= await renderCollectionMedicalProcedures(ctx, medicalProcedures);
@@ -152,7 +133,7 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["medicalProcedures"].href, async (ctx,next) => {
-    var medicalProcedureData = await parseTemplate(ctx);
+    var medicalProcedureData = await CJUtils.parseTemplate(ctx);
     var associated_room = await Room.findById(medicalProcedureData.room);
     if (typeof associated_room === 'undefined') {
       //TODO
