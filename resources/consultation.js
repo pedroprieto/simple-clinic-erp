@@ -208,7 +208,7 @@ module.exports = function(router) {
 
       var item = {};
 	    // Item data
-	    item.data = p.toObject({transform: Patient.tx_cj});
+      item.data = Patient.toCJ(ctx.i18n, p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["patient"], {patient: p._id}).href;
@@ -272,7 +272,6 @@ module.exports = function(router) {
       var item = {};
 	    // Item data
       item.data = MedicalProcedure.toCJ(ctx.i18n, p);
-	    item.data = p.toObject({transform: MedicalProcedure.tx_cj});
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["medicalProcedure"], {medicalprocedure: p._id}).href;
@@ -438,7 +437,6 @@ module.exports = function(router) {
     var psaved = await p.save();
     ctx.consultation.invoice = psaved._id;
     var csaved = await ctx.consultation.save();
-    // TODO: asignar número de factura
     ctx.status = 201;
     ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: ctx.consultation._id}).href);
     return next();
