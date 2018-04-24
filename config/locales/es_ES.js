@@ -65,5 +65,8 @@
 	"Seleccionar paciente para la consulta": "Seleccionar paciente para la consulta",
 	"Siguiente paso": "Siguiente paso",
 	"Seleccionar tipo de consulta": "Seleccionar tipo de consulta",
-	"Fecha": "Fecha"
+	"Fecha": "Fecha",
+	"Fecha de factura": "Fecha de factura",
+	"Facturas": "Facturas",
+	"Factura": "Factura"
 }

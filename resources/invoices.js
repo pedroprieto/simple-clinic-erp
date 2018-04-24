@@ -22,7 +22,6 @@ module.exports = function(router) {
 	  col.items = invoiceList.map(function(p) {
       var item = {};
 
-      console.log(p);
 	    // Item data
       item.data = p.invoiceToCJ();
 
@@ -69,7 +68,6 @@ module.exports = function(router) {
 
     // Get invoices
     var invoices = await Invoice.list();
-    console.log(invoices);
     var col= await renderCollectionInvoices(ctx, invoices);
 
     ctx.body = {collection: col};
