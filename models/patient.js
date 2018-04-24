@@ -55,6 +55,41 @@ PatientSchema.virtual('fullName').get(function () {
   return this.givenName + ' ' + this.familyName;
 });
 
+// Convert mongoose object to plain object ready to transform to CJ item data format
+PatientSchema.statics.toCJ = function(i18n, obj) {
+  var props = ['givenName', 'familyName', 'taxID', 'birthDate', 'telephone', 'address', 'email', 'diagnosis', 'description'];
+  // Call function defined in baseschema
+  return this.propsToCJ(props, i18n, false, obj);
+}
+
+PatientSchema.statics.getTemplate = function(i18n, obj) {
+  var props = ['givenName', 'familyName', 'taxID', 'birthDate', 'telephone', 'address', 'email', 'diagnosis', 'description'];
+  // Call function defined in baseschema
+  return this.propsToCJ(props, i18n, true, obj);
+}
+
+
+// Get patient by id
+PatientSchema.statics.findById = function (id) {
+  return this.findOne({_id: id});
+}
+
+// Delete patient by id
+PatientSchema.statics.delById = function (id) {
+  return this.findByIdAndRemove(id);
+}
+
+// Update patient by id
+PatientSchema.methods.updatePatient = function (data) {
+  this.set(data);
+  return this.save();
+}
+
+// Get patients
+PatientSchema.statics.list = function () {
+  return this.find();
+}
+
 var Patient = mongoose.model('Patient', PatientSchema);
 
 module.exports = Patient;

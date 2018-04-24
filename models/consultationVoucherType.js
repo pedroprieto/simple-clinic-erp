@@ -32,51 +32,68 @@ var consultationVoucherTypeSchema = {
 
 var ConsultationVoucherTypeSchema = baseschema(consultationVoucherTypeSchema);
 
-// Static function to generate template
-// I do not use schema.statics.tx_cj because I want to change populated property
-ConsultationVoucherTypeSchema.statics.template_suggest = function (item) {
-  var template = {};
-  template.data = [];
+// Convert mongoose object to plain object ready to transform to CJ item data format
+ConsultationVoucherTypeSchema.statics.toCJ = function(i18n, obj) {
+  var props = ['name', 'numberOfConsultations', 'price'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  // Build medicalProcedure
+  var medicalProcedure = {
+    name: 'medicalProcedure',
+    prompt: i18n.__('Tipo de sesión'),
+    type: 'select',
+    value: obj.medicalProcedure.name
+  };
 
-  for (var p in this.schema.paths) {
-	  if (p.substring(0,1) != '_') {
-      var v = (typeof item !== 'undefined') ? item[p].value : '';
-      var el;
-      if (p !== 'medicalProcedure') {
-	      el = {
-		      name : p,
-		      value: v,
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType
-	      };
-      } else {
-	      el = {
-		      name : p,
-		      value: v,
-          text: ((typeof item !== 'undefined') ? item[p].text : ''),
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType,
-          suggest: {
-            related: 'medicalProcedurelist',
-            value: '_id',
-            text: 'name'
-          }
-	      };
-      }
+  data.push(medicalProcedure);
 
-	    if (this.schema.paths[p].isRequired == true)
-		    el.required = true;
-
-	    if (typeof this.schema.paths[p].options.match !== 'undefined')
-		    el.match = this.schema.paths[p].options.match.toString().replace("/","").replace("/","");
-	    
-	    template.data.push(el);
-    }
-  }
-
-  return template;
+  return data;
 }
 
+ConsultationVoucherTypeSchema.statics.getTemplate = function(i18n, obj) {
+  var props = ['name', 'numberOfConsultations', 'price'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  // Build medicalProcedure
+  var medicalProcedure = {
+    name: 'medicalProcedure',
+    prompt: i18n.__('Tipo de sesión'),
+    type: 'select',
+    value: obj ? obj.medicalProcedure._id : "",
+    text: obj ? obj.medicalProcedure.name : "",
+    suggest: {
+      related: 'medicalProcedurelist',
+      value: '_id',
+      text: 'name'
+    }
+  };
+
+  data.push(medicalProcedure);
+
+  return data;
+}
+
+
+// Get consultationVoucher by id
+ConsultationVoucherTypeSchema.statics.findById = function (id) {
+  return this.findOne({_id: id}).populate('medicalProcedure').exec();
+}
+
+// Delete consultationVoucher by id
+ConsultationVoucherTypeSchema.statics.delById = function (id) {
+  return this.findByIdAndRemove(id);
+}
+
+// Update consultationVoucher by id
+ConsultationVoucherTypeSchema.methods.updateConsultationVoucherType = function (data) {
+  this.set(data);
+  return this.save();
+}
+
+// Get consultationVouchers
+ConsultationVoucherTypeSchema.statics.list = function () {
+  return this.find().populate('medicalProcedure').exec();
+}
 
 var ConsultationVoucherType = mongoose.model('ConsultationVoucherType', ConsultationVoucherTypeSchema);
 

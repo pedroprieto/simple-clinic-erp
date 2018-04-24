@@ -14,19 +14,20 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: ctx.patient._id}).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: ctx.patient._id}).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: ctx.patient._id}).prompt);
 
 	  // Collection Links
     col.links = [];
-    col.links.push(ctx.getLinkCJFormat(router.routesList["root"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
 
 	  // Items
 	  col.items = patientVoucherList.map(function(p) {
       var item = {};
 
 	    // Item data
-      item.data = PatientVoucher.objToCJ(p.patientVoucherToCJ());
+      item.data = PatientVoucher.toCJ(ctx.i18n, p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: ctx.patient._id, patientVoucher: p._id}).href;
@@ -42,7 +43,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay bonos para este paciente");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -51,15 +52,13 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = PatientVoucher.template_suggest();
-
+    col.template = {};
+	  col.template.data = PatientVoucher.getTemplate(ctx.i18n);
 
     // Related
     col.related = {};
-    col.related.patientlist = [];
-    col.related.patientlist = await Patient.find() ;
     col.related.consultationVoucherList = [];
-    col.related.consultationVoucherList = await ConsultationVoucherType.find() ;
+    col.related.consultationVoucherList = await ConsultationVoucherType.list();
 
 	  // Return collection object
     return col;
@@ -69,6 +68,9 @@ module.exports = function(router) {
   // Parameter patientVoucher
   router.param('patientVoucher', async (id, ctx, next) => {
     ctx.patientVoucher = await PatientVoucher.findById(id);
+    if (!ctx.patientVoucher) {
+      ctx.throw(404,ctx.i18n.__('Recurso no encontrado'));
+    }
     return next();
   });
 
@@ -100,17 +102,18 @@ module.exports = function(router) {
 
   // PUT item
   router.put(router.routesList["patientVoucher"].name, router.routesList["patientVoucher"].href, async (ctx, next) => {
-    var patientVoucherData = await CJUtils.parseTemplate(ctx);
-    await PatientVoucher.updateById(ctx.patientVoucher, patientVoucherData);
-    var patientVouchers = await PatientVoucher.find();
-    var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
+    var patientVoucherData = CJUtils.parseTemplate(ctx);
+    var updatedVoucher = await ctx.patientVoucher.updatePatientVoucher(patientVoucherData);
+    var vouchers = [];
+    vouchers.push(updatedVoucher);
+    var col= await renderCollectionPatientVouchers(ctx, vouchers);
     ctx.body = {collection: col};
     return next();
   });
 
   // POST
   router.post(router.routesList["patientVouchers"].href, async (ctx,next) => {
-    var patientVoucherData = await CJUtils.parseTemplate(ctx);
+    var patientVoucherData = CJUtils.parseTemplate(ctx);
     var associated_consultationVoucherType = await ConsultationVoucherType.findById(patientVoucherData.consultationVoucherType);
     if (typeof associated_consultationVoucherType === 'undefined') {
       //TODO

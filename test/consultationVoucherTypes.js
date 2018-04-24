@@ -82,10 +82,8 @@ describe('ConsultationVoucherTypes resource', function() {
     var item = response.body.collection.items[0];
     item.href.should.equal(url_created_consultationVoucherType);
 
-
     // Check item 'medicalProcedure' data
-    response.body.collection.items[0].data[3].value.should.equal(medicalProcedure_id);
-    response.body.collection.items[0].data[3].text.should.equal(medicalProcedure_name);
+    response.body.collection.items[0].data[3].value.should.equal(medicalProcedure_name);
 
     // GET consultationVoucherType list and check item length
     response = await request(app.server)
@@ -114,6 +112,12 @@ describe('ConsultationVoucherTypes resource', function() {
         .delete(url_created_consultationVoucherType)
         .set('Accept', 'application/json')
         .expect(200);
+
+    response = await request(app.server)
+        .get(routesList['consultationVoucherTypes'].href)
+        .set('Accept', 'application/json')
+        .expect(200);
+
     var col = response.body.collection;
     col.should.have.property('items').with.lengthOf(1);
     col.items[0].data[0].name.should.equal('message');

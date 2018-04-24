@@ -12,7 +12,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["doctors"]).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["doctors"]).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["doctors"]).prompt);
 
 	  // Collection Links
     col.links = [];
@@ -25,7 +25,7 @@ module.exports = function(router) {
 
       var item = {};
 	    // Item data
-      item.data = Doctor.objToCJ(p.toCJ());
+      item.data = Doctor.toCJ(ctx.i18n, p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: p._id}).href;
@@ -46,7 +46,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay médicos");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -55,7 +55,8 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = Doctor.getTemplate();
+    col.template = {};
+	  col.template.data = Doctor.getTemplate(ctx.i18n);
 
 	  // Return collection object
     return col;
@@ -66,7 +67,7 @@ module.exports = function(router) {
   router.param('doctor', async (id, ctx, next) => {
     ctx.doctor = await Doctor.findById(id);
     if (!ctx.doctor) {
-      ctx.throw(404,'Recurso no encontrado');
+      ctx.throw(404,ctx.i18n.__('Recurso no encontrado'));
     }
     return next();
   });
@@ -100,7 +101,7 @@ module.exports = function(router) {
 
   // PUT item
   router.put(router.routesList["doctor"].name, router.routesList["doctor"].href, async (ctx, next) => {
-    var doctorData= await CJUtils.parseTemplate(ctx);
+    var doctorData= CJUtils.parseTemplate(ctx);
     var updatedDoctor = await ctx.doctor.updateDoctor(doctorData);
 	  var doctors = [];
 	  doctors.push(updatedDoctor);
@@ -111,7 +112,7 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["doctors"].href, async (ctx,next) => {
-    var doctorData= await CJUtils.parseTemplate(ctx);
+    var doctorData= CJUtils.parseTemplate(ctx);
     var p = new Doctor(doctorData);
     var psaved = await p.save();
     ctx.status = 201;

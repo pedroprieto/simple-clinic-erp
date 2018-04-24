@@ -25,7 +25,7 @@ module.exports = function(router) {
       var item = {};
 
 	    // Item data
-      item.data = Consultation.objToCJ(p.consultationToCJ());
+      item.data = Consultation.toCJ(ctx.i18n, p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: p._id}).href;
@@ -46,7 +46,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay consultas");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -59,7 +59,10 @@ module.exports = function(router) {
 
   // Parameter consultation
   router.param('consultation', async (id, ctx, next) => {
-    ctx.consultation = await Consultation.findOne({_id: id}).populate(['doctor', 'patient', 'medicalProcedure']).exec();
+    ctx.consultation = await Consultation.findById(id);
+    if (!ctx.consultation) {
+      ctx.throw(404,ctx.i18n.__('Recurso no encontrado'));
+    }
     return next();
   });
 
@@ -95,7 +98,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).prompt);
 
     // Doctor link
     var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
@@ -106,30 +109,22 @@ module.exports = function(router) {
     var l;
     l = ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: cur_isoweekdate}});
     l.rel = 'current';
-    l.prompt = 'Semana actual';
+    l.prompt = ctx.i18n.__('Semana actual');
     col.links.push(l);
 
     l = ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: previousisoweekdate}});
     l.rel = 'prev';
-    l.prompt = 'Semana anterior';
+    l.prompt = ctx.i18n.__('Semana anterior');
     col.links.push(l);
 
     l = ctx.getLinkCJFormat(router.routesList["consultations"],{doctor: ctx.doctor._id},{query: {isoweekdate: nextisoweekdate}});
     l.rel = 'next';
-    l.prompt = 'Semana siguiente';
+    l.prompt = ctx.i18n.__('Semana siguiente');
     col.links.push(l);
 
 	  // Template
-    col.template = {data: []};
-    col.template.data.push(
-      {
-        prompt: "Seleccionar fecha",
-        name: "date",
-        value: "",
-        type: 'date',
-        required: true
-      }
-    );
+    col.template = {};
+	  col.template.data = Consultation.getTemplate(ctx.i18n);
 
     ctx.body = {collection: col};
     return next();
@@ -146,7 +141,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: ctx.patient._id}).href;
 
 	  // Collection title
-    col.href= ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: ctx.patient._id}).prompt;
+    col.href= ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: ctx.patient._id}).prompt);
 
 	  // Patient Link
     var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.patient._id});
@@ -184,6 +179,10 @@ module.exports = function(router) {
   router.put(router.routesList["consultation"].name, router.routesList["consultation"].href, async (ctx, next) => {
     var consultationData = CJUtils.parseTemplate(ctx);
     var aa = await Consultation.updateById(ctx.consultation._id, consultationData);
+	  var consultations = [];
+	  consultations.push(aa);
+    var col = renderCollectionConsultations(ctx, consultations);
+    ctx.body = {collection: col};
     ctx.status = 200;
     return next();
   });
@@ -198,7 +197,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["patients"]).href;
 
 	  // Collection title
-    col.title = "Seleccionar paciente para la consulta";
+    col.title = ctx.i18n.__("Seleccionar paciente para la consulta");
 
 	  // Collection Links
     col.links = [];
@@ -228,7 +227,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay pacientes");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -237,12 +236,13 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = Patient.template();
+    col.template = {};
+	  col.template.data = Patient.getTemplate(ctx.i18n);
     col.template.data.push(
       {
 		    name : 'nextStep',
 		    value: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: ctx.date}).href,
-        prompt : 'next step',
+        prompt : ctx.i18n.__('Siguiente paso'),
         type: 'hidden'
       });
 
@@ -260,17 +260,18 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["medicalProcedures"]).href;
 
 	  // Collection title
-    col.title = "Seleccionar tipo de consulta";
+    col.title = ctx.i18n.__("Seleccionar tipo de consulta");
 
 	  // Collection Links
     col.links = [];
 
 	  // Items
-    var medProcList = await MedicalProcedure.find();
+    var medProcList = await MedicalProcedure.list();
 	  col.items = medProcList.map(function(p) {
 
       var item = {};
 	    // Item data
+      item.data = MedicalProcedure.toCJ(ctx.i18n, p);
 	    item.data = p.toObject({transform: MedicalProcedure.tx_cj});
 
 	    // Item href
@@ -290,7 +291,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay tipos de consulta creadas");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -299,12 +300,13 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = MedicalProcedure.template();
+    col.template = {};
+	  col.template.data = MedicalProcedure.getTemplate(ctx.i18n);
     col.template.data.push(
       {
 		    name : 'nextStep',
 		    value: ctx.getLinkCJFormat(router.routesList["consultations_select_medProc"], {doctor: ctx.doctor._id, date: ctx.date, patient: ctx.patient._id}).href,
-        prompt : 'next step',
+        prompt : ctx.i18n.__('Siguiente paso'),
         type: 'hidden'
       });
 
@@ -327,7 +329,7 @@ module.exports = function(router) {
     col.template = {data: []};
     col.template.data.push(
       {
-        prompt: "Crear consulta",
+        prompt: ctx.i18n.__("Crear consulta"),
         name: "confirm",
         value: true,
         type: 'checkbox',
@@ -389,7 +391,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).prompt);
 
 	  // Collection Links
     col.links = [];
@@ -399,8 +401,8 @@ module.exports = function(router) {
 
     // Collection template
     col.template = {data: []};
-    col.template.data.push({prompt: 'Fecha de factura', name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
-    col.template.data.push({prompt: 'Precio', name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number'});
+    col.template.data.push({prompt: ctx.i18n.__('Fecha de factura'), name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
+    col.template.data.push({prompt: ctx.i18n.__('Precio'), name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number'});
 
     ctx.body = {collection: col};
     return next();
@@ -437,7 +439,7 @@ module.exports = function(router) {
     ctx.consultation.invoice = psaved._id;
     var csaved = await ctx.consultation.save();
     // TODO: asignar número de factura
-    ctx.status = 200;
+    ctx.status = 201;
     ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: ctx.consultation._id}).href);
     return next();
 
@@ -462,7 +464,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id}).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id}).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id}).prompt);
 
 	  // Collection Links
     col.links = [];
@@ -473,14 +475,13 @@ module.exports = function(router) {
     // Collection template
     col.template = {data: []};
     col.template.data.push({
-      prompt: 'Bono asociado',
+      prompt: ctx.i18n.__('Bono asociado'),
       name: 'associatedVoucher',
       value: "",
       type: 'select',
       suggest: {
         related: 'voucherList',
         value: '_id',
-        //TODO
         text: 'text'
       }
     });
@@ -526,7 +527,7 @@ module.exports = function(router) {
 
     // Update voucher consultation list
     await associatedVoucher.addConsultation(con._id);
-    ctx.status = 200;
+    ctx.status = 201;
     ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: ctx.consultation._id}).href);
     return next();
 

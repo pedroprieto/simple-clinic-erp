@@ -45,6 +45,52 @@ var consultationSchema = {
 
 var ConsultationSchema = baseschema(consultationSchema);
 
+// Convert mongoose object to plain object ready to transform to CJ item data format
+ConsultationSchema.statics.toCJ = function(i18n, obj) {
+  var props = ['date'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  var medicalProcedure = {
+    name: 'medicalProcedure',
+    prompt: i18n.__('Tipo de sesión'),
+    type: 'select',
+    value: obj.medicalProcedure.name
+  };
+  var patient = {
+    name: 'patient',
+    prompt: i18n.__('Paciente'),
+    type: 'select',
+    value: obj.patient.fullName
+  };
+  var doctor = {
+    name: 'doctor',
+    prompt: i18n.__('Médico'),
+    type: 'select',
+    value: obj.doctor.fullName
+  };
+
+  data.push(medicalProcedure);
+  data.push(patient);
+  data.push(doctor);
+
+  return data;
+}
+
+ConsultationSchema.statics.getTemplate = function(i18n, obj) {
+  var data = [];
+  data.push(
+    {
+      prompt: i18n.__("Seleccionar fecha"),
+      name: "date",
+      value: "",
+      type: 'date',
+      required: true
+    }
+  );
+
+  return data;
+}
+
 // Get consultation by id
 ConsultationSchema.statics.findById = function (id) {
   return this.findOne({_id: id}).populate(['doctor', 'patient', 'medicalProcedure']).exec();
@@ -58,17 +104,6 @@ ConsultationSchema.statics.delById = function (id) {
 // Update consultation by id
 ConsultationSchema.statics.updateById = function (id, data) {
   return Consultation.findByIdAndUpdate(id, data);
-}
-
-// Convert mongoose object to plain object ready to transform to CJ item data format
-// Assume populated object
-ConsultationSchema.methods.consultationToCJ = function() {
-  var res = {};
-  res.date = this.date;
-  res.patient = this.patient.fullName;
-  res.doctor = this.doctor.fullName;
-  res.medicalProcedure = this.medicalProcedure.name;
-  return res;
 }
 
 // Get consultation list by date range and doctor

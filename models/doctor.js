@@ -51,35 +51,29 @@ DoctorSchema.virtual('fullName').get(function () {
 });
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
-// Assume populated object
-DoctorSchema.methods.toCJ = function() {
-  var res = {};
-  res.givenName = this.givenName;
-  res.familyName = this.familyName;
-  res.taxID = this.taxID;
-  res.telephone = this.telephone;
-  res.address = this.address;
-  res.email = this.email;
-  return res;
+DoctorSchema.statics.toCJ = function(i18n, obj) {
+  var props = ['givenName', 'familyName', 'taxID', 'telephone', 'address', 'email'];
+  // Call function defined in baseschema
+  return this.propsToCJ(props, i18n, false, obj);
 }
 
-// Generate template from baseschema function
-DoctorSchema.statics.getTemplate = function(item) {
-  return this.template(item);
+DoctorSchema.statics.getTemplate = function(i18n, obj) {
+  var props = ['givenName', 'familyName', 'taxID', 'telephone', 'address', 'email'];
+  // Call function defined in baseschema
+  return this.propsToCJ(props, i18n, true, obj);
 }
-
 
 // Get doctor by id
 DoctorSchema.statics.findById = function (id) {
   return this.findOne({_id: id}).populate('_schedule').exec();
 }
 
-// Delete consultation by id
+// Delete doctor by id
 DoctorSchema.statics.delById = function (id) {
   return this.findByIdAndRemove(id);
 }
 
-// Update consultation by id
+// Update doctor by id
 DoctorSchema.methods.updateDoctor = function (data) {
   this.set(data);
   return this.save();

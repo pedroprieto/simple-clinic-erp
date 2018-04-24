@@ -7,7 +7,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["config"]).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["config"]).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["config"]).prompt);
 
 	  // Collection Links
     col.links = [];

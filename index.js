@@ -36,7 +36,7 @@ app.context.getLinkCJFormat = function(link, ...params) {
   return {
     href: this.request.origin + this.router.url(link.name, ...params),
     rel: link.rel,
-    prompt: link.prompt
+    prompt: this.i18n.__(link.prompt)
   }
 };
 
@@ -89,62 +89,62 @@ app.use(async (ctx, next) => {
 
 
 // i18n
-app.use(async (ctx, next) => {
-  // ctx.type = 'application/vnd.collection+json; charset=utf-8';
-  if (ctx.response.body && ctx.response.body.collection) {
-    var col = ctx.response.body.collection;
-    // Title
-    if (col.title)
-      col.title = ctx.i18n.__(col.title);
-    // Items
-    if (col.items) {
-      col.items = col.items.map(function(it) {
-        if (it.data) {
-          it.data = it.data.map(function (d) {
-            d.prompt = ctx.i18n.__(d.prompt);
-            return d;
-          });
-        }
-        if (it.links) {
-          it.links = it.links.map(function (l) {
-            l.prompt = ctx.i18n.__(l.prompt);
-            return l;
-          });
-        }
-        return it;
-      });
-    }
-    // Links
-    if (col.links) {
-      col.links = col.links.map(function(link) {
-        link.prompt = ctx.i18n.__(link.prompt);
-        return link;
-      });
-    }
-    // Template
-    if (col.template && col.template.data) {
-      col.template.data = col.template.data.map(function(d) {
-        d.prompt = ctx.i18n.__(d.prompt);
-        return d;
-      });
-    }
-    // Queries
-    if (col.queries) {
-      col.queries = col.queries.map(function(q) {
-        if (q.prompt)
-          q.prompt = ctx.i18n.__(q.prompt);
-        if (q.data) {
-          q.data = q.data.map(function (d) {
-            d.prompt = ctx.i18n.__(d.prompt);
-            return d;
-          });
-        }
-        return q;
-      });
-    }
-  }
-  return next();
-});
+// app.use(async (ctx, next) => {
+//   // ctx.type = 'application/vnd.collection+json; charset=utf-8';
+//   if (ctx.response.body && ctx.response.body.collection) {
+//     var col = ctx.response.body.collection;
+//     // Title
+//     if (col.title)
+//       col.title = ctx.i18n.__(col.title);
+//     // Items
+//     if (col.items) {
+//       col.items = col.items.map(function(it) {
+//         if (it.data) {
+//           it.data = it.data.map(function (d) {
+//             d.prompt = ctx.i18n.__(d.prompt);
+//             return d;
+//           });
+//         }
+//         if (it.links) {
+//           it.links = it.links.map(function (l) {
+//             l.prompt = ctx.i18n.__(l.prompt);
+//             return l;
+//           });
+//         }
+//         return it;
+//       });
+//     }
+//     // Links
+//     if (col.links) {
+//       col.links = col.links.map(function(link) {
+//         link.prompt = ctx.i18n.__(link.prompt);
+//         return link;
+//       });
+//     }
+//     // Template
+//     if (col.template && col.template.data) {
+//       col.template.data = col.template.data.map(function(d) {
+//         d.prompt = ctx.i18n.__(d.prompt);
+//         return d;
+//       });
+//     }
+//     // Queries
+//     if (col.queries) {
+//       col.queries = col.queries.map(function(q) {
+//         if (q.prompt)
+//           q.prompt = ctx.i18n.__(q.prompt);
+//         if (q.data) {
+//           q.data = q.data.map(function (d) {
+//             d.prompt = ctx.i18n.__(d.prompt);
+//             return d;
+//           });
+//         }
+//         return q;
+//       });
+//     }
+//   }
+//   return next();
+// });
 
 // Start server and export for testing
 var server = module.exports.server = app.listen(3000);

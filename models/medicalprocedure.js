@@ -26,57 +26,79 @@ var medicalProcedureSchema = {
     ref: 'Room',
     promptCJ: "Sala",
     htmlType: "select"
-  }
+  },
+  // active: {
+  //   type: Boolean,
+  //   promptCJ: "Activo",
+  //   htmlType: "checkbox"
+  // }
 };
 
 
 var MedicalProcedureSchema = baseschema(medicalProcedureSchema);
 
-// Static function to generate template
-// I do not use schema.statics.tx_cj because I want to change populated property
-MedicalProcedureSchema.statics.template_suggest = function (item) {
-  var template = {};
-  template.data = [];
+// Convert mongoose object to plain object ready to transform to CJ item data format
+MedicalProcedureSchema.statics.toCJ = function(i18n, obj) {
+  var props = ['name', 'duration', 'price'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  // Build room
+  var room = {
+    name: 'room',
+    prompt: i18n.__('Sala'),
+    type: 'select',
+    value: obj.room.name
+  };
 
-  for (var p in this.schema.paths) {
-	  if (p.substring(0,1) != '_') {
-      var v = (typeof item !== 'undefined') ? item[p].value : '';
-      var el;
-      if (p !== 'room') {
-	      el = {
-		      name : p,
-		      value: v,
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType
-	      };
-      } else {
-	      el = {
-		      name : p,
-		      value: v,
-          text: ((typeof item !== 'undefined') ? item[p].text : ''),
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType,
-          suggest: {
-            related: 'roomlist',
-            value: '_id',
-            text: 'name'
-          }
-	      };
-      }
+  data.push(room);
 
-	    if (this.schema.paths[p].isRequired == true)
-		    el.required = true;
-
-	    if (typeof this.schema.paths[p].options.match !== 'undefined')
-		    el.match = this.schema.paths[p].options.match.toString().replace("/","").replace("/","");
-	    
-	    template.data.push(el);
-    }
-  }
-
-  return template;
+  return data;
 }
 
+MedicalProcedureSchema.statics.getTemplate = function(i18n, obj) {
+  var props = ['name', 'duration', 'price'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  // Build room
+  var room = {
+    name: 'room',
+    prompt: i18n.__('Sala'),
+    type: 'select',
+    value: obj ? obj.room._id : "",
+    text: obj ? obj.room.name : "",
+    suggest: {
+      related: 'roomlist',
+      value: '_id',
+      text: 'name'
+    }
+  };
+
+  data.push(room);
+
+  return data;
+}
+
+
+// Get medicalProcedure by id
+MedicalProcedureSchema.statics.findById = function (id) {
+  return this.findOne({_id: id}).populate('room').exec();
+}
+
+// Delete medicalProcedure by id
+MedicalProcedureSchema.statics.delById = function (id) {
+  return this.findByIdAndRemove(id);
+}
+
+// Update medicalProcedure by id
+MedicalProcedureSchema.methods.updateMedicalProcedure = function (data) {
+  this.set(data);
+  return this.save();
+}
+
+// Get medicalProcedures
+MedicalProcedureSchema.statics.list = function () {
+  return this.find().populate('room').exec();
+}
 
 var MedicalProcedure = mongoose.model('MedicalProcedure', MedicalProcedureSchema);
 

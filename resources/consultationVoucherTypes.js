@@ -13,7 +13,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["consultationVoucherTypes"]).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["consultationVoucherTypes"]).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationVoucherTypes"]).prompt);
 
 	  // Collection Links
     col.links = [];
@@ -29,24 +29,8 @@ module.exports = function(router) {
 	  col.items = consultationVoucherTypeList.map(function(p) {
       var pobj = p.toObject();
       var item = {};
-      item.data = [];
 
-      for (var d in pobj) {
-	      if (d.substring(0,1) != '_') {
-          var dat = {};
-          dat.name = d;
-          dat.prompt = p.schema.obj[d].promptCJ;
-          dat.type = p.schema.obj[d].htmlType;
-          // TODO: required
-          if (d!=='medicalProcedure') {
-            dat.value = pobj[d];
-          } else {
-            dat.value = pobj[d]._id;
-            dat.text= pobj[d].name;
-          }
-          item.data.push(dat);
-        }
-      }
+      item.data = ConsultationVoucherType.toCJ(ctx.i18n, p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["consultationVoucherType"], {consultationVoucherType: p._id}).href;
@@ -62,7 +46,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay bonos");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -71,13 +55,14 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = ConsultationVoucherType.template_suggest();
+    col.template = {};
+	  col.template.data = MedicalProcedure.getTemplate(ctx.i18n);
 
 
     // Related
     col.related = {};
     col.related.medicalProcedurelist = [];
-    col.related.medicalProcedurelist = await MedicalProcedure.find() ;
+    col.related.medicalProcedurelist = await MedicalProcedure.list() ;
 
 	  // Return collection object
     return col;
@@ -85,14 +70,17 @@ module.exports = function(router) {
   }
 
   // Parameter consultationVoucherType
-  router.param('consultationVoucherType', (id, ctx, next) => {
-    ctx.consultationVoucherType = id;
+  router.param('consultationVoucherType', async (id, ctx, next) => {
+    ctx.consultationVoucherType = await ConsultationVoucherType.findById(id);
+    if (!ctx.consultationVoucherType) {
+      ctx.throw(404,ctx.i18n.__('Recurso no encontrado'));
+    }
     return next();
   });
 
   // GET ConsultationVoucherType list
   router.get(router.routesList["consultationVoucherTypes"].name, router.routesList["consultationVoucherTypes"].href, async (ctx, next) => {
-    var consultationVoucherTypes = await ConsultationVoucherType.find().populate('medicalProcedure').exec();
+    var consultationVoucherTypes = await ConsultationVoucherType.list();
     var col= await renderCollectionConsultationVoucherTypes(ctx, consultationVoucherTypes);
     ctx.body = {collection: col};
     return next();
@@ -101,7 +89,7 @@ module.exports = function(router) {
 
   // GET item
   router.get(router.routesList["consultationVoucherType"].name, router.routesList["consultationVoucherType"].href, async (ctx, next) => {
-    var consultationVoucherType = await ConsultationVoucherType.findOne({_id: ctx.consultationVoucherType}).populate('medicalProcedure').exec();
+    var consultationVoucherType = ctx.consultationVoucherType;
 	  var consultationVoucherTypes = [];
 	  consultationVoucherTypes.push(consultationVoucherType);
     var col = await renderCollectionConsultationVoucherTypes(ctx, consultationVoucherTypes);
@@ -111,38 +99,35 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["consultationVoucherType"].name, router.routesList["consultationVoucherType"].href, async (ctx, next) => {
-    var doc = await ConsultationVoucherType.findByIdAndRemove(ctx.consultationVoucherType);
-    var consultationVoucherTypes = await ConsultationVoucherType.find();
-    var col= await renderCollectionConsultationVoucherTypes(ctx, consultationVoucherTypes);
-    ctx.body = {collection: col};
+    var doc = await ConsultationVoucherType.delById(ctx.consultationVoucherType._id);
+    ctx.status = 200;
     return next();
 
   });
 
   // PUT item
   router.put(router.routesList["consultationVoucherType"].name, router.routesList["consultationVoucherType"].href, async (ctx, next) => {
-    var consultationVoucherTypeData = await CJUtils.parseTemplate(ctx);
-    await ConsultationVoucherType.findByIdAndUpdate(ctx.consultationVoucherType, consultationVoucherTypeData);
-    var consultationVoucherTypes = await ConsultationVoucherType.find();
-    var col= await renderCollectionConsultationVoucherTypes(ctx, consultationVoucherTypes);
+    var consultationVoucherTypeData = CJUtils.parseTemplate(ctx);
+    var updatedCVT = await ctx.consultationVoucherType.updateConsultationVoucherType(consultationVoucherTypeData);
+    var CVTs = [];
+    CVTs.push(updatedCVT);
+    var col= await renderCollectionConsultationVoucherTypes(ctx, CVTs);
     ctx.body = {collection: col};
     return next();
   });
 
   // POST
   router.post(router.routesList["consultationVoucherTypes"].href, async (ctx,next) => {
-    var consultationVoucherTypeData = await CJUtils.parseTemplate(ctx);
+    var consultationVoucherTypeData = CJUtils.parseTemplate(ctx);
     var associated_medicalProcedure = await MedicalProcedure.findById(consultationVoucherTypeData.medicalProcedure);
     if (typeof associated_medicalProcedure === 'undefined') {
       //TODO
-      ctx.throw('400', 'Error');
+      ctx.throw('400', 'Error. Tipo de sesión no válido.');
     } else {
-      consultationVoucherTypeData.medicalProcedure = associated_medicalProcedure._id;
       var p = new ConsultationVoucherType(consultationVoucherTypeData);
+      p.medicalProcedure = associated_medicalProcedure._id;
+
       var psaved = await p.save();
-      var consultationVoucherTypes = await ConsultationVoucherType.find().populate('medicalProcedure').exec();
-      var col= await renderCollectionConsultationVoucherTypes(ctx, consultationVoucherTypes);
-      ctx.body = {collection: col};
       ctx.status = 201;
       ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultationVoucherType"], {consultationVoucherType: psaved._id}).href);
       return next();

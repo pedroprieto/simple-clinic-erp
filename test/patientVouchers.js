@@ -24,6 +24,12 @@ describe('Patient vouchers resource', function() {
 	      .send(patient_test)
         .expect(201);
 
+    response = await request(app.server)
+      .get(routesList['patients'].href)
+      .set('Accept', 'application/json')
+	    .send(patient_test)
+      .expect(200);
+
     var patientVouchers_url = response.body.collection.items[0].links[0].href;
 
     // Create room

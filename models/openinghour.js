@@ -26,49 +26,62 @@ var openingHourSchema = {
 
 var OpeningHourSchema = baseschema(openingHourSchema);
 
-// Static function to generate template
-// I do not use schema.statics.tx_cj because I want to change populated property
-OpeningHourSchema.statics.template_suggest = function (item) {
-  var template = {};
-  template.data = [];
+// Convert mongoose object to plain object ready to transform to CJ item data format
+OpeningHourSchema.statics.toCJ = function(i18n, obj) {
+  var props = ['opens', 'closes'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  // Build dayOfWeek
+  var dayOfWeek = {
+    name: 'dayOfWeek',
+    prompt: i18n.__('Día de la semana'),
+    type: 'select',
+    value: i18n.__(obj.dayOfWeek)
+  };
 
-  for (var p in this.schema.paths) {
-	  if (p.substring(0,1) != '_') {
-      var v = (typeof item !== 'undefined') ? item[p].value : '';
-      var el;
-      if (p !== 'dayOfWeek') {
-	      el = {
-		      name : p,
-		      value: v,
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType
-	      };
-      } else {
-	      el = {
-		      name : p,
-		      value: v,
-          text: ((typeof item !== 'undefined') ? item[p].text : ''),
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType,
-          suggest: {
-            related: 'dayOfWeekList',
-            value: 'name',
-            text: 'name'
-          }
-	      };
-      }
+  data.push(dayOfWeek);
 
-	    if (this.schema.paths[p].isRequired == true)
-		    el.required = true;
+  return data;
+}
 
-	    if (typeof this.schema.paths[p].options.match !== 'undefined')
-		    el.match = this.schema.paths[p].options.match.toString().replace("/","").replace("/","");
-	    
-	    template.data.push(el);
+OpeningHourSchema.statics.getTemplate = function(i18n, obj) {
+  var props = ['opens', 'closes'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  // Build dayOfWeek
+  var dayOfWeek = {
+    name: 'dayOfWeek',
+    prompt: i18n.__('Día de la semana'),
+    type: 'select',
+    value: obj ? obj.dayOfWeek : "",
+    text: obj ? i18n.__(obj.dayOfWeek) : "",
+    suggest: {
+      related: 'dayOfWeek',
+      value: 'value',
+      text: 'text'
     }
-  }
+  };
 
-  return template;
+  data.push(dayOfWeek);
+
+  return data;
+}
+
+
+// Get openingHour by id
+OpeningHourSchema.statics.findById = function (id) {
+  return this.findOne({_id: id});
+}
+
+// Delete openingHour by id
+OpeningHourSchema.statics.delById = function (id) {
+  return this.findByIdAndRemove(id);
+}
+
+// Update openingHour by id
+OpeningHourSchema.methods.updateOpeningHour = function (data) {
+  this.set(data);
+  return this.save();
 }
 
 var OpeningHour = mongoose.model('OpeningHour', OpeningHourSchema);

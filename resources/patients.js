@@ -13,7 +13,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["patients"]).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["patients"]).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["patients"]).prompt);
 
 	  // Collection Links
     col.links = [];
@@ -26,7 +26,7 @@ module.exports = function(router) {
 
       var item = {};
 	    // Item data
-	    item.data = p.toObject({transform: Patient.tx_cj});
+      item.data = Patient.toCJ(ctx.i18n, p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["patient"], {patient: p._id}).href;
@@ -47,7 +47,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay pacientes");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -56,7 +56,8 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = Patient.template();
+    col.template = {};
+	  col.template.data = Patient.getTemplate(ctx.i18n);
 
 	  // Return collection object
     return col;
@@ -65,13 +66,16 @@ module.exports = function(router) {
 
   // Parameter patient
   router.param('patient', async (id, ctx, next) => {
-    ctx.patient = await Patient.findOne({_id: id});
+    ctx.patient = await Patient.findById(id);
+    if (!ctx.patient) {
+      ctx.throw(404,ctx.i18n.__('Recurso no encontrado'));
+    }
     return next();
   });
 
   // GET Patient list
   router.get(router.routesList["patients"].name, router.routesList["patients"].href, async (ctx, next) => {
-    var patients = await Patient.find();
+    var patients = await Patient.list();
     var col= renderCollectionPatients(ctx, patients);
     ctx.body = {collection: col};
     return next();
@@ -80,7 +84,7 @@ module.exports = function(router) {
 
   // GET item
   router.get(router.routesList["patient"].name, router.routesList["patient"].href, async (ctx, next) => {
-    var patient = await Patient.findOne({_id: ctx.patient});
+    var patient = ctx.patient;
 	  var patients = [];
 	  patients.push(patient);
     var col = renderCollectionPatients(ctx, patients);
@@ -90,19 +94,18 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["patient"].name, router.routesList["patient"].href, async (ctx, next) => {
-    var doc = await Patient.findByIdAndRemove(ctx.patient);
-    var patients = await Patient.find();
-    var col= renderCollectionPatients(ctx, patients);
-    ctx.body = {collection: col};
+    var doc = await Patient.delById(ctx.patient._id);
+    ctx.status = 200;
     return next();
 
   });
 
   // PUT item
   router.put(router.routesList["patient"].name, router.routesList["patient"].href, async (ctx, next) => {
-    var patientData = await CJUtils.parseTemplate(ctx);
-    await Patient.findByIdAndUpdate(ctx.patient, patientData);
-    var patients = await Patient.find();
+    var patientData = CJUtils.parseTemplate(ctx);
+    var updatedPatient = await ctx.patient.updatePatient(patientData);
+    var patients = [];
+    patients.push(updatedPatient);
     var col= renderCollectionPatients(ctx, patients);
     ctx.body = {collection: col};
     return next();
@@ -110,12 +113,9 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["patients"].href, async (ctx,next) => {
-    var patientData = await CJUtils.parseTemplate(ctx);
+    var patientData = CJUtils.parseTemplate(ctx);
     var p = new Patient(patientData);
     var psaved = await p.save();
-    var patients = await Patient.find();
-    var col= renderCollectionPatients(ctx, patients);
-    ctx.body = {collection: col};
     ctx.status = 201;
     // Check nextStep
     // If patient was created during consultation creation, return to next step

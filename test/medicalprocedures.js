@@ -57,10 +57,8 @@ describe('MedicalProcedures resource', function() {
     var item = response.body.collection.items[0];
     item.href.should.equal(url_created_medicalProcedure);
 
-
     // Check item 'room' data
-    response.body.collection.items[0].data[3].value.should.equal(room_id);
-    response.body.collection.items[0].data[3].text.should.equal(room_name);
+    response.body.collection.items[0].data[3].value.should.equal(room_name);
 
     // GET medicalProcedure list and check item length
     response = await request(app.server)
@@ -89,6 +87,12 @@ describe('MedicalProcedures resource', function() {
         .delete(url_created_medicalProcedure)
         .set('Accept', 'application/json')
         .expect(200);
+
+    response = await request(app.server)
+      .get(routesList['medicalProcedures'].href)
+      .set('Accept', 'application/json')
+      .expect(200);
+
     var col = response.body.collection;
     col.should.have.property('items').with.lengthOf(1);
     col.items[0].data[0].name.should.equal('message');

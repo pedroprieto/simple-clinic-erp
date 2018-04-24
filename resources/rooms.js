@@ -12,7 +12,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["rooms"]).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["rooms"]).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["rooms"]).prompt);
 
 	  // Collection Links
     col.links = [];
@@ -28,7 +28,7 @@ module.exports = function(router) {
 
       var item = {};
 	    // Item data
-	    item.data = p.toObject({transform: Room.tx_cj});
+      item.data = Room.toCJ(ctx.i18n, p);
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["room"], {room: p._id}).href;
@@ -44,7 +44,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay salas");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -53,7 +53,8 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = Room.template();
+    col.template = {};
+	  col.template.data = Room.getTemplate(ctx.i18n);
 
 	  // Return collection object
     return col;
@@ -61,14 +62,17 @@ module.exports = function(router) {
   }
 
   // Parameter room
-  router.param('room', (id, ctx, next) => {
-    ctx.room = id;
+  router.param('room', async (id, ctx, next) => {
+    ctx.room = await Room.findById(id);
+    if (!ctx.room) {
+      ctx.throw(404,ctx.i18n.__('Recurso no encontrado'));
+    }
     return next();
   });
 
   // GET Room list
   router.get(router.routesList["rooms"].name, router.routesList["rooms"].href, async (ctx, next) => {
-    var rooms = await Room.find();
+    var rooms = await Room.list();
     var col= renderCollectionRooms(ctx, rooms);
     ctx.body = {collection: col};
     return next();
@@ -77,7 +81,7 @@ module.exports = function(router) {
 
   // GET item
   router.get(router.routesList["room"].name, router.routesList["room"].href, async (ctx, next) => {
-    var room = await Room.findOne({_id: ctx.room});
+    var room = ctx.room;
 	  var rooms = [];
 	  rooms.push(room);
     var col = renderCollectionRooms(ctx, rooms);
@@ -87,19 +91,17 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["room"].name, router.routesList["room"].href, async (ctx, next) => {
-    var doc = await Room.findByIdAndRemove(ctx.room);
-    var rooms = await Room.find();
-    var col= renderCollectionRooms(ctx, rooms);
-    ctx.body = {collection: col};
+    var doc = await Room.delById(ctx.room._id);
+    ctx.status = 200;
     return next();
-
   });
 
   // PUT item
   router.put(router.routesList["room"].name, router.routesList["room"].href, async (ctx, next) => {
-    var roomData = await CJUtils.parseTemplate(ctx);
-    await Room.findByIdAndUpdate(ctx.room, roomData);
-    var rooms = await Room.find();
+    var roomData = CJUtils.parseTemplate(ctx);
+    var updatedRoom = await ctx.room.updateRoom(roomData);
+    var rooms = [];
+    rooms.push(updatedRoom);
     var col= renderCollectionRooms(ctx, rooms);
     ctx.body = {collection: col};
     return next();
@@ -107,12 +109,9 @@ module.exports = function(router) {
 
   // POST
   router.post(router.routesList["rooms"].href, async (ctx,next) => {
-    var roomData = await CJUtils.parseTemplate(ctx);
+    var roomData = CJUtils.parseTemplate(ctx);
     var p = new Room(roomData);
     var psaved = await p.save();
-    var rooms = await Room.find();
-    var col= renderCollectionRooms(ctx, rooms);
-    ctx.body = {collection: col};
     ctx.status = 201;
     ctx.set('location', ctx.getLinkCJFormat(router.routesList["room"], {room: psaved._id}).href);
     return next();

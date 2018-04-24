@@ -13,7 +13,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["medicalProcedures"]).href;
 
 	  // Collection title
-    col.title = ctx.getLinkCJFormat(router.routesList["medicalProcedures"]).prompt;
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["medicalProcedures"]).prompt);
 
 	  // Collection Links
     col.links = [];
@@ -26,31 +26,15 @@ module.exports = function(router) {
 
 
 	  // Items
-	  // Item data
 	  col.items = medicalProcedureList.map(function(p) {
-      var pobj = p.toObject();
-      var item = {};
-      item.data = [];
 
-      for (var d in pobj) {
-	      if (d.substring(0,1) != '_') {
-          var dat = {};
-          dat.name = d;
-          dat.prompt = p.schema.obj[d].promptCJ;
-          dat.type = p.schema.obj[d].htmlType;
-          // TODO: required
-          if (d!=='room') {
-            dat.value = pobj[d];
-          } else {
-            dat.value = pobj[d]._id;
-            dat.text= pobj[d].name;
-          }
-          item.data.push(dat);
-        }
-      }
+      var item = {};
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["medicalProcedure"], {medicalprocedure: p._id}).href;
+
+	    // Item data
+      item.data = MedicalProcedure.toCJ(ctx.i18n, p);
 
 	    // Item links
 
@@ -63,7 +47,7 @@ module.exports = function(router) {
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
-      d.prompt = "Mensaje";
+      d.prompt = ctx.i18n.__("Mensaje");
 	    d.value= ctx.i18n.__("No hay salas");
 	    item.data.push(d);
 	    col.items.push(item);
@@ -72,13 +56,13 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = MedicalProcedure.template_suggest();
-
+    col.template = {};
+	  col.template.data = MedicalProcedure.getTemplate(ctx.i18n);
 
     // Related
     col.related = {};
     col.related.roomlist = [];
-    col.related.roomlist = await Room.find() ;
+    col.related.roomlist = await Room.list() ;
 
 	  // Return collection object
     return col;
@@ -87,14 +71,16 @@ module.exports = function(router) {
 
   // Parameter medicalProcedure
   router.param('medicalprocedure', async (id, ctx, next) => {
-    ctx.medicalProcedure = await MedicalProcedure.findOne({_id: id}).populate('room').exec();
-    // ctx.medicalProcedure = id;
+    ctx.medicalProcedure = await MedicalProcedure.findById(id);
+    if (!ctx.medicalProcedure) {
+      ctx.throw(404,ctx.i18n.__('Recurso no encontrado'));
+    }
     return next();
   });
 
   // GET MedicalProcedure list
   router.get(router.routesList["medicalProcedures"].name, router.routesList["medicalProcedures"].href, async (ctx, next) => {
-    var medicalProcedures = await MedicalProcedure.find().populate('room').exec();
+    var medicalProcedures = await MedicalProcedure.list();
     var col= await renderCollectionMedicalProcedures(ctx, medicalProcedures);
     ctx.body = {collection: col};
     return next();
@@ -103,7 +89,7 @@ module.exports = function(router) {
 
   // GET item
   router.get(router.routesList["medicalProcedure"].name, router.routesList["medicalProcedure"].href, async (ctx, next) => {
-    var medicalProcedure = await MedicalProcedure.findOne({_id: ctx.medicalProcedure}).populate('room').exec();
+    var medicalProcedure = ctx.medicalProcedure;
 	  var medicalProcedures = [];
 	  medicalProcedures.push(medicalProcedure);
     var col = await renderCollectionMedicalProcedures(ctx, medicalProcedures);
@@ -113,38 +99,34 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["medicalProcedure"].name, router.routesList["medicalProcedure"].href, async (ctx, next) => {
-    var doc = await MedicalProcedure.findByIdAndRemove(ctx.medicalProcedure);
-    var medicalProcedures = await MedicalProcedure.find();
-    var col= await renderCollectionMedicalProcedures(ctx, medicalProcedures);
-    ctx.body = {collection: col};
+    var doc = await MedicalProcedure.delById(ctx.medicalProcedure._id);
+    ctx.status = 200;
     return next();
 
   });
 
   // PUT item
   router.put(router.routesList["medicalProcedure"].name, router.routesList["medicalProcedure"].href, async (ctx, next) => {
-    var medicalProcedureData = await CJUtils.parseTemplate(ctx);
-    await MedicalProcedure.findByIdAndUpdate(ctx.medicalProcedure, medicalProcedureData);
-    var medicalProcedures = await MedicalProcedure.find();
-    var col= await renderCollectionMedicalProcedures(ctx, medicalProcedures);
+    var medicalProcedureData = CJUtils.parseTemplate(ctx);
+    var updatedMedicalProcedure = await ctx.medicalProcedure.updateMedicalProcedure(medicalProcedureData);
+    var medProcs = [];
+    medProcs.push(updatedMedicalProcedure);
+    var col= await renderCollectionMedicalProcedures(ctx, medProcs);
     ctx.body = {collection: col};
     return next();
   });
 
   // POST
   router.post(router.routesList["medicalProcedures"].href, async (ctx,next) => {
-    var medicalProcedureData = await CJUtils.parseTemplate(ctx);
+    var medicalProcedureData = CJUtils.parseTemplate(ctx);
     var associated_room = await Room.findById(medicalProcedureData.room);
     if (typeof associated_room === 'undefined') {
       //TODO
-      ctx.throw('400', 'Error');
+      ctx.throw('400', 'Error. Sala no válida.');
     } else {
       medicalProcedureData.room = associated_room._id;
       var p = new MedicalProcedure(medicalProcedureData);
       var psaved = await p.save();
-      var medicalProcedures = await MedicalProcedure.find().populate('room').exec();
-      var col= await renderCollectionMedicalProcedures(ctx, medicalProcedures);
-      ctx.body = {collection: col};
       ctx.status = 201;
       // Check nextStep
       // If medicalProcedure created during consultation creation, return to next step

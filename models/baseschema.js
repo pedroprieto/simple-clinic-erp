@@ -14,77 +14,44 @@ module.exports = function(schema_skel) {
     return this.schema.obj[prop].htmlType;
   };
 
-
-  // Static function to convert plain JS object to Collection + JSON data format
-  // Used with output from aggretation framework (plain object)
-  // Assumed: object with desired properties + _id
-  schema.statics.objToCJ = function (obj) {
-    var data = [];
-    for (var prop in obj) {
-      if (prop === "_id")
-        continue;
-      var dat = {};
-      dat.name = prop;
-      dat.value = obj[prop];
-      dat.prompt = this.getPrompt(prop);
-      dat.type= this.getType(prop);
-      data.push(dat);
-    }
-    return data;
-  }
-
-  // Static function to convert data to Collection + JSON format
-  // Used by method toObject()
-  schema.statics.tx_cj = function (doc, ret, options) {
-    var data = [];
-
-    // Delete _id and __v fields
-    delete ret._id;
-    delete ret.__v;
-
-    for(var p in ret) {
-	    if (p.substring(0,1) != '_') {
-	      data.push({
-          name : p,
-          value : ret[p],
-          prompt :  doc.schema.obj[p].promptCJ,
-          type: doc.schema.obj[p].htmlType
-	      });
-      }
-    }
-    return data;
+  // Get required field from schema definition
+  schema.statics.isRequired = function (prop) {
+    return this.schema.obj[prop].required;
   };
 
-  // Static function to generate template
-  schema.statics.template = function (item) {
-    var template = {};
-    template.data = [];
+  // Get required field from schema definition
+  schema.statics.matchField = function (prop) {
+    if (typeof this.schema.obj[prop].match !== 'undefined')
+		  return this.schema.obj[prop].options.match.toString().replace("/","").replace("/","");
 
-    for (var p in this.schema.paths) {
+    return null;
+  };
 
-	    if (p.substring(0,1) != '_') {
-        var v = (typeof item !== 'undefined') ? item[p].value : '';
+  // Function to convert mongoose object to CJ data. Only converts properties in 'props' array
+  // obj: object to be converted
+  // props: array of item props to convert
+  // isTemplate: include (or not) 'required' and 'match' fields for template
+  // i18n: locales
+  schema.statics.propsToCJ = function (props, i18n, isTemplate, obj) {
+    return props.map(
+      function(prop) {
+        var dat = {};
+        dat.name = prop;
+        dat.value = obj ? obj[prop] : "";
+        dat.prompt = i18n ? i18n.__(this.getPrompt(prop)) : this.getPrompt(prop);
+        dat.type= this.getType(prop);
 
-	      var el = {
-		      name : p,
-		      value: v,
-          prompt :  this.schema.obj[p].promptCJ,
-          type: this.schema.obj[p].htmlType
-	      };
+        if (isTemplate) {
+          if (this.isRequired(prop))
+		        dat.required = true;
 
-	      if (this.schema.paths[p].isRequired == true)
-		      el.required = true;
-
-	      if (typeof this.schema.paths[p].options.match !== 'undefined')
-		      el.match = this.schema.paths[p].options.match.toString().replace("/","").replace("/","");
-	      
-	      template.data.push(el);
-	    }
-    }
-
-    return template;
-  }
+          if (this.matchField(prop))
+            dat.match = this.matchField();
+        }
+        return dat;
+      }.bind(this)
+    );
+  };
 
   return schema;
-
 }

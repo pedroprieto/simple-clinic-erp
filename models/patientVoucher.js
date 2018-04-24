@@ -55,6 +55,58 @@ PatientVoucherSchema.pre('save', function(next) {
   next();
 });
 
+
+// Convert mongoose object to plain object ready to transform to CJ item data format
+PatientVoucherSchema.statics.toCJ = function(i18n, obj) {
+  var props = ['numberOfSessions', 'price', 'remainingConsultations'];
+  // Call function defined in baseschema
+  var data = this.propsToCJ(props, i18n, false, obj);
+  // Build consultation Voucher Type
+  var type = {
+    name: 'consultationVoucherType',
+    prompt: i18n.__('Tipo de sesión'),
+    type: 'select',
+    value: obj.consultationVoucherType.name
+  };
+  // Build patient name
+  var patient = {
+    name: 'patient',
+    prompt: i18n.__('Paciente'),
+    type: 'select',
+    value: obj.patient.fullName
+  };
+
+  data.push(type);
+  data.push(patient);
+
+  return data;
+}
+
+PatientVoucherSchema.statics.getTemplate = function(i18n, obj) {
+  var data = [];
+  // Build consultation Voucher Type
+  var type = {
+    name: 'consultationVoucherType',
+    prompt: i18n.__('Tipo de sesión'),
+    type: 'select',
+    value: obj ? obj.consultationVoucherType._id : "",
+    text: obj ? obj.consultationVoucherType.name : "",
+    suggest: {
+      related: 'consultationVoucherList',
+      value: '_id',
+      text: 'name'
+    }
+  };
+
+  data.push(type);
+
+  return data;
+}
+
+PatientVoucherSchema.statics.list = function () {
+  return PatientVoucher.find().populate(['patient','consultationVoucherType']).exec();
+}
+
 PatientVoucherSchema.statics.findById = function (id) {
   return PatientVoucher.findOne({_id: id}).populate(['patient','consultationVoucherType']).exec();
 }
@@ -82,56 +134,6 @@ PatientVoucherSchema.statics.findAvailableByPatient = function (patient) {
   }).populate('consultationVoucherType').exec();
 }
 
-
-// Convert mongoose object to plain object ready to transform to CJ item data format
-// Assume populated object
-PatientVoucherSchema.methods.patientVoucherToCJ = function() {
-  var res = {};
-  res.consultationVoucherType = this.consultationVoucherType.name;
-  res.numberOfSessions = this.numberOfSessions;
-  res.price = this.price;
-  res.patient = this.patient.fullName;
-  res.remainingConsultations = this.remainingConsultations;
-  return res;
-}
-
-// Static function to generate template
-// I do not use schema.statics.tx_cj because I want to change populated property
-PatientVoucherSchema.statics.template_suggest = function (item) {
-  var template = {};
-  template.data = [];
-
-  for (var p in this.schema.paths) {
-	  if (p.substring(0,1) != '_') {
-      var v = (typeof item !== 'undefined') ? item[p].value : '';
-      var el;
-      if (p !== 'consultationVoucherType')
-        continue;
-	    el = {
-		    name : p,
-		    value: v,
-        text: ((typeof item !== 'undefined') ? item[p].text : ''),
-        prompt :  this.schema.obj[p].promptCJ,
-        type: this.schema.obj[p].htmlType,
-        suggest: {
-          related: 'consultationVoucherList',
-          value: '_id',
-          text: 'name'
-        }
-	    };
-
-	    if (this.schema.paths[p].isRequired == true)
-		    el.required = true;
-
-	    if (typeof this.schema.paths[p].options.match !== 'undefined')
-		    el.match = this.schema.paths[p].options.match.toString().replace("/","").replace("/","");
-	    
-	    template.data.push(el);
-    }
-  }
-
-  return template;
-}
 
 
 var PatientVoucher = mongoose.model('PatientVoucher', PatientVoucherSchema);
