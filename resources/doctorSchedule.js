@@ -59,7 +59,7 @@ module.exports = function(router) {
 
     // Related
     col.related = {};
-    col.related.dayOfWeekList = OpeningHour.schema.obj['dayOfWeek'].enum.map(function(el) {
+    col.related.dayOfWeek = OpeningHour.schema.obj['dayOfWeek'].enum.map(function(el) {
       return {
         value: el,
         text: ctx.i18n.__(el)
