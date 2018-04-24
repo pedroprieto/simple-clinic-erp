@@ -2,6 +2,7 @@
 var Consultation = require('../models/consultation');
 var Patient = require('../models/patient');
 var Doctor = require('../models/doctor');
+var Room = require('../models/room');
 var MedicalProcedure = require('../models/medicalprocedure');
 var Moment = require('moment');
 var PatientVoucher = require('../models/patientVoucher');
@@ -101,9 +102,10 @@ module.exports = function(router) {
     col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id}).prompt);
 
     // Doctor link
-    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
-    doctor_link.prompt = ctx.doctor.fullName;
-    col.links.push(doctor_link);
+    var back_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    back_link.prompt = ctx.doctor.fullName;
+    back_link.rel = "collection up";
+    col.links.push(back_link);
 
     // Pagination links
     var l;
@@ -201,6 +203,15 @@ module.exports = function(router) {
 
 	  // Collection Links
     col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+
+    // Back link
+    var back_link = ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id});
+    back_link.prompt = ctx.i18n.__("Volver");
+    back_link.rel = "collection prev";
+    col.links.push(back_link);
 
 	  // Items
     var patientList = await Patient.find();
@@ -264,6 +275,14 @@ module.exports = function(router) {
 
 	  // Collection Links
     col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+    // Back link
+    var back_link = ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: ctx.date});
+    back_link.prompt = ctx.i18n.__("Volver");
+    back_link.rel = "collection prev";
+    col.links.push(back_link);
 
 	  // Items
     var medProcList = await MedicalProcedure.list();
@@ -309,6 +328,11 @@ module.exports = function(router) {
         type: 'hidden'
       });
 
+    // Related
+    col.related = {};
+    col.related.roomlist = [];
+    col.related.roomlist = await Room.list() ;
+
 	  // Return collection object
     ctx.body = {collection: col};
     return next();
@@ -323,6 +347,17 @@ module.exports = function(router) {
 
 	  // Collection href
     col.href = ctx.getLinkCJFormat(router.routesList["consultations_create"], {doctor: ctx.doctor._id, date: ctx.date, patient: ctx.patient._id, medicalprocedure: ctx.medicalProcedure._id}).href;
+
+    // Collection links
+    col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+    // Back link
+    var back_link = ctx.getLinkCJFormat(router.routesList["consultations_select_medProc"], {doctor: ctx.doctor._id, date: ctx.date, patient: ctx.patient._id});
+    back_link.prompt = ctx.i18n.__("Volver");
+    back_link.rel = "collection prev";
+    col.links.push(back_link);
 
 	  // Template
     col.template = {data: []};

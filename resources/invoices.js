@@ -82,6 +82,12 @@ module.exports = function(router) {
     var invoices = await Invoice.listByCustomer(ctx.patient._id);
     var col= await renderCollectionInvoices(ctx, invoices);
 
+    // Patientlink
+    var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {doctor: ctx.patient._id});
+    patient_link.prompt = ctx.patient.fullName;
+    patient_link.rel = "collection up";
+    col.links.push(patient_link);
+
     ctx.body = {collection: col};
     return next();
 
@@ -93,6 +99,12 @@ module.exports = function(router) {
     // Get invoices
     var invoices = await Invoice.listBySeller(ctx.doctor._id);
     var col= await renderCollectionInvoices(ctx, invoices);
+
+    // Doctor link
+    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    doctor_link.prompt = ctx.doctor.fullName;
+    doctor_link.rel = "collection up";
+    col.links.push(doctor_link);
 
     ctx.body = {collection: col};
     return next();

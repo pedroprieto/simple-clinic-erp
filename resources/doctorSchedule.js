@@ -22,6 +22,7 @@ module.exports = function(router) {
 
     var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
     doctor_link.prompt = ctx.doctor.fullName;
+    doctor_link.rel = "collection up";
     col.links.push(doctor_link);
 
 	  // Items
