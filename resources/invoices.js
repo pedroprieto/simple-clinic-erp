@@ -75,6 +75,30 @@ module.exports = function(router) {
 
   });
 
+  // GET patient invoices
+  router.get(router.routesList["patientInvoices"].name, router.routesList["patientInvoices"].href, async (ctx, next) => {
+
+    // Get invoices
+    var invoices = await Invoice.listByCustomer(ctx.patient._id);
+    var col= await renderCollectionInvoices(ctx, invoices);
+
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
+  // GET doctor invoices
+  router.get(router.routesList["doctorInvoices"].name, router.routesList["doctorInvoices"].href, async (ctx, next) => {
+
+    // Get invoices
+    var invoices = await Invoice.listBySeller(ctx.doctor._id);
+    var col= await renderCollectionInvoices(ctx, invoices);
+
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
   // GET item
   router.get(router.routesList["invoice"].name, router.routesList["invoice"].href, async (ctx, next) => {
 	  var invoices = [];

@@ -137,7 +137,6 @@ module.exports = {
     rel: "collection",
     prompt: "Lista de consultas del paciente"
   },
-  //TODO
   invoices: {
     name: "invoices",
     href: "/api/invoices",
@@ -151,10 +150,16 @@ module.exports = {
     prompt: "Factura"
   },
   patientInvoices: {
-    name: "patient",
+    name: "patientInvoices",
     href: "/api/patients/:patient/invoices",
     rel: "collection",
     prompt: "Lista de facturas del paciente"
+  },
+  doctorInvoices: {
+    name: "doctorInvoices",
+    href: "/api/doctors/:doctor/invoices",
+    rel: "collection",
+    prompt: "Lista de facturas del médico"
   },
   config: {
     name: "config",

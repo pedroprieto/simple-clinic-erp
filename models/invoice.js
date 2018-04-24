@@ -23,11 +23,23 @@ var invoiceSchema = {
     htmlType: "checkbox",
     default: false
   },
+  customer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Patient',
+    promptCJ: "Paciente",
+    htmlType: "select"
+  },
   customerName: {
     type: String,
     promptCJ: "Cliente",
     required: true,
     htmlType: "text"
+  },
+  seller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Doctor',
+    promptCJ: "Médico",
+    htmlType: "select"
   },
   sellerName: {
     type: String,
@@ -87,6 +99,14 @@ InvoiceSchema.methods.invoiceToCJ = function() {
 
 InvoiceSchema.statics.list = function () {
   return this.find().populate('orderItems.item').exec();
+}
+
+InvoiceSchema.statics.listByCustomer = function (patient) {
+  return this.find({customer: patient}).populate('orderItems.item').exec();
+}
+
+InvoiceSchema.statics.listBySeller = function (doctor) {
+  return this.find({seller: doctor}).populate('orderItems.item').exec();
 }
 
 var Invoice = mongoose.model('Invoice', InvoiceSchema);

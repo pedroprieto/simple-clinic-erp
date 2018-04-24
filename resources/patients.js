@@ -37,6 +37,8 @@ module.exports = function(router) {
       item.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: p._id}));
       // Patient consultations
       item.links.push(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: p._id}));
+      // Patient invoices
+      item.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: p._id}));
 
 	    return item;
 	  });

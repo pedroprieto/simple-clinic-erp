@@ -422,7 +422,9 @@ module.exports = function(router) {
     var data = await CJUtils.parseTemplate(ctx);
     var p = new Invoice();
     p.date = data.date;
+    p.customer= ctx.consultation.patient._id;
     p.customerName = ctx.consultation.patient.fullName;
+    p.seller = ctx.consultation.doctor._id;
     p.sellerName = ctx.consultation.doctor.fullName;
     p.orderItems = [];
     p.orderItems.push(
