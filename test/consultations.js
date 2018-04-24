@@ -38,6 +38,12 @@ describe('Consultations resource', function() {
 	      .send(doctor_test)
         .expect(201);
 
+    // Get Doctor list
+    response = await request(app.server)
+      .get(routesList['doctors'].href)
+      .set('Accept', 'application/json')
+      .expect(200);
+
     // Store link to doctor consultations
     var consultations_url = response.body.collection.items[0].links[1].href;
 

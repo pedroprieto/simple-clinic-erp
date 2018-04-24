@@ -18,6 +18,12 @@ describe('Schedule resource', function() {
 	      .send(doctor_test)
         .expect(201);
 
+    // Get Doctor list
+    response = await request(app.server)
+      .get(routesList['doctors'].href)
+      .set('Accept', 'application/json')
+      .expect(200);
+
     var schedule_url = response.body.collection.items[0].links[0].href;
 
     // Expect empty list

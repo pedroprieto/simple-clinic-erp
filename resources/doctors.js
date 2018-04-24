@@ -25,7 +25,7 @@ module.exports = function(router) {
 
       var item = {};
 	    // Item data
-	    item.data = p.toObject({transform: Doctor.tx_cj});
+      item.data = Doctor.objToCJ(p.toCJ());
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: p._id}).href;
@@ -55,7 +55,7 @@ module.exports = function(router) {
 	  // Queries
 
 	  // Template
-	  col.template = Doctor.template();
+	  col.template = Doctor.getTemplate();
 
 	  // Return collection object
     return col;
@@ -64,7 +64,7 @@ module.exports = function(router) {
 
   // Parameter doctor
   router.param('doctor', async (id, ctx, next) => {
-    ctx.doctor = await Doctor.findOne({_id: id}).populate('_schedule').exec();
+    ctx.doctor = await Doctor.findById(id);
     if (!ctx.doctor) {
       ctx.throw(404,'Recurso no encontrado');
     }
@@ -73,7 +73,7 @@ module.exports = function(router) {
 
   // GET Doctor list
   router.get(router.routesList["doctors"].name, router.routesList["doctors"].href, async (ctx, next) => {
-    var doctors = await Doctor.find();
+    var doctors = await Doctor.list();
     var col= renderCollectionDoctors(ctx, doctors);
     ctx.body = {collection: col};
     return next();
@@ -92,10 +92,8 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["doctor"].name, router.routesList["doctor"].href, async (ctx, next) => {
-    var doc = await Doctor.remove(ctx.doctor);
-    var doctors = await Doctor.find();
-    var col= renderCollectionDoctors(ctx, doctors);
-    ctx.body = {collection: col};
+    var doc = await Doctor.delById(ctx.doctor._id);
+    ctx.status = 200;
     return next();
 
   });
@@ -103,9 +101,10 @@ module.exports = function(router) {
   // PUT item
   router.put(router.routesList["doctor"].name, router.routesList["doctor"].href, async (ctx, next) => {
     var doctorData= await CJUtils.parseTemplate(ctx);
-    await ctx.doctor.update(doctorData);
-    var doctors = await Doctor.find();
-    var col= renderCollectionDoctors(ctx, doctors);
+    var updatedDoctor = await ctx.doctor.updateDoctor(doctorData);
+	  var doctors = [];
+	  doctors.push(updatedDoctor);
+    var col = renderCollectionDoctors(ctx, doctors);
     ctx.body = {collection: col};
     return next();
   });
@@ -115,9 +114,6 @@ module.exports = function(router) {
     var doctorData= await CJUtils.parseTemplate(ctx);
     var p = new Doctor(doctorData);
     var psaved = await p.save();
-    var doctors = await Doctor.find();
-    var col= renderCollectionDoctors(ctx, doctors);
-    ctx.body = {collection: col};
     ctx.status = 201;
     ctx.set('location', ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: psaved._id}).href);
     return next();
