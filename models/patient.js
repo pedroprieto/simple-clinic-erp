@@ -1,5 +1,6 @@
 var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
+var Moment = require('moment');
 
 var patientSchema = {
   givenName: {
@@ -57,9 +58,17 @@ PatientSchema.virtual('fullName').get(function () {
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
 PatientSchema.statics.toCJ = function(i18n, obj) {
-  var props = ['givenName', 'familyName', 'taxID', 'birthDate', 'telephone', 'address', 'email', 'diagnosis', 'description'];
+  var props = ['givenName', 'familyName', 'taxID', 'telephone', 'address', 'email', 'diagnosis', 'description'];
   // Call function defined in baseschema
-  return this.propsToCJ(props, i18n, false, obj);
+  var data = this.propsToCJ(props, i18n, false, obj);
+  var birthDate = {
+    name: 'birthDate',
+    prompt: i18n.__('Fecha de nacimiento'),
+    type: 'date',
+    value: Moment(obj.birthDate).format('YYYY-MM-DD')
+  };
+  data.push(birthDate);
+  return data;
 }
 
 PatientSchema.statics.getTemplate = function(i18n, obj) {

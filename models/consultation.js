@@ -56,7 +56,8 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     name: 'date',
     prompt: i18n.__('Fecha'),
     type: 'date',
-    value: Moment(obj.date).format('llll')
+    value: obj.date
+
   };
   var medicalProcedure = {
     name: 'medicalProcedure',
