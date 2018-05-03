@@ -40,6 +40,7 @@ module.exports = function(router) {
 	  // If no items
 	  if (patientVoucherList.length == 0) {
 	    var item = {};
+      item.readOnly = true;
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
