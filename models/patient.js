@@ -95,8 +95,19 @@ PatientSchema.methods.updatePatient = function (data) {
 }
 
 // Get patients
-PatientSchema.statics.list = function () {
-  return this.find();
+PatientSchema.statics.list = function (query) {
+  var q = {};
+	if (typeof query.patientData !== 'undefined') {
+	  var re =  new RegExp(query.patientData, "i");
+	  q.$or = [];
+	  q.$or.push({givenName: re});
+	  q.$or.push({familiyName: re});
+	  q.$or.push({taxID: re});
+	  q.$or.push({telephone: re});
+	  q.$or.push({address: re});
+	  q.$or.push({email: re});
+	}
+  return this.find(q, null, {sort: {familyName: 1}});
 }
 
 var Patient = mongoose.model('Patient', PatientSchema);

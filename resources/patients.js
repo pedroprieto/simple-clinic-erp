@@ -56,7 +56,23 @@ module.exports = function(router) {
 	  }
 
 	  // Queries
-
+    col.queries = [];
+	  col.queries.push(
+	    {
+		    href: ctx.getLinkCJFormat(router.routesList["patients"]).href,
+		    rel: "search",
+		    name: "searchpatient",
+		    prompt: ctx.i18n.__("Buscar paciente"),
+		    data: [
+		      {
+			      name: "patientData",
+			      value: ctx.query.patientData || "",
+			      prompt: ctx.i18n.__("Búsqueda por texto"),
+            type: 'text'
+		      }
+		    ]
+	    }
+	  );
 	  // Template
     col.template = {};
 	  col.template.data = Patient.getTemplate(ctx.i18n);
@@ -77,7 +93,7 @@ module.exports = function(router) {
 
   // GET Patient list
   router.get(router.routesList["patients"].name, router.routesList["patients"].href, async (ctx, next) => {
-    var patients = await Patient.list();
+    var patients = await Patient.list(ctx.query);
     var col= renderCollectionPatients(ctx, patients);
     ctx.body = {collection: col};
     return next();
