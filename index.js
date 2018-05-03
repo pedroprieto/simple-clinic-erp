@@ -6,6 +6,7 @@ const i18n = require('koa-i18n');
 const mongoose = require('mongoose');
 var db_config = require('./config/db.js');
 mongoose.connect(process.env.NODE_ENV!='test'? db_config.db.uri : db_config.db.testuri);
+var Moment = require('moment');
 
 const app = new Koa();
 // Required!
@@ -24,6 +25,9 @@ app.use(i18n(app, {
   ]
 }));
 
+// Moment locale
+// TODO: select locale
+Moment.locale('es');
 
 var router = new Router();
 
@@ -49,9 +53,11 @@ require('./resources/rooms')(router);
 require('./resources/medicalProcedures')(router);
 require('./resources/consultation')(router);
 require('./resources/consultationVoucherTypes')(router);
+
 require('./resources/patientVouchers')(router);
 require('./resources/config')(router);
 require('./resources/invoices')(router);
+require('./resources/agenda')(router);
 
 // Error processing
 app.use(async (ctx, next) => {

@@ -83,6 +83,12 @@ module.exports = {
     rel: "collection",
     prompt: "Consultas"
   },
+  agenda: {
+    name: "agenda",
+    href: "/api/doctors/:doctor/agenda",
+    rel: "collection",
+    prompt: "Agenda"
+  },
   consultations_select_patient: {
     name: "consultations_select_patient",
     href: "/api/doctors/:doctor/consultations/select/:date",

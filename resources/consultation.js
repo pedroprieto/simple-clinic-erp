@@ -53,6 +53,31 @@ module.exports = function(router) {
 	    col.items.push(item);
 	  }
 
+    // Meta
+    col.meta = {};
+    // col.meta.availableHours = [];
+    // var limitHours = ctx.doctor._schedule.reduce(function(prev, sch) {
+    //   var ret = prev;
+    //   if (sch.opens < prev.from) {
+    //     ret.from= sch.opens;
+    //   }
+    //   if (sch.closes > prev.to) {
+    //     ret.to = sch.closes;
+    //   }
+    //   return ret;
+    // },{from: '23:59', to: '00:00'});
+    // // console.log(limitHours);
+
+    // var init_hour = Moment('2018-01-01 ' + limitHours.from);
+    // while (init_hour.format('HH:mm') < limitHours.to) {
+    //   col.meta.availableHours.push(init_hour.format('HH:mm'));
+    //   init_hour.add(30, 'm');
+    // }
+    // console.log(col.meta.availableHours);
+    // console.log(init_hour.format('HH:mm'));
+    // console.log(init_hour);
+    // console.log(init_hour.add(30, 'm'));
+
 	  // Return collection object
     return col;
 
@@ -127,6 +152,19 @@ module.exports = function(router) {
 	  // Template
     col.template = {};
 	  col.template.data = Consultation.getTemplate(ctx.i18n);
+
+    // Meta current Week
+    col.meta.currentWeek = isoweekdate;
+    col.meta.listOfDays = [];
+
+    var begin = displayed_date.clone().startOf('isoWeek').isoWeekday();
+    var wend = displayed_date.clone().endOf('isoWeek').isoWeekday();
+    var d = displayed_date.startOf('week');
+    while (begin <= wend) {
+      col.meta.listOfDays.push(d.format('YYYY-MM-DD'));
+      d.add(1, 'days');
+      begin++;
+    }
 
     ctx.body = {collection: col};
     return next();

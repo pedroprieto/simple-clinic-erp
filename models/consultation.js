@@ -1,5 +1,6 @@
 var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
+var Moment = require('moment');
 
 var consultationSchema = {
   date: {
@@ -47,9 +48,16 @@ var ConsultationSchema = baseschema(consultationSchema);
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
 ConsultationSchema.statics.toCJ = function(i18n, obj) {
-  var props = ['date'];
+  // var props = ['date'];
   // Call function defined in baseschema
-  var data = this.propsToCJ(props, i18n, false, obj);
+  // var data = this.propsToCJ(props, i18n, false, obj);
+  var data = [];
+  var date = {
+    name: 'date',
+    prompt: i18n.__('Fecha'),
+    type: 'date',
+    value: Moment(obj.date).format('llll')
+  };
   var medicalProcedure = {
     name: 'medicalProcedure',
     prompt: i18n.__('Tipo de sesión'),
@@ -69,6 +77,7 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     value: obj.doctor.fullName
   };
 
+  data.push(date);
   data.push(medicalProcedure);
   data.push(patient);
   data.push(doctor);
