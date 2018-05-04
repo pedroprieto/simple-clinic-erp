@@ -253,16 +253,17 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
 
     // Back link
-    var back_link = ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: ctx.doctor._id});
+    var back_link = ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id});
     back_link.prompt = ctx.i18n.__("Volver");
     back_link.rel = "collection prev";
     col.links.push(back_link);
 
 	  // Items
-    var patientList = await Patient.find();
+    var patientList = await Patient.list(ctx.query);
 	  col.items = patientList.map(function(p) {
 
       var item = {};
+      item.readOnly = true;
 	    // Item data
       item.data = Patient.toCJ(ctx.i18n, p);
 
@@ -280,6 +281,7 @@ module.exports = function(router) {
 	  // If no items
 	  if (patientList.length == 0) {
 	    var item = {};
+      item.readOnly = true;
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
@@ -290,6 +292,23 @@ module.exports = function(router) {
 	  }
 
 	  // Queries
+    col.queries = [];
+	  col.queries.push(
+	    {
+		    href: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: ctx.date}).href,
+		    rel: "search",
+		    name: "searchpatient",
+		    prompt: ctx.i18n.__("Buscar paciente"),
+		    data: [
+		      {
+			      name: "patientData",
+			      value: ctx.query.patientData || "",
+			      prompt: ctx.i18n.__("Búsqueda por texto"),
+            type: 'text'
+		      }
+		    ]
+	    }
+	  );
 
 	  // Template
     col.template = {};
@@ -334,6 +353,7 @@ module.exports = function(router) {
 	  col.items = medProcList.map(function(p) {
 
       var item = {};
+      item.readOnly = true;
 	    // Item data
       item.data = MedicalProcedure.toCJ(ctx.i18n, p);
 
@@ -351,6 +371,7 @@ module.exports = function(router) {
 	  // If no items
 	  if (medProcList.length == 0) {
 	    var item = {};
+      item.readOnly = true;
 	    item.data = [];
 	    var d = {};
 	    d.name = "message";
@@ -612,4 +633,7 @@ module.exports = function(router) {
     return next();
 
   });
+
+
+
 }
