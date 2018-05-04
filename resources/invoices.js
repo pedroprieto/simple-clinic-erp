@@ -102,10 +102,17 @@ module.exports = function(router) {
     var col= await renderCollectionInvoices(ctx, invoices);
 
     // Doctor link
+    // var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    // doctor_link.prompt = ctx.doctor.fullName;
+    // doctor_link.rel = "collection up";
+    // col.links.push(doctor_link);
+    col.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}));
     var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
-    doctor_link.prompt = ctx.doctor.fullName;
-    doctor_link.rel = "collection up";
+    doctor_link.prompt = ctx.i18n.__("Datos personales"); 
     col.links.push(doctor_link);
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: ctx.doctor._id}));
+    col.title = ctx.i18n.__("Facturas de ") + ctx.doctor.fullName;
 
     ctx.body = {collection: col};
     return next();

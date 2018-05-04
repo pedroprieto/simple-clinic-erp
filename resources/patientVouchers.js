@@ -25,6 +25,17 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
     col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
 
+	  // Patient Link
+    var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.patient._id});
+    patient_link.prompt = ctx.i18n.__("Datos personales"); 
+    col.links.push(patient_link);
+    // Patient Vouchers
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: ctx.patient._id}));
+    // Patient consultations
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: ctx.patient._id}));
+    // Patient invoices
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: ctx.patient._id}));
+
 	  // Items
 	  col.items = patientVoucherList.map(function(p) {
       var item = {};

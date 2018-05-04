@@ -5,7 +5,7 @@ var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
-  function renderCollectionPatients(ctx, patientList) {
+  function renderCollectionPatients(ctx, patientList, isItem) {
     var col = {};
     col.version = "1.0";
 
@@ -32,13 +32,26 @@ module.exports = function(router) {
       item.href = ctx.getLinkCJFormat(router.routesList["patient"], {patient: p._id}).href;
 
 	    // Item links
-      // Patient Vouchers
-      item.links = [];
-      item.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: p._id}));
-      // Patient consultations
-      item.links.push(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: p._id}));
-      // Patient invoices
-      item.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: p._id}));
+      if (!isItem) {
+        // Patient Vouchers
+        item.links = [];
+        item.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: p._id}));
+        // Patient consultations
+        item.links.push(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: p._id}));
+        // Patient invoices
+        item.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: p._id}));
+      } else {
+	      // Patient Link
+        var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.patient._id});
+        patient_link.prompt = ctx.i18n.__("Datos personales"); 
+        col.links.push(patient_link);
+        // Patient Vouchers
+        col.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: p._id}));
+        // Patient consultations
+        col.links.push(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: p._id}));
+        // Patient invoices
+        col.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: p._id}));
+      }
 
 	    return item;
 	  });
@@ -57,23 +70,25 @@ module.exports = function(router) {
 	  }
 
 	  // Queries
-    col.queries = [];
-	  col.queries.push(
-	    {
-		    href: ctx.getLinkCJFormat(router.routesList["patients"]).href,
-		    rel: "search",
-		    name: "searchpatient",
-		    prompt: ctx.i18n.__("Buscar paciente"),
-		    data: [
-		      {
-			      name: "patientData",
-			      value: ctx.query.patientData || "",
-			      prompt: ctx.i18n.__("Búsqueda por texto"),
-            type: 'text'
-		      }
-		    ]
-	    }
-	  );
+    if (!isItem) {
+      col.queries = [];
+	    col.queries.push(
+	      {
+		      href: ctx.getLinkCJFormat(router.routesList["patients"]).href,
+		      rel: "search",
+		      name: "searchpatient",
+		      prompt: ctx.i18n.__("Buscar paciente"),
+		      data: [
+		        {
+			        name: "patientData",
+			        value: ctx.query.patientData || "",
+			        prompt: ctx.i18n.__("Búsqueda por texto"),
+              type: 'text'
+		        }
+		      ]
+	      }
+	    );
+    }
 	  // Template
     col.template = {};
 	  col.template.data = Patient.getTemplate(ctx.i18n);
@@ -106,7 +121,8 @@ module.exports = function(router) {
     var patient = ctx.patient;
 	  var patients = [];
 	  patients.push(patient);
-    var col = renderCollectionPatients(ctx, patients);
+    var col = renderCollectionPatients(ctx, patients, true);
+    col.title = ctx.i18n.__('Paciente: ') + ctx.patient.fullName;
     ctx.body = {collection: col};
     return next();
   });

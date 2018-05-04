@@ -128,10 +128,20 @@ module.exports = function(router) {
     col.title = ctx.i18n.__("Agenda de ") + ctx.doctor.fullName;
 
     // Doctor link
-    var back_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
-    back_link.prompt = ctx.doctor.fullName;
-    back_link.rel = "collection up";
-    col.links.push(back_link);
+    // var back_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    // back_link.prompt = ctx.doctor.fullName;
+    // back_link.rel = "collection up";
+    // col.links.push(back_link);
+
+	  // Doctor Link
+    col.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}));
+    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+    doctor_link.prompt = ctx.i18n.__("Datos personales"); 
+    col.links.push(doctor_link);
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: ctx.doctor._id}));
+
+
 
     // Pagination links
     var l;

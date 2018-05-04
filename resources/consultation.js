@@ -192,8 +192,14 @@ module.exports = function(router) {
 
 	  // Patient Link
     var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.patient._id});
-    patient_link.prompt = ctx.patient.fullName;
+    patient_link.prompt = ctx.i18n.__("Datos personales"); 
     col.links.push(patient_link);
+    // Patient Vouchers
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patientVouchers"], {patient: ctx.patient._id}));
+    // Patient consultations
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patientConsultations"], {patient: ctx.patient._id}));
+    // Patient invoices
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: ctx.patient._id}));
 
     ctx.body = {collection: col};
     return next();

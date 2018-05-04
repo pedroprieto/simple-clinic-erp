@@ -4,7 +4,7 @@ var CJUtils = require('../aux/CJUtils');
 
 module.exports = function(router) {
 
-  function renderCollectionDoctors(ctx, doctorList) {
+  function renderCollectionDoctors(ctx, doctorList, isItem) {
     var col = {};
     col.version = "1.0";
 
@@ -31,14 +31,28 @@ module.exports = function(router) {
       item.href = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: p._id}).href;
 
 	    // Item links
-      item.links = [];
-      // Doctor schedule link
-      item.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: p._id}));
-      item.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: p._id}));
-      // Doctor consultations
-      // item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
-      // Doctor invoices
-      item.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: p._id}));
+      if (!isItem) {
+        item.links = [];
+        // Doctor schedule link
+        item.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: p._id}));
+        item.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: p._id}));
+        // Doctor consultations
+        // item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
+        // Doctor invoices
+        item.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: p._id}));
+      } else {
+        // Put links in col instead
+	      // Doctor Link
+        col.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: p._id}));
+        var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+        doctor_link.prompt = ctx.i18n.__("Datos personales"); 
+        col.links.push(doctor_link);
+        col.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: p._id}));
+        // Doctor consultations
+        // item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
+        // Doctor invoices
+        col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: p._id}));
+      }
 
 	    return item;
 	  });
@@ -90,7 +104,8 @@ module.exports = function(router) {
     var doctor = ctx.doctor;
 	  var doctors = [];
 	  doctors.push(doctor);
-    var col = renderCollectionDoctors(ctx, doctors);
+    var col = renderCollectionDoctors(ctx, doctors, true);
+    col.title = ctx.i18n.__('Médico: ') + ctx.doctor.fullName;
     ctx.body = {collection: col};
     return next();
   });

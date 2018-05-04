@@ -20,7 +20,7 @@ module.exports = {
   patientVouchers: {
     name: "patientVouchers",
     href: "/api/patients/:patient/vouchers",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Bonos del paciente"
   },
   patientVoucher: {
@@ -44,7 +44,7 @@ module.exports = {
   doctorSchedule: {
     name: "doctorSchedule",
     href: "/api/doctors/:doctor/schedule",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Horario del médico"
   },
   doctorScheduleOpeningHour: {
@@ -86,7 +86,7 @@ module.exports = {
   agenda: {
     name: "agenda",
     href: "/api/doctors/:doctor/agenda",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Agenda"
   },
   consultations_select_patient: {
@@ -146,7 +146,7 @@ module.exports = {
   patientConsultations: {
     name: "patientConsultations",
     href: "/api/patients/:patient/consultations",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Lista de consultas del paciente"
   },
   invoices: {
@@ -164,13 +164,13 @@ module.exports = {
   patientInvoices: {
     name: "patientInvoices",
     href: "/api/patients/:patient/invoices",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Lista de facturas del paciente"
   },
   doctorInvoices: {
     name: "doctorInvoices",
     href: "/api/doctors/:doctor/invoices",
-    rel: "collection",
+    rel: "collection secondary",
     prompt: "Lista de facturas del médico"
   },
   config: {
