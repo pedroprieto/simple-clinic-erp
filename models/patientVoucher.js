@@ -130,7 +130,7 @@ PatientVoucherSchema.methods.addConsultation = function (consultation) {
 PatientVoucherSchema.statics.findByPatient = function (patient) {
   return this.find({
     patient: patient
-  }).populate(['patient','consultationVoucherType']).exec();
+  }).populate(['patient','consultationVoucherType','consultationVoucherType.medicalProcedure']).exec();
 }
 
 // Find patient vouchers with remaining sessions available
