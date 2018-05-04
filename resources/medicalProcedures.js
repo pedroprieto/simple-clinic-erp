@@ -49,7 +49,7 @@ module.exports = function(router) {
 	    var d = {};
 	    d.name = "message";
       d.prompt = ctx.i18n.__("Mensaje");
-	    d.value= ctx.i18n.__("No hay salas");
+	    d.value= ctx.i18n.__("No hay tipos de sesión");
 	    item.data.push(d);
 	    col.items.push(item);
 	  }

@@ -27,11 +27,12 @@ var medicalProcedureSchema = {
     promptCJ: "Sala",
     htmlType: "select"
   },
-  // active: {
-  //   type: Boolean,
-  //   promptCJ: "Activo",
-  //   htmlType: "checkbox"
-  // }
+  active: {
+    type: Boolean,
+    default: true,
+    promptCJ: "Activo",
+    htmlType: "checkbox"
+  }
 };
 
 
@@ -86,7 +87,8 @@ MedicalProcedureSchema.statics.findById = function (id) {
 
 // Delete medicalProcedure by id
 MedicalProcedureSchema.statics.delById = function (id) {
-  return this.findByIdAndRemove(id);
+  // return this.findByIdAndRemove(id);
+  return this.findByIdAndUpdate(id,{ $set: { active: false }});
 }
 
 // Update medicalProcedure by id
@@ -97,7 +99,7 @@ MedicalProcedureSchema.methods.updateMedicalProcedure = function (data) {
 
 // Get medicalProcedures
 MedicalProcedureSchema.statics.list = function () {
-  return this.find().populate('room').exec();
+  return this.find({active: true}).populate('room').exec();
 }
 
 var MedicalProcedure = mongoose.model('MedicalProcedure', MedicalProcedureSchema);
