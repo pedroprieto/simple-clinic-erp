@@ -161,6 +161,12 @@ module.exports = {
     rel: "collection",
     prompt: "Factura"
   },
+  invoiceHTML: {
+    name: "invoiceHTML",
+    href: "/api/invoices/:invoice/html",
+    rel: "external",
+    prompt: "Factura impresa"
+  },
   patientInvoices: {
     name: "patientInvoices",
     href: "/api/patients/:patient/invoices",

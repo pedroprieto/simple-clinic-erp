@@ -36,6 +36,7 @@ module.exports = function(router) {
       //   item.links.push(ctx.getLinkCJFormat(router.routesList["invoiceAssignInvoice"], {invoice: p._id}));
       //   item.links.push(ctx.getLinkCJFormat(router.routesList["invoiceAssignVoucher"], {invoice: p._id}));
       // }
+      item.links.push(ctx.getLinkCJFormat(router.routesList["invoiceHTML"], {invoice: p._id}));
 
 	    return item;
 	  });
@@ -60,7 +61,7 @@ module.exports = function(router) {
 
   // Parameter invoice
   router.param('invoice', async (id, ctx, next) => {
-    ctx.invoice = await Invoice.findOne({_id: id}).populate(['doctor', 'customer', 'orderItems']).exec();
+    ctx.invoice = await Invoice.findOne({_id: id}).populate(['seller', 'customer', 'orderItems']).exec();
     return next();
   });
 
@@ -127,6 +128,15 @@ module.exports = function(router) {
     var col = await renderCollectionInvoices(ctx, invoices);
     ctx.body = {collection: col};
     return next();
+  });
+
+  // Invoice HTML
+  router.get(router.routesList["invoiceHTML"].name, router.routesList["invoiceHTML"].href, async (ctx, next) => {
+
+    await ctx.render('invoice', {
+      invoice: ctx.invoice
+    });
+
   });
 
 }

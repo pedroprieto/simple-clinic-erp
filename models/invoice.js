@@ -1,5 +1,6 @@
 var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
+var moment = require('moment');
 
 // To keep track of invoiceNumbers and invoiceBatches
 var InvoiceNumerationSchema = mongoose.Schema({
@@ -74,6 +75,16 @@ var invoiceSchema = {
 
 
 var InvoiceSchema = baseschema(invoiceSchema);
+
+InvoiceSchema.virtual('amountDue').get(function () {
+  return this.orderItems.reduce(function(res, el) {
+    return (res + el.price);
+  }, 0);
+});
+
+InvoiceSchema.virtual('dateLocalized').get(function () {
+  return moment(this.date).format('LL');
+});
 
 // Invoice numeration
 InvoiceSchema.pre('validate',async function(next) {

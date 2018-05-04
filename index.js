@@ -1,6 +1,7 @@
 const Koa = require('koa');
 var Router = require('koa-router');
 var bodyParser = require('koa-bodyparser');
+var views = require('koa-views');
 const locale = require('koa-locale'); //  detect the locale
 const i18n = require('koa-i18n');
 const mongoose = require('mongoose');
@@ -28,6 +29,13 @@ app.use(i18n(app, {
 // Moment locale
 // TODO: select locale
 Moment.locale('es');
+
+// views
+app.use(views(__dirname + '/views', {
+  map: {
+    html: 'handlebars'
+  }
+}));
 
 var router = new Router();
 
