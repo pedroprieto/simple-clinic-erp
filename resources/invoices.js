@@ -24,6 +24,7 @@ module.exports = function(router) {
 
 	    // Item data
       item.data = p.invoiceToCJ();
+      item.readOnly = true;
 
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["invoice"], {invoice: p._id}).href;
