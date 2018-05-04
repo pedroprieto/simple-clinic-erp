@@ -3,7 +3,11 @@ var mongoose = require('mongoose');
 
 // To keep track of invoiceNumbers and invoiceBatches
 var InvoiceNumerationSchema = mongoose.Schema({
-  batchName: {type: String, required: true},
+  doctor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Doctor',
+    required: true
+  },
   currentNumber: { type: Number, default: 0, required: true}
 });
 var invoiceNumber = mongoose.model('InvoiceNumeration', InvoiceNumerationSchema);
@@ -74,7 +78,7 @@ var InvoiceSchema = baseschema(invoiceSchema);
 // Invoice numeration
 InvoiceSchema.pre('validate',async function(next) {
   var doc = this;
-  var counter = await invoiceNumber.findOneAndUpdate({batchName: 'invoice'}, {$inc: {currentNumber: 1} }, {upsert: true});
+  var counter = await invoiceNumber.findOneAndUpdate({doctor: mongoose.Types.ObjectId(doc.seller)}, {$inc: {currentNumber: 1} }, {upsert: true});
   doc.invoiceNumber = counter.currentNumber;
   next();
 });
