@@ -137,6 +137,12 @@ module.exports = {
     rel: "collection",
     prompt: "Asociar a bono"
   },
+  voucherAssignInvoice: {
+    name: "voucherAssignInvoice",
+    href: "/api/patients/:patient/vouchers/:patientVoucher/voucherAssignInvoice",
+    rel: "collection",
+    prompt: "Asignar factura a bono"
+  },
   patientConsultations: {
     name: "patientConsultations",
     href: "/api/patients/:patient/consultations",
