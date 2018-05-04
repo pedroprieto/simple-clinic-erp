@@ -76,7 +76,7 @@ describe('Schedule resource', function() {
 
 
     // UPDATE item
-    var newday = "Miércoles";
+    var newday = 3;
     hour2.template.data[0].value = newday;
     response = await request('')
         .put(url_created_openingHour)

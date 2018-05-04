@@ -14,6 +14,8 @@ module.exports = function(router) {
 
 	  // Collection title
     col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationVoucherTypes"]).prompt);
+    if (ctx.consultationVoucherType)
+      col.title = ctx.i18n.__("Bono '") + ctx.consultationVoucherType.name + "'";
 
 	  // Collection Links
     col.links = [];

@@ -1,10 +1,11 @@
 var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
+var Moment = require('moment');
 
 var openingHourSchema = {
   dayOfWeek: {
     type: String,
-    enum: ['Lunes', 'Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'],
+    enum: [1,2,3,4,5,6,7],
     promptCJ: "Día de la semana",
     required: true,
     htmlType: "select"
@@ -36,11 +37,11 @@ OpeningHourSchema.statics.toCJ = function(i18n, obj) {
     name: 'dayOfWeek',
     prompt: i18n.__('Día de la semana'),
     type: 'select',
-    value: i18n.__(obj.dayOfWeek)
+    value: parseInt(obj.dayOfWeek),
+    text: Moment().isoWeekday(parseInt(obj.dayOfWeek)).format('dddd')
   };
 
   data.push(dayOfWeek);
-
   return data;
 }
 
@@ -53,8 +54,8 @@ OpeningHourSchema.statics.getTemplate = function(i18n, obj) {
     name: 'dayOfWeek',
     prompt: i18n.__('Día de la semana'),
     type: 'select',
-    value: obj ? obj.dayOfWeek : "",
-    text: obj ? i18n.__(obj.dayOfWeek) : "",
+    value: obj ? obj.dayOfWeek : null,
+    text: obj ? Moment().isoWeekday(parseInt(obj.dayOfWeek)).format('dddd') : "",
     suggest: {
       related: 'dayOfWeek',
       value: 'value',

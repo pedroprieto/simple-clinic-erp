@@ -121,7 +121,7 @@ ConsultationSchema.statics.findInDateRange = function (dateStart, dateEnd, docto
   return this.find({
     date: {$gte: dateStart, $lte: dateEnd},
     doctor: doctor
-  }).populate().exec();
+  }).populate(['doctor', 'patient', 'medicalProcedure']).exec();
 }
 
 // Get consultation list by patient

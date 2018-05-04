@@ -29,7 +29,7 @@ module.exports = {
   doctor_opening_hour_1: {
     template: {
       data: [
-        {name: "dayOfWeek", value: "Lunes"},
+        {name: "dayOfWeek", value: 1},
         {name: "opens", value: "10:00"},
         {name: "closes", value: "14:00"}
       ]
@@ -38,7 +38,7 @@ module.exports = {
   doctor_opening_hour_2: {
     template: {
       data: [
-        {name: "dayOfWeek", value: "Martes"},
+        {name: "dayOfWeek", value: 2},
         {name: "opens", value: "11:00"},
         {name: "closes", value: "14:00"}
       ]

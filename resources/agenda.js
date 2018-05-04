@@ -13,30 +13,7 @@ module.exports = function(router) {
     var mD = Moment(date);
 
     for (var a of docSch) {
-      var day = 0;
-      switch (a.dayOfWeek) {
-      case 'Lunes':
-        day = 1;
-        break;
-      case 'Martes':
-        day = 2;
-        break;
-      case 'Miércoles':
-        day = 3;
-        break;
-      case 'Jueves':
-        day = 4;
-        break;
-      case 'Viernes':
-        day = 5;
-        break;
-      case 'Sábado':
-        day = 6;
-        break;
-      case 'Domingo':
-        day = 7;
-        break;
-      }
+      var day = a.dayOfWeek;
 
       if (mD.isoWeekday() == day) {
         if ((mD.format('HH:mm') >= a.opens) && (mD.format('HH:mm') < a.closes))
@@ -108,7 +85,9 @@ module.exports = function(router) {
         var cs = consultations.filter(function(c) {
           return Moment(c.date).isSame(wD);
         }).map(function(e) {
-          return ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: e._id});
+          var con = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: e._id});
+          con.prompt = e.patient.fullName;
+          return con;
         });
         it.links = cs;
         // Template
@@ -145,7 +124,8 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).href;
 
 	  // Collection title
-    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).prompt);
+    // col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).prompt);
+    col.title = ctx.i18n.__("Agenda de ") + ctx.doctor.fullName;
 
     // Doctor link
     var back_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});

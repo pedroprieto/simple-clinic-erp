@@ -36,7 +36,7 @@ module.exports = function(router) {
       item.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: p._id}));
       item.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: p._id}));
       // Doctor consultations
-      item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
+      // item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
       // Doctor invoices
       item.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: p._id}));
 

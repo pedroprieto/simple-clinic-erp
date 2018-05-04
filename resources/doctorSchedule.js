@@ -1,6 +1,7 @@
 // OpeningHours resource
 var OpeningHour = require('../models/openinghour');
 var CJUtils = require('../aux/CJUtils');
+var Moment = require('moment');
 
 module.exports = function(router) {
 
@@ -12,7 +13,8 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}).href;
 
 	  // Collection title
-    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}).prompt);
+    // col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}).prompt);
+    col.title = ctx.i18n.__("Horario de ") + ctx.doctor.fullName;
 
 	  // Collection Links
     col.links = [];
@@ -64,7 +66,7 @@ module.exports = function(router) {
     col.related.dayOfWeek = OpeningHour.schema.obj['dayOfWeek'].enum.map(function(el) {
       return {
         value: el,
-        text: ctx.i18n.__(el)
+        text: Moment().isoWeekday(el).format('dddd') 
       };
     });
 

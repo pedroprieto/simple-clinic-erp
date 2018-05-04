@@ -65,7 +65,7 @@ DoctorSchema.statics.getTemplate = function(i18n, obj) {
 
 // Get doctor by id
 DoctorSchema.statics.findById = function (id) {
-  return this.findOne({_id: id}).populate('_schedule').exec();
+  return this.findOne({_id: id}).populate({path: '_schedule', options: {sort: {dayOfWeek: 1, opens: 1}}}).exec();
 }
 
 // Delete doctor by id

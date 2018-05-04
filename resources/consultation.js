@@ -15,6 +15,12 @@ module.exports = function(router) {
     var col = {};
     col.version = "1.0";
 
+    if (ctx.consultation)
+      col.title = ctx.i18n.__("Consulta de ") + ctx.consultation.patient.fullName;
+
+    if (ctx.patient)
+      col.title = ctx.i18n.__("Consultas de ") + ctx.patient.fullName;
+
 	  // Collection Links
     col.links = [];
     col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
