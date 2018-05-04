@@ -129,6 +129,7 @@ module.exports = function(router) {
       //TODO
       ctx.throw('400', 'Error');
     } else {
+      patientVoucherData.name = associated_consultationVoucherType.name + ' - ' + associated_consultationVoucherType.medicalProcedure.name;
       patientVoucherData.patient = ctx.patient._id;
       patientVoucherData.consultationVoucherType = associated_consultationVoucherType._id;
       patientVoucherData.numberOfSessions = associated_consultationVoucherType.numberOfConsultations;

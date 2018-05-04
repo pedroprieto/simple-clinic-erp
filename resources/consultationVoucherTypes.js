@@ -59,12 +59,11 @@ module.exports = function(router) {
 
 	  // Template
     col.template = {};
-	  col.template.data = MedicalProcedure.getTemplate(ctx.i18n);
+	  col.template.data = ConsultationVoucherType.getTemplate(ctx.i18n);
 
 
     // Related
     col.related = {};
-    col.related.medicalProcedurelist = [];
     col.related.medicalProcedurelist = await MedicalProcedure.list() ;
 
 	  // Return collection object

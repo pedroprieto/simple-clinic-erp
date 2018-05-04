@@ -9,6 +9,12 @@ var patientVoucherSchema = {
     promptCJ: "Tipo de sesión",
     htmlType: "select"
   },
+  name: {
+    type: String,
+    promptCJ: "Nombre",
+    required: true,
+    htmlType: "text"
+  },
   numberOfSessions: {
     type: Number,
     required: true,
@@ -58,25 +64,26 @@ PatientVoucherSchema.pre('save', function(next) {
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
 PatientVoucherSchema.statics.toCJ = function(i18n, obj) {
-  var props = ['numberOfSessions', 'price', 'remainingConsultations'];
+  var props = ['name', 'numberOfSessions', 'price', 'remainingConsultations'];
   // Call function defined in baseschema
   var data = this.propsToCJ(props, i18n, false, obj);
-  // Build consultation Voucher Type
-  var type = {
-    name: 'consultationVoucherType',
-    prompt: i18n.__('Tipo de sesión'),
-    type: 'select',
-    value: obj.consultationVoucherType.name
-  };
+  // // Build consultation Voucher Type
+  // var type = {
+  //   name: 'consultationVoucherType',
+  //   prompt: i18n.__('Tipo de sesión'),
+  //   type: 'select',
+  //   value: obj.consultationVoucherType.name
+  // };
   // Build patient name
   var patient = {
     name: 'patient',
     prompt: i18n.__('Paciente'),
     type: 'select',
-    value: obj.patient.fullName
+    value: obj.patient.fullName,
+    text: obj.patient.fullName
   };
 
-  data.push(type);
+  // data.push(type);
   data.push(patient);
 
   return data;
@@ -104,7 +111,7 @@ PatientVoucherSchema.statics.getTemplate = function(i18n, obj) {
 }
 
 PatientVoucherSchema.statics.list = function () {
-  return PatientVoucher.find().populate(['patient','consultationVoucherType']).exec();
+  return PatientVoucher.find().populate(['patient','consultationVoucherType','consultationVoucherType.medicalProcedure']).exec();
 }
 
 PatientVoucherSchema.statics.findById = function (id) {
