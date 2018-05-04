@@ -26,6 +26,12 @@ var consultationVoucherTypeSchema = {
     promptCJ: "Precio",
     required: true,
     htmlType: "number"
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    promptCJ: "Activo",
+    htmlType: "checkbox"
   }
 };
 
@@ -81,7 +87,8 @@ ConsultationVoucherTypeSchema.statics.findById = function (id) {
 
 // Delete consultationVoucher by id
 ConsultationVoucherTypeSchema.statics.delById = function (id) {
-  return this.findByIdAndRemove(id);
+  // return this.findByIdAndRemove(id);
+  return this.findByIdAndUpdate(id,{ $set: { active: false }});
 }
 
 // Update consultationVoucher by id
