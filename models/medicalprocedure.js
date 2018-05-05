@@ -48,6 +48,7 @@ MedicalProcedureSchema.statics.toCJ = function(i18n, obj) {
     name: 'room',
     prompt: i18n.__('Sala'),
     type: 'select',
+    text: obj.room.name,
     value: obj.room.name
   };
 

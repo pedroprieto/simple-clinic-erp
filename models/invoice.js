@@ -99,7 +99,7 @@ InvoiceSchema.pre('validate',async function(next) {
 InvoiceSchema.methods.invoiceToCJ = function() {
   var data = [];
   data.push({name: 'invoiceNumber', prompt: "Número", value: this.invoiceNumber});
-  data.push({name: 'date', prompt: "Fecha", value: this.date});
+  data.push({name: 'date', prompt: "Fecha", value: this.dateLocalized});
   data.push({name: 'paid', prompt: "Pagada", value: this.paid});
   data.push({name: 'seller', prompt: "Vendedor", value: this.sellerName});
   data.push({name: 'customer', prompt: "Cliente", value: this.customerName});

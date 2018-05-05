@@ -48,7 +48,8 @@ ConsultationVoucherTypeSchema.statics.toCJ = function(i18n, obj) {
     name: 'medicalProcedure',
     prompt: i18n.__('Tipo de sesión'),
     type: 'select',
-    value: obj.medicalProcedure.name
+    value: obj.medicalProcedure.name,
+    text: obj.medicalProcedure.name
   };
 
   data.push(medicalProcedure);
