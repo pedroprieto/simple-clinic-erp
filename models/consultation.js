@@ -9,6 +9,16 @@ var consultationSchema = {
     required: true,
     htmlType: "date"
   },
+  diagnosis: {
+    type: String,
+    promptCJ: "Diagnóstico",
+    htmlType: "textarea"
+  },
+  description: {
+    type: String,
+    promptCJ: "Observaciones y tratamiento",
+    htmlType: "textarea"
+  },
   patient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Patient',
@@ -52,10 +62,9 @@ ConsultationSchema.virtual('dateLocalized').get(function () {
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
 ConsultationSchema.statics.toCJ = function(i18n, obj) {
-  // var props = ['date'];
+  var props = ['diagnosis', 'description'];
   // Call function defined in baseschema
-  // var data = this.propsToCJ(props, i18n, false, obj);
-  var data = [];
+  var data = this.propsToCJ(props, i18n, false, obj);
   var date = {
     name: 'date',
     prompt: i18n.__('Fecha'),

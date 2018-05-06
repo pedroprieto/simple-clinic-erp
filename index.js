@@ -2,6 +2,7 @@ const Koa = require('koa');
 var Router = require('koa-router');
 var bodyParser = require('koa-bodyparser');
 var views = require('koa-views');
+var koaStatic = require('koa-static');
 const locale = require('koa-locale'); //  detect the locale
 const i18n = require('koa-i18n');
 const mongoose = require('mongoose');
@@ -101,6 +102,8 @@ app.use(async (ctx, next) => {
   return next();
 });
 
+// Static
+app.use(koaStatic('./assets'));
 
 // i18n
 // app.use(async (ctx, next) => {

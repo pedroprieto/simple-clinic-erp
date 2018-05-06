@@ -27,9 +27,11 @@
 
       #address { width: 250px; height: 150px; float: left; }
       #customer { overflow: hidden; }
+     #identity {display: flex; margin-bottom: 10px;}
 
-      #logo { text-align: right; float: right; position: relative; margin-top: 25px; border: 1px solid #fff; max-width: 540px; max-height: 100px; overflow: hidden; }
-      #logo:hover, #logo.edit { border: 1px solid #000; margin-top: 0px; max-height: 125px; }
+      #logo { flex: 1 1 auto; text-align: right; position: relative; border: 1px solid #fff; max-width: 300px; max-height: 100px; overflow: hidden; }
+     /* #logo:hover, #logo.edit { border: 1px solid #000; margin-top: 0px; max-height: 125px; } */
+     #logo img {width: 100%}
       #logoctr { display: none; }
       #logo:hover #logoctr, #logo.edit #logoctr { display: block; text-align: right; line-height: 25px; background: #eee; padding: 0 5px; }
       #logohelp { text-align: left; display: none; font-style: italic; padding: 10px 5px;}
@@ -38,6 +40,8 @@
       .edit #save-logo, .edit #cancel-logo { display: inline; }
       .edit #image, #save-logo, #cancel-logo, .edit #change-logo, .edit #delete-logo { display: none; }
       #customer-title { font-size: 20px; font-weight: bold; float: left; }
+
+     #seller-title {flex: 1 1 auto}
 
       #meta { margin-top: 1px; width: 300px; float: right; }
       #meta td { text-align: right;  }
@@ -116,7 +120,7 @@
             <input id="imageloc" type="text" size="50" value="" /><br />
             (max width: 540px, max height: 100px)
           </div>
-          <img id="image" src="images/logo.png" alt="logo" />
+          <img id="image" src="/images/logo_texto.png" alt="logo" />
         </div>
 		    
 		  </div>
@@ -139,11 +143,11 @@
             <td class="meta-head">Fecha</td>
             <td><div id="date">{{invoice.dateLocalized}}</div></td>
           </tr>
-          <tr>
-            <td class="meta-head">Total</td>
-            <td><div class="due">{{invoice.amountDue}} €</div></td>
-          </tr>
-
+          <!-- <tr>
+               <td class="meta-head">Total</td>
+               <td><div class="due">{{invoice.amountDue}} €</div></td>
+               </tr>
+             -->
         </table>
 		    
 		  </div>
@@ -176,7 +180,7 @@
 		    <tr>
 
 		      <td colspan="2" class="blank"> </td>
-		      <td colspan="1" class="total-line">Total</td>
+		      <td colspan="1" class="total-line"><b>Total</b></td>
 		      <td class="total-value">{{invoice.amountDue}}€</td>
 		    </tr>
 		    <!-- <tr>
