@@ -59,8 +59,9 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
   var date = {
     name: 'date',
     prompt: i18n.__('Fecha'),
-    type: 'date',
-    value: obj.date
+    type: 'datetime',
+    value: obj.date,
+    text: obj.dateLocalized
   };
   var medicalProcedure = {
     name: 'medicalProcedure',
@@ -127,14 +128,18 @@ ConsultationSchema.statics.findInDateRange = function (dateStart, dateEnd, docto
   return this.find({
     date: {$gte: dateStart, $lte: dateEnd},
     doctor: doctor
-  }).populate(['doctor', 'patient', 'medicalProcedure']).exec();
+  }).
+    sort({date: -1}).
+    populate(['doctor', 'patient', 'medicalProcedure']).exec();
 }
 
 // Get consultation list by patient
 ConsultationSchema.statics.findByPatient = function (patient) {
   return this.find({
     patient: patient
-  }).populate(['doctor', 'patient', 'medicalProcedure']).exec();
+  }).
+    sort({date: -1}).
+    populate(['doctor', 'patient', 'medicalProcedure']).exec();
 }
 
 var Consultation = mongoose.model('Consultation', ConsultationSchema);

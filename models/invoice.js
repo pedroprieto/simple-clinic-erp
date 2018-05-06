@@ -21,13 +21,13 @@ var invoiceSchema = {
     required: true,
     htmlType: ""
   },
-  paid: {
-    type: Boolean,
-    promptCJ: "Pagada",
-    required: true,
-    htmlType: "checkbox",
-    default: false
-  },
+  // paid: {
+  //   type: Boolean,
+  //   promptCJ: "Pagada",
+  //   required: true,
+  //   htmlType: "checkbox",
+  //   default: false
+  // },
   customer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Patient',
@@ -100,7 +100,7 @@ InvoiceSchema.methods.invoiceToCJ = function() {
   var data = [];
   data.push({name: 'invoiceNumber', prompt: "Número", value: this.invoiceNumber});
   data.push({name: 'date', prompt: "Fecha", value: this.dateLocalized});
-  data.push({name: 'paid', prompt: "Pagada", value: this.paid});
+  // data.push({name: 'paid', prompt: "Pagada", value: this.paid});
   data.push({name: 'seller', prompt: "Vendedor", value: this.sellerName});
   data.push({name: 'customer', prompt: "Cliente", value: this.customerName});
 

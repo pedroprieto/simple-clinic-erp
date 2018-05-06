@@ -168,8 +168,8 @@ module.exports = function(router) {
     col.links.push(l);
 
 	  // Template
-    col.template = {};
-	  col.template.data = Consultation.getTemplate(ctx.i18n);
+    // col.template = {};
+	  // col.template.data = Consultation.getTemplate(ctx.i18n);
 
     // Meta current Week
     col.meta.currentWeek = isoweekdate;
