@@ -34,6 +34,10 @@ module.exports = function(router) {
 	    // Item data
       item.data = Consultation.toCJ(ctx.i18n, p);
 
+      // Check if invoice or voucher associated
+      if (p.invoice || p.associatedVoucher)
+        item.readOnly = true;
+
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: p._id}).href;
 
@@ -43,6 +47,13 @@ module.exports = function(router) {
         item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: p._id}));
         item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: p._id}));
       }
+
+      if (p.associatedVoucher)
+        item.links.push(ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: p.patient._id, patientVoucher: p.associatedVoucher}));
+
+      if (p.invoice)
+        item.links.push(ctx.getLinkCJFormat(router.routesList["invoice"], {invoice: p.invoice}));
+
 
 	    return item;
 	  });
@@ -213,7 +224,7 @@ module.exports = function(router) {
 	  consultations.push(ctx.consultation);
     var col = await renderCollectionConsultations(ctx, consultations);
     // TODO: improve
-    col.items[0].links.push(ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.consultation.doctor._id}));
+    col.items[0].links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.consultation.doctor._id}));
     col.items[0].links.push(ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.consultation.patient._id}));
     ctx.body = {collection: col};
     return next();
@@ -248,6 +259,9 @@ module.exports = function(router) {
 
 	  // Collection href
     col.href= ctx.getLinkCJFormat(router.routesList["patients"]).href;
+
+    // Message
+    col.message = ctx.i18n.__("Fecha: ") + "<b>" + Moment(ctx.date).format('llll') + "</b>";
 
 	  // Collection title
     col.title = ctx.i18n.__("Seleccionar paciente para la consulta");
@@ -342,6 +356,8 @@ module.exports = function(router) {
 
 	  // Collection title
     col.title = ctx.i18n.__("Seleccionar tipo de consulta");
+    col.message = ctx.i18n.__("Fecha: ") + "<b>" + Moment(ctx.date).format('llll') + "</b>";
+    col.message += "<br>" + ctx.i18n.__("Paciente: ") + "<b>" + ctx.patient.fullName + "</b>";
 
 	  // Collection Links
     col.links = [];
@@ -416,9 +432,16 @@ module.exports = function(router) {
   router.get(router.routesList["consultations_create"].name, router.routesList["consultations_create"].href, async (ctx,next) => {
     var col = {};
     col.version = "1.0";
+    col.type = "template";
 
 	  // Collection href
     col.href = ctx.getLinkCJFormat(router.routesList["consultations_create"], {doctor: ctx.doctor._id, date: ctx.date, patient: ctx.patient._id, medicalprocedure: ctx.medicalProcedure._id}).href;
+
+    // Collection title
+    col.title = ctx.i18n.__("Crear consulta");
+    col.message = ctx.i18n.__("Fecha: ") + "<b>" + Moment(ctx.date).format('llll') + "</b>";
+    col.message += "<br>" + ctx.i18n.__("Paciente: ") + "<b>" + ctx.patient.fullName + "</b>";
+    col.message += "<br>" + ctx.i18n.__("Tipo de consulta: ") + "<b>" + ctx.medicalProcedure.name + "</b>";
 
     // Collection links
     col.links = [];
@@ -437,9 +460,8 @@ module.exports = function(router) {
       {
         prompt: ctx.i18n.__("Crear consulta"),
         name: "confirm",
-        value: true,
-        type: 'checkbox',
-        required: true
+        value: ctx.i18n.__("Crear consulta para el paciente ") + "<b>" + ctx.patient.fullName + "</b>" + ctx.i18n.__(" con fecha ") + "<b>" + Moment(ctx.date).format('llll') + "</b>",
+        type: 'notification'
       }
     );
 
@@ -492,12 +514,14 @@ module.exports = function(router) {
 
     var col = {};
     col.version = "1.0";
+    col.type = "template";
 
 	  // Collection href
     col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).href;
 
 	  // Collection title
-    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).prompt);
+    // col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationAssignInvoice"], {consultation: ctx.consultation._id}).prompt);
+    col.title = ctx.i18n.__("Facturar consulta de ") + ctx.consultation.patient.fullName + " - " + ctx.consultation.dateLocalized;
 
 	  // Collection Links
     col.links = [];
@@ -569,6 +593,8 @@ module.exports = function(router) {
 
 	  // Collection href
     col.href= ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id}).href;
+
+    col.type = "template";
 
 	  // Collection title
     col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: ctx.consultation._id}).prompt);

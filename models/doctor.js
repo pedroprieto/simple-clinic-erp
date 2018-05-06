@@ -40,7 +40,13 @@ var doctorSchema = {
       promptCJ: "Horario"
 
     }
-  ]
+  ],
+  active: {
+    type: Boolean,
+    default: true,
+    promptCJ: "Activo",
+    htmlType: "checkbox"
+  }
 };
 
 
@@ -70,7 +76,8 @@ DoctorSchema.statics.findById = function (id) {
 
 // Delete doctor by id
 DoctorSchema.statics.delById = function (id) {
-  return this.findByIdAndRemove(id);
+  // return this.findByIdAndRemove(id);
+  return this.findByIdAndUpdate(id,{ $set: { active: false }});
 }
 
 // Update doctor by id
@@ -81,7 +88,7 @@ DoctorSchema.methods.updateDoctor = function (data) {
 
 // Get doctors
 DoctorSchema.statics.list = function () {
-  return this.find().populate('_schedule').exec();
+  return this.find({active: true}).populate('_schedule').exec();
 }
 
 var Doctor = mongoose.model('Doctor', DoctorSchema);

@@ -50,6 +50,12 @@ var patientVoucherSchema = {
     type: Number,
     promptCJ: "Sesiones restantes",
     htmltype: "number"
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    promptCJ: "Activo",
+    htmlType: "checkbox"
   }
 };
 
@@ -111,7 +117,7 @@ PatientVoucherSchema.statics.getTemplate = function(i18n, obj) {
 }
 
 PatientVoucherSchema.statics.list = function () {
-  return PatientVoucher.find().populate(['patient','consultationVoucherType','consultationVoucherType.medicalProcedure']).exec();
+  return PatientVoucher.find({active: true}).populate(['patient','consultationVoucherType','consultationVoucherType.medicalProcedure']).exec();
 }
 
 PatientVoucherSchema.statics.findById = function (id) {
@@ -122,6 +128,11 @@ PatientVoucherSchema.statics.updateById = function (id, data) {
   return PatientVoucher.findByIdAndUpdate(id, data);
 }
 
+PatientVoucherSchema.statics.delById = function (id) {
+  // return this.findByIdAndRemove(id);
+  return this.findByIdAndUpdate(id,{ $set: { active: false }});
+}
+
 PatientVoucherSchema.methods.addConsultation = function (consultation) {
   this._associatedConsultations.push(consultation);
   return this.save();
@@ -129,7 +140,8 @@ PatientVoucherSchema.methods.addConsultation = function (consultation) {
 
 PatientVoucherSchema.statics.findByPatient = function (patient) {
   return this.find({
-    patient: patient
+    patient: patient,
+    active: true
   }).populate(['patient','consultationVoucherType','consultationVoucherType.medicalProcedure']).exec();
 }
 
@@ -137,6 +149,7 @@ PatientVoucherSchema.statics.findByPatient = function (patient) {
 PatientVoucherSchema.statics.findAvailableByPatient = function (patient) {
   return this.find({
     patient: patient,
+    active: true,
     remainingConsultations: {$gt: 0}
   }).populate('consultationVoucherType').exec();
 }

@@ -46,6 +46,10 @@ var consultationSchema = {
 
 var ConsultationSchema = baseschema(consultationSchema);
 
+ConsultationSchema.virtual('dateLocalized').get(function () {
+  return Moment(this.date).format('llll');
+});
+
 // Convert mongoose object to plain object ready to transform to CJ item data format
 ConsultationSchema.statics.toCJ = function(i18n, obj) {
   // var props = ['date'];
@@ -57,25 +61,27 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     prompt: i18n.__('Fecha'),
     type: 'date',
     value: obj.date
-
   };
   var medicalProcedure = {
     name: 'medicalProcedure',
     prompt: i18n.__('Tipo de sesión'),
     type: 'select',
-    value: obj.medicalProcedure.name
+    value: obj.medicalProcedure.name,
+    text: obj.medicalProcedure.name
   };
   var patient = {
     name: 'patient',
     prompt: i18n.__('Paciente'),
     type: 'select',
-    value: obj.patient.fullName
+    value: obj.patient.fullName,
+    text: obj.patient.fullName
   };
   var doctor = {
     name: 'doctor',
     prompt: i18n.__('Médico'),
     type: 'select',
-    value: obj.doctor.fullName
+    value: obj.doctor.fullName,
+    text: obj.doctor.fullName
   };
 
   data.push(date);
@@ -128,7 +134,7 @@ ConsultationSchema.statics.findInDateRange = function (dateStart, dateEnd, docto
 ConsultationSchema.statics.findByPatient = function (patient) {
   return this.find({
     patient: patient
-  });
+  }).populate(['doctor', 'patient', 'medicalProcedure']).exec();
 }
 
 var Consultation = mongoose.model('Consultation', ConsultationSchema);

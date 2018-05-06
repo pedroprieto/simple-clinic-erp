@@ -47,6 +47,12 @@ var patientSchema = {
     type: String,
     promptCJ: "Observaciones",
     htmlType: "textarea"
+  },
+  active: {
+    type: Boolean,
+    default: true,
+    promptCJ: "Activo",
+    htmlType: "checkbox"
   }
 };
 
@@ -85,7 +91,8 @@ PatientSchema.statics.findById = function (id) {
 
 // Delete patient by id
 PatientSchema.statics.delById = function (id) {
-  return this.findByIdAndRemove(id);
+  // return this.findByIdAndRemove(id);
+  return this.findByIdAndUpdate(id,{ $set: { active: false }});
 }
 
 // Update patient by id
@@ -107,6 +114,7 @@ PatientSchema.statics.list = function (query) {
 	  q.$or.push({address: re});
 	  q.$or.push({email: re});
 	}
+  q = {$and: [{active: true}, q]};
   return this.find(q, null, {sort: {familyName: 1}});
 }
 

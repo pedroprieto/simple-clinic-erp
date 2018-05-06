@@ -43,6 +43,10 @@ module.exports = function(router) {
 	    // Item data
       item.data = PatientVoucher.toCJ(ctx.i18n, p);
 
+      // Check if invoice associated
+      if (p.invoice)
+        item.readOnly = true;
+
 	    // Item href
       item.href = ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: ctx.patient._id, patientVoucher: p._id}).href;
 
@@ -97,7 +101,7 @@ module.exports = function(router) {
 
   // GET PatientVoucher list
   router.get(router.routesList["patientVouchers"].name, router.routesList["patientVouchers"].href, async (ctx, next) => {
-    var patientVouchers = await PatientVoucher.findByPatient(ctx.patient._id);
+    var patientVouchers = await PatientVoucher.findAvailableByPatient(ctx.patient._id);
     var col= await renderCollectionPatientVouchers(ctx, patientVouchers);
     ctx.body = {collection: col};
     return next();
@@ -115,7 +119,7 @@ module.exports = function(router) {
 
   // DELETE item
   router.delete(router.routesList["patientVoucher"].name, router.routesList["patientVoucher"].href, async (ctx, next) => {
-    var doc = await PatientVoucher.findByIdAndRemove(ctx.patientVoucher._id);
+    var doc = await PatientVoucher.delById(ctx.patientVoucher._id);
     ctx.status = 200;
     return next();
 
@@ -169,6 +173,8 @@ module.exports = function(router) {
 
 	  // Collection title
     col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["voucherAssignInvoice"], {patient: ctx.patient._id, patientVoucher: ctx.patientVoucher._id}).prompt);
+
+    col.type = "template";
 
 	  // Collection Links
     col.links = [];

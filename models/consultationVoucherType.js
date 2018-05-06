@@ -100,7 +100,7 @@ ConsultationVoucherTypeSchema.methods.updateConsultationVoucherType = function (
 
 // Get consultationVouchers
 ConsultationVoucherTypeSchema.statics.list = function () {
-  return this.find().populate('medicalProcedure').exec();
+  return this.find({active: true}).populate('medicalProcedure').exec();
 }
 
 var ConsultationVoucherType = mongoose.model('ConsultationVoucherType', ConsultationVoucherTypeSchema);
