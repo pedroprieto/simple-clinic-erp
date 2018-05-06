@@ -223,9 +223,13 @@ module.exports = function(router) {
 	  var consultations = [];
 	  consultations.push(ctx.consultation);
     var col = await renderCollectionConsultations(ctx, consultations);
+    delete col.href;
     // TODO: improve
     col.items[0].links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.consultation.doctor._id}));
     col.items[0].links.push(ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.consultation.patient._id}));
+	  // Template
+    col.template = {};
+	  col.template.data = Consultation.getTemplate(ctx.i18n);
     ctx.body = {collection: col};
     return next();
   });
