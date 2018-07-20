@@ -48,8 +48,10 @@ module.exports = function(router) {
         item.links.push(ctx.getLinkCJFormat(router.routesList["consultationAssignVoucher"], {consultation: p._id}));
       }
 
-      if (p.associatedVoucher)
+      if (p.associatedVoucher) {
         item.links.push(ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: p.patient._id, patientVoucher: p.associatedVoucher}));
+        item.links.push(ctx.getLinkCJFormat(router.routesList["consultationDeleteVoucher"], {consultation: p._id}));
+      }
 
       if (p.invoice)
         item.links.push(ctx.getLinkCJFormat(router.routesList["invoice"], {invoice: p.invoice}));
@@ -671,5 +673,73 @@ module.exports = function(router) {
   });
 
 
+  // Consultation delete assigned Voucher
+  router.get(router.routesList["consultationDeleteVoucher"].name, router.routesList["consultationDeleteVoucher"].href, async (ctx, next) => {
 
+    if (! ctx.consultation.associatedVoucher) {
+      ctx.throw(400, 'La consulta no tiene un bono asociado.');
+    }
+
+    if (ctx.consultation.invoice) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada.');
+    }
+
+    var col = {};
+    col.version = "1.0";
+
+	  // Collection href
+    col.href= ctx.getLinkCJFormat(router.routesList["consultationDeleteVoucher"], {consultation: ctx.consultation._id}).href;
+
+    col.type = "template";
+
+	  // Collection title
+    col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["consultationDeleteVoucher"], {consultation: ctx.consultation._id}).prompt);
+
+	  // Collection Links
+    col.links = [];
+    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+
+    // Collection template
+    col.template = {data: []};
+    col.template.data.push({
+      prompt: ctx.i18n.__('Eliminar bono asociado: ' + ctx.consultation.associatedVoucher.name),
+      name: 'associatedVoucher',
+      value: ctx.consultation.associatedVoucher._id,
+      type: "hidden",
+    });
+
+    ctx.body = {collection: col};
+    return next();
+
+  });
+
+  // Post delete assigned Voucher
+  router.post(router.routesList["consultationDeleteVoucher"].href, async (ctx, next) => {
+
+    if (! ctx.consultation.associatedVoucher) {
+      ctx.throw(400, 'La consulta no tiene un bono asociado.');
+    }
+
+    if (ctx.consultation.invoice) {
+      ctx.throw(400, 'La consulta ya tiene una factura asociada. No se puede asociar a un bono.');
+    }
+
+    // Get associatedVoucher
+    var data = await CJUtils.parseTemplate(ctx);
+    var associatedVoucher = await PatientVoucher.findById(data.associatedVoucher);
+    if (! associatedVoucher )
+      ctx.throw(400, 'No existe el bono indicado.');
+
+    ctx.consultation.associatedVoucher = null;
+    var con = await ctx.consultation.save();
+
+    // Update voucher consultation list
+    await associatedVoucher.removeConsultation(con._id);
+    ctx.status = 201;
+    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: ctx.consultation._id}).href);
+    return next();
+
+  });
 }

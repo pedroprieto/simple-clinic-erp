@@ -138,6 +138,11 @@ PatientVoucherSchema.methods.addConsultation = function (consultation) {
   return this.save();
 }
 
+PatientVoucherSchema.methods.removeConsultation = function (consultation) {
+  this._associatedConsultations.pop(consultation);
+  return this.save();
+}
+
 PatientVoucherSchema.statics.findByPatient = function (patient) {
   return this.find({
     patient: patient,

@@ -121,7 +121,7 @@ ConsultationSchema.statics.getTemplate = function(i18n, obj) {
 
 // Get consultation by id
 ConsultationSchema.statics.findById = function (id) {
-  return this.findOne({_id: id}).populate(['doctor', 'patient', 'medicalProcedure']).exec();
+  return this.findOne({_id: id}).populate(['doctor', 'patient', 'medicalProcedure', 'associatedVoucher']).exec();
 }
 
 // Delete consultation by id

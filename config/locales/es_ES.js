@@ -98,5 +98,8 @@
 	"Fecha: ": "Fecha: ",
 	"Tipo de consulta: ": "Tipo de consulta: ",
 	"Diagnóstico": "Diagnóstico",
-	"Observaciones y tratamiento": "Observaciones y tratamiento"
+	"Observaciones y tratamiento": "Observaciones y tratamiento",
+	"Eliminar bono asociado": "Eliminar bono asociado",
+	"Eliminar bono asociado: bono 5 - sesión individual": "Eliminar bono asociado: bono 5 - sesión individual",
+	"Eliminar: bono 5 - sesión individual": "Eliminar: bono 5 - sesión individual"
 }
