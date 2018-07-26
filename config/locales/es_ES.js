@@ -100,6 +100,10 @@
 	"Diagnóstico": "Diagnóstico",
 	"Observaciones y tratamiento": "Observaciones y tratamiento",
 	"Eliminar bono asociado": "Eliminar bono asociado",
-	"Eliminar bono asociado: bono 5 - sesión individual": "Eliminar bono asociado: bono 5 - sesión individual",
-	"Eliminar: bono 5 - sesión individual": "Eliminar: bono 5 - sesión individual"
+	"Archivos del paciente": "Archivos del paciente",
+	"No hay archivos para este paciente": "No hay archivos para este paciente",
+	"Archivo adjunto": "Archivo adjunto",
+	"Los datos no están en formato CJ": "Los datos no están en formato CJ",
+	"No se encuentra el adjunto fileData.": "No se encuentra el adjunto fileData.",
+	"No se encuentra el parámetro name.": "No se encuentra el parámetro name."
 }

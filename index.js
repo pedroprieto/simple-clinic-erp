@@ -1,6 +1,6 @@
 const Koa = require('koa');
 var Router = require('koa-router');
-var bodyParser = require('koa-bodyparser');
+var bodyParser = require('koa-body');
 var views = require('koa-views');
 var koaStatic = require('koa-static');
 const locale = require('koa-locale'); //  detect the locale
@@ -13,7 +13,7 @@ var Moment = require('moment');
 const app = new Koa();
 // Required!
 locale(app);
-app.use(bodyParser());
+app.use(bodyParser({multipart: true}));
 app.use(i18n(app, {
   directory: './config/locales',
   locales: ['es_ES', 'en'], //  `es_ES` defualtLocale, must match the locales to the filenames
@@ -64,6 +64,7 @@ require('./resources/consultation')(router);
 require('./resources/consultationVoucherTypes')(router);
 
 require('./resources/patientVouchers')(router);
+require('./resources/patientAttachments')(router);
 require('./resources/config')(router);
 require('./resources/invoices')(router);
 require('./resources/agenda')(router);
@@ -98,7 +99,9 @@ app
 
 // Content type
 app.use(async (ctx, next) => {
-  ctx.type = 'application/vnd.collection+json; charset=utf-8';
+  // Koa defaults JSON response to application/json. Change that.
+  if (ctx.type == 'application/json')
+    ctx.type = 'application/vnd.collection+json; charset=utf-8';
   return next();
 });
 

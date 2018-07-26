@@ -29,6 +29,24 @@ module.exports = {
     rel: "collection",
     prompt: "Bono del paciente"
   },
+  patientAttachments: {
+    name: "patientAttachments",
+    href: "/api/patients/:patient/attachments",
+    rel: "collection secondary",
+    prompt: "Archivos del paciente"
+  },
+  patientAttachment: {
+    name: "patientAttachment",
+    href: "/api/patients/:patient/attachments/:patientAttachment",
+    rel: "collection",
+    prompt: "Archivo adjunto"
+  },
+  patientAttachmentFile: {
+    name: "patientAttachmentFile",
+    href: "/api/patients/:patient/attachments/:patientAttachment/file",
+    rel: "external",
+    prompt: "Archivo adjunto"
+  },
   doctors: {
     name: "doctors",
     href: "/api/doctors",

@@ -1,6 +1,7 @@
 var baseschema = require('./baseschema');
 var mongoose = require('mongoose');
 var Moment = require('moment');
+var PatientAttachment = require('./patientAttachment');
 
 var patientSchema = {
   givenName: {
@@ -53,7 +54,12 @@ var patientSchema = {
     default: true,
     promptCJ: "Activo",
     htmlType: "checkbox"
-  }
+  },
+  attachments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PatientAttachment',
+    promptCJ: "Archivo asociado"
+  }]
 };
 
 
@@ -86,7 +92,7 @@ PatientSchema.statics.getTemplate = function(i18n, obj) {
 
 // Get patient by id
 PatientSchema.statics.findById = function (id) {
-  return this.findOne({_id: id});
+  return this.findOne({_id: id}).populate('attachments').exec();
 }
 
 // Delete patient by id
@@ -115,7 +121,7 @@ PatientSchema.statics.list = function (query) {
 	  q.$or.push({email: re});
 	}
   q = {$and: [{active: true}, q]};
-  return this.find(q, null, {sort: {familyName: 1}});
+  return this.find(q, null, {sort: {familyName: 1}}).populate('attachments').exec();
 }
 
 var Patient = mongoose.model('Patient', PatientSchema);
