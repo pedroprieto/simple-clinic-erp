@@ -49,7 +49,7 @@ module.exports = function(router) {
       }
 
       if (p.associatedVoucher) {
-        item.links.push(ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: p.patient._id, patientVoucher: p.associatedVoucher}));
+        item.links.push(ctx.getLinkCJFormat(router.routesList["patientVoucher"], {patient: p.patient._id, patientVoucher: p.associatedVoucher._id}));
         item.links.push(ctx.getLinkCJFormat(router.routesList["consultationDeleteVoucher"], {consultation: p._id}));
       }
 

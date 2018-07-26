@@ -141,7 +141,7 @@ ConsultationSchema.statics.findInDateRange = function (dateStart, dateEnd, docto
     doctor: doctor
   }).
     sort({date: -1}).
-    populate(['doctor', 'patient', 'medicalProcedure']).exec();
+    populate(['doctor', 'patient', 'medicalProcedure', 'associatedVoucher']).exec();
 }
 
 // Get consultation list by patient
@@ -150,7 +150,7 @@ ConsultationSchema.statics.findByPatient = function (patient) {
     patient: patient
   }).
     sort({date: -1}).
-    populate(['doctor', 'patient', 'medicalProcedure']).exec();
+    populate(['doctor', 'patient', 'medicalProcedure', 'associatedVoucher']).exec();
 }
 
 var Consultation = mongoose.model('Consultation', ConsultationSchema);
