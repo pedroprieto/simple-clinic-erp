@@ -72,6 +72,7 @@ module.exports = function(router) {
 	  // Template
     col.template = {};
     col.template.contentType = "multipart/form-data";
+    col.template.type = "post-only";
 	  col.template.data = PatientAttachment.getTemplate(ctx.i18n);
 
 	  // Return collection object
