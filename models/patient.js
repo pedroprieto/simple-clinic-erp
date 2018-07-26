@@ -7,7 +7,8 @@ var patientSchema = {
   givenName: {
     type: String,
     promptCJ: "Nombre",
-    htmlType: "text"
+    htmlType: "text",
+    required: true
   },
   familyName: {
     type: String,
@@ -73,13 +74,17 @@ PatientSchema.statics.toCJ = function(i18n, obj) {
   var props = ['givenName', 'familyName', 'taxID', 'telephone', 'address', 'email', 'diagnosis', 'description'];
   // Call function defined in baseschema
   var data = this.propsToCJ(props, i18n, false, obj);
-  var birthDate = {
-    name: 'birthDate',
-    prompt: i18n.__('Fecha de nacimiento'),
-    type: 'date',
-    value: Moment(obj.birthDate).format('YYYY-MM-DD')
-  };
-  data.push(birthDate);
+  // If birthDate not set, do not send
+  var d = Moment(obj.birthDate);
+  if (d.isValid()) {
+    var birthDate = {
+      name: 'birthDate',
+      prompt: i18n.__('Fecha de nacimiento'),
+      type: 'date',
+      value: d.format('YYYY-MM-DD')
+    };
+    data.push(birthDate);
+  }
   return data;
 }
 
