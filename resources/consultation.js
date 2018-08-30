@@ -541,6 +541,7 @@ module.exports = function(router) {
     col.template = {data: []};
     col.template.data.push({prompt: ctx.i18n.__('Fecha de factura'), name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
     col.template.data.push({prompt: ctx.i18n.__('Precio'), name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number'});
+    col.template.data.push({prompt: ctx.i18n.__('IVA') + ' %', name: 'vat', value: ctx.consultation.medicalProcedure.vat, type: 'number'});
 
     ctx.body = {collection: col};
     return next();
@@ -570,6 +571,7 @@ module.exports = function(router) {
       {
         kind: 'Consultation',
         price: data.price,
+        tax: data.vat,
         description: ctx.consultation.medicalProcedure.name,
         item: ctx.consultation._id
       }

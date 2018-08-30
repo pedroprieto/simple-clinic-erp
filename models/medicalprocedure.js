@@ -21,6 +21,13 @@ var medicalProcedureSchema = {
     required: true,
     htmlType: "number"
   },
+  vat: {
+    type: Number,
+    promptCJ: "IVA (%)",
+    default: 0,
+    required: true,
+    htmlType: "number"
+  },
   room: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Room',
@@ -40,7 +47,7 @@ var MedicalProcedureSchema = baseschema(medicalProcedureSchema);
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
 MedicalProcedureSchema.statics.toCJ = function(i18n, obj) {
-  var props = ['name', 'duration', 'price'];
+  var props = ['name', 'duration', 'price','vat'];
   // Call function defined in baseschema
   var data = this.propsToCJ(props, i18n, false, obj);
   // Build room
@@ -58,7 +65,7 @@ MedicalProcedureSchema.statics.toCJ = function(i18n, obj) {
 }
 
 MedicalProcedureSchema.statics.getTemplate = function(i18n, obj) {
-  var props = ['name', 'duration', 'price'];
+  var props = ['name', 'duration', 'price','vat'];
   // Call function defined in baseschema
   var data = this.propsToCJ(props, i18n, false, obj);
   // Build room

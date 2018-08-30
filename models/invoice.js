@@ -63,6 +63,10 @@ var invoiceSchema = {
     {
       kind: String,
       price: Number,
+      tax: {
+        type: Number,
+        default: 0
+      },
       description: String,
       // Reference to order
       item: {
@@ -76,10 +80,56 @@ var invoiceSchema = {
 
 var InvoiceSchema = baseschema(invoiceSchema);
 
-InvoiceSchema.virtual('amountDue').get(function () {
+InvoiceSchema.virtual('netTotal').get(function () {
   return this.orderItems.reduce(function(res, el) {
     return (res + el.price);
   }, 0);
+});
+
+InvoiceSchema.virtual('amountDue').get(function () {
+  return this.orderItems.reduce(function(res, el) {
+    return (res + el.price * (1+el.tax/100));
+  }, 0);
+});
+
+InvoiceSchema.virtual('subTotals').get(function () {
+  var test = {};
+  test.orderItems = [];
+  test.orderItems.push(
+    {
+      price: 10,
+      tax: 21
+    }
+  );
+  test.orderItems.push(
+    {
+      price: 15,
+      tax: 21
+    }
+  );
+  test.orderItems.push(
+    {
+      price: 50,
+      tax: 0
+    }
+  );
+  test.orderItems.push(
+    {
+      price: 40,
+      tax: 10
+    }
+  );
+  return this.orderItems.reduce(function(res, el) {
+    if (res[el.tax]) {
+      res[el.tax].price += el.price;
+      res[el.tax].tax += el.tax * el.price / 100;
+    } else {
+      res[el.tax] = {};
+      res[el.tax].price = el.price;
+      res[el.tax].tax = el.tax * el.price / 100;
+    }
+    return res;
+  }, {});
 });
 
 InvoiceSchema.virtual('dateLocalized').get(function () {

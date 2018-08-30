@@ -105,5 +105,7 @@
 	"Archivo adjunto": "Archivo adjunto",
 	"Los datos no están en formato CJ": "Los datos no están en formato CJ",
 	"No se encuentra el adjunto fileData.": "No se encuentra el adjunto fileData.",
-	"No se encuentra el parámetro name.": "No se encuentra el parámetro name."
+	"No se encuentra el parámetro name.": "No se encuentra el parámetro name.",
+	"IVA": "IVA",
+	"IVA (%)": "IVA (%)"
 }
