@@ -128,6 +128,9 @@ InvoiceSchema.virtual('subTotals').get(function () {
       res[el.tax].price = el.price;
       res[el.tax].tax = el.tax * el.price / 100;
     }
+    if (el.tax == 0) {
+      res[el.tax].isZero = true;
+    }
     return res;
   }, {});
 });

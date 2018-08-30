@@ -101,9 +101,12 @@
        text-align: right;
      }
 
-      #terms { text-align: center; margin: 20px 0 0 0; }
-      #terms h5 { text-transform: uppercase; font: 13px Helvetica, Sans-Serif; letter-spacing: 10px; border-bottom: 1px solid black; padding: 0 0 8px 0; margin: 0 0 8px 0; }
-      #terms div { width: 100%; text-align: center;}
+      #terms {margin: 50px 0 0 0; }
+      #terms h5 { text-align: center; text-transform: uppercase; font: 13px Helvetica, Sans-Serif; letter-spacing: 5px; border-bottom: 1px solid black; padding: 0 0 8px 0; margin: 0 0 8px 0; }
+     #terms div {
+       width: 100%;
+       /* text-align: center; */
+     }
 
       /* div:hover, div:focus, #items td.total-value div:hover, #items td.total-value div:focus, .delete:hover { background-color:#EEFF88; } */
 
@@ -113,6 +116,12 @@
      #hiderow,
      .delete {
        display: none;
+     }
+
+     .zeroVAT {
+       margin-top: 0.5em;
+       font-size: 90%;
+       font-style: italic;
      }
 
      @media print {
@@ -246,7 +255,17 @@
 		      <td class="total-value">{{price}}€</td>
         </tr>
         <tr>
-		      <td colspan="1" class="total-line">Total IVA ({{@key}}%):</td>
+		      <td colspan="1" class="total-line">
+            <div>
+              Total IVA ({{@key}}%):
+            </div>
+            {{#if isZero}}
+            <div class="zeroVAT">
+              Factura exenta de IVA (Artículo 20. Uno. 3º - Ley 37/1992)
+            </div>
+            {{/if}}
+
+          </td>
 		      <td class="total-value">{{tax}}€</td>
         </tr>
         {{/each}}
@@ -268,9 +287,11 @@
 		    
 		  </table>
 		  
-		  <!-- <div id="terms">
-		       <h5>Terms</h5>
-		       <div>NET 30 Days. Finance Charge of 1.5% will be made on unpaid balances after 30 days.</div>
+      <!-- <div id="terms">
+		       <h5>Observaciones</h5>
+           <div>
+           Factura exenta de IVA (Artículo 20. Uno. 3º - Ley 37/1992)
+           </div>
 		       </div> -->
 	    
 	  </div>
