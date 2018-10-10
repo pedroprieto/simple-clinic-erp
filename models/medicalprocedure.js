@@ -67,7 +67,7 @@ MedicalProcedureSchema.statics.toCJ = function(i18n, obj) {
 MedicalProcedureSchema.statics.getTemplate = function(i18n, obj) {
   var props = ['name', 'duration', 'price','vat'];
   // Call function defined in baseschema
-  var data = this.propsToCJ(props, i18n, false, obj);
+  var data = this.propsToCJ(props, i18n, true, obj);
   // Build room
   var room = {
     name: 'room',

@@ -187,7 +187,7 @@ module.exports = function(router) {
     // Collection template
     col.template = {data: []};
     col.template.data.push({prompt: ctx.i18n.__('Fecha de factura'), name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
-    col.template.data.push({prompt: ctx.i18n.__('Precio'), name: 'price', value: ctx.patientVoucher.price, type: 'number'});
+    col.template.data.push({prompt: ctx.i18n.__('Precio'), name: 'price', value: ctx.patientVoucher.price, type: 'number', step: '0.01'});
     col.template.data.push({
       prompt: ctx.i18n.__('Médico'),
       name: 'doctor',

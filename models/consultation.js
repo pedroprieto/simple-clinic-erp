@@ -105,7 +105,7 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
 ConsultationSchema.statics.getTemplate = function(i18n, obj) {
   var props = ['diagnosis', 'description'];
   // Call function defined in baseschema
-  var data = this.propsToCJ(props, i18n, false, obj);
+  var data = this.propsToCJ(props, i18n, true, obj);
   // data.push(
   //   {
   //     prompt: i18n.__("Seleccionar fecha"),

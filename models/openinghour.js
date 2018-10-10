@@ -48,7 +48,7 @@ OpeningHourSchema.statics.toCJ = function(i18n, obj) {
 OpeningHourSchema.statics.getTemplate = function(i18n, obj) {
   var props = ['opens', 'closes'];
   // Call function defined in baseschema
-  var data = this.propsToCJ(props, i18n, false, obj);
+  var data = this.propsToCJ(props, i18n, true, obj);
   // Build dayOfWeek
   var dayOfWeek = {
     name: 'dayOfWeek',

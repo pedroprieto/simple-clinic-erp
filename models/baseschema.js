@@ -21,8 +21,9 @@ module.exports = function(schema_skel) {
 
   // Get required field from schema definition
   schema.statics.matchField = function (prop) {
-    if (typeof this.schema.obj[prop].match !== 'undefined')
-		  return this.schema.obj[prop].options.match.toString().replace("/","").replace("/","");
+    if (typeof this.schema.obj[prop].match !== 'undefined') {
+		  return this.schema.obj[prop].match.toString().replace("/","").replace("/","");
+    }
 
     return null;
   };
@@ -42,11 +43,13 @@ module.exports = function(schema_skel) {
         dat.type= this.getType(prop);
 
         if (isTemplate) {
+          if (prop == 'price')
+            dat.step = "0.01";
           if (this.isRequired(prop))
 		        dat.required = true;
 
           if (this.matchField(prop))
-            dat.match = this.matchField();
+            dat.match = this.matchField(prop);
         }
         return dat;
       }.bind(this)

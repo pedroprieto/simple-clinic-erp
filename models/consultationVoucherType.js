@@ -60,7 +60,7 @@ ConsultationVoucherTypeSchema.statics.toCJ = function(i18n, obj) {
 ConsultationVoucherTypeSchema.statics.getTemplate = function(i18n, obj) {
   var props = ['name', 'numberOfConsultations', 'price'];
   // Call function defined in baseschema
-  var data = this.propsToCJ(props, i18n, false, obj);
+  var data = this.propsToCJ(props, i18n, true, obj);
   // Build medicalProcedure
   var medicalProcedure = {
     name: 'medicalProcedure',
