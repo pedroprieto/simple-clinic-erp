@@ -27,6 +27,13 @@ var consultationVoucherTypeSchema = {
     required: true,
     htmlType: "number"
   },
+  vat: {
+    type: Number,
+    promptCJ: "IVA (%)",
+    default: 0,
+    required: true,
+    htmlType: "number"
+  },
   active: {
     type: Boolean,
     default: true,
@@ -40,7 +47,7 @@ var ConsultationVoucherTypeSchema = baseschema(consultationVoucherTypeSchema);
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
 ConsultationVoucherTypeSchema.statics.toCJ = function(i18n, obj) {
-  var props = ['name', 'numberOfConsultations', 'price'];
+  var props = ['name', 'numberOfConsultations', 'price', 'vat'];
   // Call function defined in baseschema
   var data = this.propsToCJ(props, i18n, false, obj);
   // Build medicalProcedure
@@ -58,7 +65,7 @@ ConsultationVoucherTypeSchema.statics.toCJ = function(i18n, obj) {
 }
 
 ConsultationVoucherTypeSchema.statics.getTemplate = function(i18n, obj) {
-  var props = ['name', 'numberOfConsultations', 'price'];
+  var props = ['name', 'numberOfConsultations', 'price', 'vat'];
   // Call function defined in baseschema
   var data = this.propsToCJ(props, i18n, true, obj);
   // Build medicalProcedure

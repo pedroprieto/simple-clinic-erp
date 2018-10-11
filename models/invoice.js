@@ -80,15 +80,29 @@ var invoiceSchema = {
 
 var InvoiceSchema = baseschema(invoiceSchema);
 
+InvoiceSchema.virtual('orderItemsCalc').get(function() {
+  return this.orderItems.map(function(el) {
+    return {
+      netPrice: Math.round(el.price/(1+el.tax/100) * 100) / 100,
+      price: el.price,
+      tax: el.tax,
+      taxPrice: Math.round(el.tax * el.price/(1+el.tax/100)) / 100,
+      description: el.description
+    }
+
+  })
+
+});
+
 InvoiceSchema.virtual('netTotal').get(function () {
-  return this.orderItems.reduce(function(res, el) {
-    return (res + el.price);
+  return this.orderItemsCalc.reduce(function(res, el) {
+    return (res + el.netPrice);
   }, 0);
 });
 
 InvoiceSchema.virtual('amountDue').get(function () {
-  return this.orderItems.reduce(function(res, el) {
-    return (res + el.price * (1+el.tax/100));
+  return this.orderItemsCalc.reduce(function(res, el) {
+    return (res + el.price);
   }, 0);
 });
 
@@ -119,14 +133,14 @@ InvoiceSchema.virtual('subTotals').get(function () {
       tax: 10
     }
   );
-  return this.orderItems.reduce(function(res, el) {
+  return this.orderItemsCalc.reduce(function(res, el) {
     if (res[el.tax]) {
-      res[el.tax].price += el.price;
-      res[el.tax].tax += el.tax * el.price / 100;
+      res[el.tax].price += el.netPrice;
+      res[el.tax].tax += el.taxPrice;
     } else {
       res[el.tax] = {};
-      res[el.tax].price = el.price;
-      res[el.tax].tax = el.tax * el.price / 100;
+      res[el.tax].price = el.netPrice;
+      res[el.tax].tax = el.taxPrice;
     }
     if (el.tax == 0) {
       res[el.tax].isZero = true;

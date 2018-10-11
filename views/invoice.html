@@ -228,14 +228,14 @@
 		      <th>Precio</th>
 		    </tr>
 		    
-        {{#each invoice.orderItems}}
+        {{#each invoice.orderItemsCalc}}
 		    <tr class="item-row">
 		      <!-- <td class="item-name"><div class="delete-wpr"><div>Web Updates</div><a class="delete" href="javascript:;" title="Remove row">X</a></div></td> -->
 		      <td class="description"><div>{{description}}</div></td>
-		      <td class="cost">{{price}}€</td>
+		      <td class="cost">{{netPrice}}€</td>
 		      <td class="tax">{{tax}}%</td>
 		      <td class="qty">1</td>
-		      <td class="price"><span class="price">{{price}}€</span></td>
+		      <td class="price"><span class="price">{{netPrice}}€</span></td>
 		    </tr>
         {{/each}}
 		    

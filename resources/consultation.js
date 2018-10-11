@@ -540,7 +540,7 @@ module.exports = function(router) {
     // Collection template
     col.template = {data: []};
     col.template.data.push({prompt: ctx.i18n.__('Fecha de factura'), name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
-    col.template.data.push({prompt: ctx.i18n.__('Precio'), name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number', step: '0.01'});
+    col.template.data.push({prompt: ctx.i18n.__('Precio final (con impuestos)'), name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number', step: '0.01'});
     col.template.data.push({prompt: ctx.i18n.__('IVA') + ' %', name: 'vat', value: ctx.consultation.medicalProcedure.vat, type: 'number'});
 
     ctx.body = {collection: col};

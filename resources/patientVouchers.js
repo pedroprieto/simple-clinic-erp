@@ -151,6 +151,7 @@ module.exports = function(router) {
       patientVoucherData.consultationVoucherType = associated_consultationVoucherType._id;
       patientVoucherData.numberOfSessions = associated_consultationVoucherType.numberOfConsultations;
       patientVoucherData.price = associated_consultationVoucherType.price;
+      patientVoucherData.vat = associated_consultationVoucherType.vat;
       var p = new PatientVoucher(patientVoucherData);
       var psaved = await p.save();
       ctx.status = 201;
@@ -187,7 +188,8 @@ module.exports = function(router) {
     // Collection template
     col.template = {data: []};
     col.template.data.push({prompt: ctx.i18n.__('Fecha de factura'), name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
-    col.template.data.push({prompt: ctx.i18n.__('Precio'), name: 'price', value: ctx.patientVoucher.price, type: 'number', step: '0.01'});
+    col.template.data.push({prompt: ctx.i18n.__('Precio final (con impuestos)'), name: 'price', value: ctx.patientVoucher.price, type: 'number', step: '0.01'});
+    col.template.data.push({prompt: ctx.i18n.__('IVA') + ' %', name: 'vat', value: ctx.patientVoucher.vat, type: 'number'});
     col.template.data.push({
       prompt: ctx.i18n.__('Médico'),
       name: 'doctor',
@@ -240,6 +242,7 @@ module.exports = function(router) {
       {
         kind: 'PatientVoucher',
         price: data.price,
+        tax: data.vat,
         // TODO: improve
         description: ctx.patientVoucher.consultationVoucherType.medicalProcedure.name,
         item: ctx.patientVoucher._id

@@ -27,6 +27,13 @@ var patientVoucherSchema = {
     promptCJ: "Precio",
     htmlType: "number"
   },
+  vat: {
+    type: Number,
+    promptCJ: "IVA (%)",
+    default: 0,
+    required: true,
+    htmlType: "number"
+  },
   patient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Patient',
@@ -70,7 +77,7 @@ PatientVoucherSchema.pre('save', function(next) {
 
 // Convert mongoose object to plain object ready to transform to CJ item data format
 PatientVoucherSchema.statics.toCJ = function(i18n, obj) {
-  var props = ['name', 'numberOfSessions', 'price', 'remainingConsultations'];
+  var props = ['name', 'numberOfSessions', 'price', 'vat', 'remainingConsultations'];
   // Call function defined in baseschema
   var data = this.propsToCJ(props, i18n, false, obj);
   // // Build consultation Voucher Type
