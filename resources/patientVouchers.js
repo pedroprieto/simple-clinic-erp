@@ -244,7 +244,7 @@ module.exports = function(router) {
         price: data.price,
         tax: data.vat,
         // TODO: improve
-        description: ctx.patientVoucher.consultationVoucherType.medicalProcedure.name,
+        description: ctx.patientVoucher.consultationVoucherType.name,
         item: ctx.patientVoucher._id
       }
     );
