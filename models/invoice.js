@@ -174,6 +174,7 @@ InvoiceSchema.methods.invoiceToCJ = function() {
   if (Array.isArray(this.orderItems)) {
     var item = this.orderItems[0];
     data.push({name: 'price', prompt: "Precio", value: item.price});
+    data.push({name: 'tax', prompt: "IVA", value: item.tax});
     data.push({name: 'description', prompt: "Descripción", value: item.description});
   }
   return data;
