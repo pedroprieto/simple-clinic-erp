@@ -540,8 +540,9 @@ module.exports = function(router) {
     // Collection template
     col.template = {data: []};
     col.template.data.push({prompt: ctx.i18n.__('Fecha de factura'), name: 'date', value: Moment().format('YYYY-MM-DD'), type: 'date'});
-    col.template.data.push({prompt: ctx.i18n.__('Precio final (con impuestos)'), name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number', step: '0.01'});
+    col.template.data.push({prompt: ctx.i18n.__('Precio final (con IVA)'), name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number', step: '0.01'});
     col.template.data.push({prompt: ctx.i18n.__('IVA') + ' %', name: 'vat', value: ctx.consultation.medicalProcedure.vat, type: 'number'});
+    col.template.data.push({prompt: ctx.i18n.__('Retención IRPF') + ' %', name: 'incomeTax', value: 0, type: 'number'});
 
     ctx.body = {collection: col};
     return next();
@@ -566,6 +567,7 @@ module.exports = function(router) {
     p.customerName = ctx.consultation.patient.fullName;
     p.seller = ctx.consultation.doctor._id;
     p.sellerName = ctx.consultation.doctor.fullName;
+    p.incomeTax = data.incomeTax;
     p.orderItems = [];
     p.orderItems.push(
       {

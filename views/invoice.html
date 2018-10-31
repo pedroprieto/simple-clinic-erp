@@ -269,6 +269,12 @@
 		      <td class="total-value">{{tax}}€</td>
         </tr>
         {{/each}}
+        {{#if invoice.incomeTax}}
+		    <tr>
+		      <td colspan="1" class="total-line">IRPF ({{invoice.incomeTax}}%):</td>
+		      <td class="total-value">- {{invoice.incomeTaxTotal}}€</td>
+		    </tr>
+        {{/if}}
 		    <tr>
 		      <td colspan="1" class="total-line"><b>Total:</b></td>
 		      <td class="total-value"><b>{{invoice.amountDue}}€</b></td>

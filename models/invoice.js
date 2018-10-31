@@ -59,6 +59,13 @@ var invoiceSchema = {
     htmlType: "date",
     default: Date.now
   },
+  incomeTax: {
+    type: Number,
+    promptCJ: "IRPF %",
+    required: true,
+    htmlType: "number",
+    default: 0
+  },
   orderItems: [
     {
       kind: String,
@@ -100,10 +107,15 @@ InvoiceSchema.virtual('netTotal').get(function () {
   }, 0);
 });
 
+InvoiceSchema.virtual('incomeTaxTotal').get(function () {
+  return Math.round(this.netTotal * this.incomeTax) / 100;
+});
+
 InvoiceSchema.virtual('amountDue').get(function () {
-  return this.orderItemsCalc.reduce(function(res, el) {
+  var totalWithoutIncomeTax = this.orderItemsCalc.reduce(function(res, el) {
     return (res + el.price);
   }, 0);
+  return totalWithoutIncomeTax - this.incomeTaxTotal;
 });
 
 InvoiceSchema.virtual('subTotals').get(function () {
@@ -173,10 +185,11 @@ InvoiceSchema.methods.invoiceToCJ = function() {
 
   if (Array.isArray(this.orderItems)) {
     var item = this.orderItems[0];
-    data.push({name: 'price', prompt: "Precio", value: item.price});
-    data.push({name: 'tax', prompt: "IVA", value: item.tax});
+    data.push({name: 'price', prompt: "Precio", value: item.price + '€'});
+    data.push({name: 'tax', prompt: "IVA", value: item.tax + '%'});
     data.push({name: 'description', prompt: "Descripción", value: item.description});
   }
+  data.push({name: 'IRPF', prompt: "IRPF", value: this.incomeTax + '%'});
   return data;
 };
 
