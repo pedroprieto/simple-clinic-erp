@@ -198,11 +198,11 @@ InvoiceSchema.statics.list = function () {
 }
 
 InvoiceSchema.statics.listByCustomer = function (patient) {
-  return this.find({customer: patient}).populate('orderItems.item').exec();
+  return this.find({customer: patient}).sort({invoiceNumber: 1}).populate('orderItems.item').exec();
 }
 
 InvoiceSchema.statics.listBySeller = function (doctor) {
-  return this.find({seller: doctor}).populate('orderItems.item').exec();
+  return this.find({seller: doctor}).sort({invoiceNumber: 1}).populate('orderItems.item').exec();
 }
 
 var Invoice = mongoose.model('Invoice', InvoiceSchema);
