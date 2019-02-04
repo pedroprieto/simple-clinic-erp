@@ -9,7 +9,12 @@ var InvoiceNumerationSchema = mongoose.Schema({
     ref: 'Doctor',
     required: true
   },
-  currentNumber: { type: Number, default: 0, required: true}
+  year: {
+    type: Number, default: 0, required: true
+  },
+  currentNumber: {
+    type: Number, default: 0, required: true
+  }
 });
 var invoiceNumber = mongoose.model('InvoiceNumeration', InvoiceNumerationSchema);
 
@@ -168,8 +173,9 @@ InvoiceSchema.virtual('dateLocalized').get(function () {
 // Invoice numeration
 InvoiceSchema.pre('validate',async function(next) {
   var doc = this;
-  var counter = await invoiceNumber.findOneAndUpdate({doctor: mongoose.Types.ObjectId(doc.seller)}, {$inc: {currentNumber: 1} }, {upsert: true});
-  doc.invoiceNumber = counter.currentNumber;
+  var invoiceYear = this.date.getFullYear();
+  var counter = await invoiceNumber.findOneAndUpdate({doctor: mongoose.Types.ObjectId(doc.seller), year: invoiceYear }, {$inc: {currentNumber: 1} }, {upsert: true, new: true});
+  doc.invoiceNumber = counter.year * 1000000 + counter.currentNumber;
   next();
 });
 
