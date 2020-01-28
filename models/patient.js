@@ -119,7 +119,7 @@ PatientSchema.statics.list = function (query) {
 	  var re =  new RegExp(query.patientData, "i");
 	  q.$or = [];
 	  q.$or.push({givenName: re});
-	  q.$or.push({familiyName: re});
+	  q.$or.push({familyName: re});
 	  q.$or.push({taxID: re});
 	  q.$or.push({telephone: re});
 	  q.$or.push({address: re});
