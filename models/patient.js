@@ -112,11 +112,23 @@ PatientSchema.methods.updatePatient = function (data) {
   return this.save();
 }
 
+
+function diacriticSensitiveRegex(string = '') {
+    var st_norm = string.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return st_norm.replace(/a/g, '[a,á,à,ä]')
+        .replace(/e/g, '[e,é,ë]')
+        .replace(/i/g, '[i,í,ï]')
+        .replace(/o/g, '[o,ó,ö,ò]')
+        .replace(/u/g, '[u,ü,ú,ù]')
+        .replace(/n/g, '[n,ñ]');
+}
+
 // Get patients
 PatientSchema.statics.list = function (query) {
   var q = {};
 	if (typeof query.patientData !== 'undefined') {
-	  var re =  new RegExp(query.patientData, "i");
+	  // var re =  new RegExp(query.patientData, "i");
+    re = { $regex: diacriticSensitiveRegex(query.patientData), $options: 'i' };
 	  q.$or = [];
 	  q.$or.push({givenName: re});
 	  q.$or.push({familyName: re});
