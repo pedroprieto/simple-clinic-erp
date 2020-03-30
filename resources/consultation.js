@@ -269,7 +269,7 @@ module.exports = function(router) {
     col.href= ctx.getLinkCJFormat(router.routesList["patients"]).href;
 
     // Message
-    col.message = ctx.i18n.__("Fecha: ") + "<b>" + Moment(ctx.date).format('llll') + "</b>";
+    col.message = ctx.i18n.__("Fecha: ") + "<b>" + Moment(ctx.query.date).format('llll') + "</b>";
 
 	  // Collection title
     col.title = ctx.i18n.__("Seleccionar paciente para la consulta");
@@ -301,7 +301,7 @@ module.exports = function(router) {
 	    // Item link
       // Link to select med Proc
       item.links = [];
-      item.links.push(ctx.getLinkCJFormat(router.routesList["consultations_select_medProc"], {doctor: ctx.doctor._id, date: ctx.date, patient: p._id}));
+      item.links.push(ctx.getLinkCJFormat(router.routesList["consultations_select_medProc"], {doctor: ctx.doctor._id, date: ctx.query.date, patient: p._id}));
 
 	    return item;
 	  });
@@ -323,7 +323,7 @@ module.exports = function(router) {
     col.queries = [];
 	  col.queries.push(
 	    {
-		    href: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: ctx.date}).href,
+		    href: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id}).href,
 		    rel: "search",
 		    name: "searchpatient",
 		    prompt: ctx.i18n.__("Buscar paciente"),
@@ -333,18 +333,25 @@ module.exports = function(router) {
 			      value: ctx.query.patientData || "",
 			      prompt: ctx.i18n.__("Búsqueda por texto"),
             type: 'text'
-		      }
+		      },
+		        {
+			          name: "date",
+			          value: ctx.query.date,
+			          prompt: ctx.i18n.__("Fecha"),
+                type: 'hidden'
+		        }
 		    ]
 	    }
 	  );
 
 	  // Template
+    // TODO: fix nextStep
     col.template = {};
 	  col.template.data = Patient.getTemplate(ctx.i18n);
     col.template.data.push(
       {
 		    name : 'nextStep',
-		    value: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: ctx.date}).href,
+		    value: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id}).href + ctx.query.date,
         prompt : ctx.i18n.__('Siguiente paso'),
         type: 'hidden'
       });
@@ -374,6 +381,7 @@ module.exports = function(router) {
     col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
     // Back link
     var back_link = ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: ctx.date});
+		back_link.href = ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id}).href + '?date=' + ctx.date,
     back_link.prompt = ctx.i18n.__("Volver");
     back_link.rel = "collection prev";
     col.links.push(back_link);
@@ -504,7 +512,8 @@ module.exports = function(router) {
       ctx.throw(400, 'La fecha no es válida.');
 
     ctx.status = 201;
-    ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: data.date}).href);
+      ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id}).href + '?date=' + data.date);
+
     return next();
   });
 

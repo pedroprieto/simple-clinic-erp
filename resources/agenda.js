@@ -9,170 +9,152 @@ var PatientVoucher = require('../models/patientVoucher');
 var Invoice = require('../models/invoice');
 var CJUtils = require('../aux/CJUtils');
 module.exports = function(router) {
-  function checkIfWithinDoctorSchedule(date, docSch) {
-    var mD = Moment(date);
+    function checkIfWithinDoctorSchedule(date, docSch) {
+        var mD = Moment(date);
 
-    for (var a of docSch) {
-      var day = a.dayOfWeek;
+        for (var a of docSch) {
+            var day = a.dayOfWeek;
 
-      if (mD.isoWeekday() == day) {
-        if ((mD.format('HH:mm') >= a.opens) && (mD.format('HH:mm') < a.closes))
-          return true;
-      }
-    }
-    return false;
-  };
-
-  // GET Doctor agenda
-  router.get(router.routesList["agenda"].name, router.routesList["agenda"].href, async (ctx, next) => {
-
-    // Get selected ISO week in query. Current week if invalid or no query
-    var queryweek = ctx.query.isoweekdate;
-
-    var cur_date = Moment();
-    var displayed_date = Moment(queryweek);
-
-    if (!displayed_date.isValid()) {
-      return ctx.redirect(router.routesList["agenda"].href);
-    }
-
-    var cur_isoweekdate = cur_date.format('GGGG[-W]WW');
-    var isoweekdate = displayed_date.clone().format('GGGG[-W]WW');
-    var nextisoweekdate = displayed_date.clone().add(1,'w').format('GGGG[-W]WW');
-    var previousisoweekdate= displayed_date.clone().subtract(1,'w').format('GGGG[-W]WW');
-
-
-    var availableHours = [];
-    var limitHours = ctx.doctor._schedule.reduce(function(prev, sch) {
-      var ret = prev;
-      if (sch.opens < prev.from) {
-        ret.from= sch.opens;
-      }
-      if (sch.closes > prev.to) {
-        ret.to = sch.closes;
-      }
-      return ret;
-    },{from: '23:59', to: '00:00'});
-
-    var init_hour = Moment('2018-01-01 ' + limitHours.from);
-    while (init_hour.format('HH:mm') < limitHours.to) {
-      availableHours.push(init_hour.format('HH:mm'));
-      init_hour.add(30, 'm');
-    }
-
-
-    // col.meta.currentWeek = isoweekdate;
-    var listOfDays = [];
-
-    var begin = displayed_date.clone().startOf('isoWeek').isoWeekday();
-    var wend = displayed_date.clone().endOf('isoWeek').isoWeekday();
-    var d = displayed_date.clone().startOf('isoWeek');
-    while (begin <= wend) {
-      listOfDays.push(d.format('YYYY-MM-DD'));
-      d.add(1, 'days');
-      begin++;
-    }
-
-    // Get consultations from specified week
-    var consultations = await Consultation.findInDateRange(displayed_date.clone().startOf('isoWeek').toDate(), displayed_date.clone().endOf('isoWeek').toDate(), ctx.doctor._id);
-
-    // List of days and hours
-
-    var dayHour = listOfDays.reduce(function(res, el) {
-      var wholeDate = availableHours.map(function(h) {
-        var wD = this + 'T' + h;
-        var it = {data: [], links:[], group: el, hour: h};
-        var cs = consultations.filter(function(c) {
-          return Moment(c.date).isSame(wD);
-        }).map(function(e) {
-          var con = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: e._id});
-          con.prompt = e.patient.fullName;
-          return con;
-        });
-        it.links = cs;
-        // Template
-        // TODO: only if within doctor schedule
-        if (checkIfWithinDoctorSchedule(wD, ctx.doctor._schedule)) {
-          var l = ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id, date: wD});
-          l.rel += " template";
-          it.links.push(l);
+            if (mD.isoWeekday() == day) {
+                if ((mD.format('HH:mm') >= a.opens) && (mD.format('HH:mm') < a.closes))
+                    return true;
+            }
         }
-        return it;
-      }, el);
+        return false;
+    };
 
-      return res.concat(wholeDate);
-    }.bind(this), []);;
+    // GET Doctor agenda
+    router.get(router.routesList["agenda"].name, router.routesList["agenda"].href, async (ctx, next) => {
 
-    // var col= await renderCollectionConsultations(ctx, consultations);
-    var col = {};
-    col.version = "1.0";
+        var momentBegin, momentEnd;
 
+        if (ctx.query.dateBegin) {
+            momentBegin = Moment(ctx.query.dateBegin);
+        } else {
+            momentBegin = Moment().startOf('isoWeek');
+        }
 
-    // Col type
-    col.type = "agenda";
+        if (ctx.query.dateEnd) {
+            momentEnd = Moment(ctx.query.dateEnd);
+        } else {
+            momentEnd = Moment().endOf('isoWeek');
+        }
 
-	  // Collection Links
-    col.links = [];
-    col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
+        // Redirect if incorrect dates provided in query
+        if ((!momentBegin.isValid()) || (!momentEnd.isValid()))
+            return ctx.redirect(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).href);
 
-    // col items
-    col.items = dayHour;
-
-    // Collection href
-    col.href= ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).href;
-
-	  // Collection title
-    // col.title = ctx.i18n.__(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).prompt);
-    col.title = ctx.i18n.__("Agenda de ") + ctx.doctor.fullName;
-
-    // Doctor link
-    // var back_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
-    // back_link.prompt = ctx.doctor.fullName;
-    // back_link.rel = "collection up";
-    // col.links.push(back_link);
-
-	  // Doctor Link
-    col.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}));
-    var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
-    doctor_link.prompt = ctx.i18n.__("Datos personales"); 
-    col.links.push(doctor_link);
-    col.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}));
-    col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: ctx.doctor._id}));
+        var availableHours = ctx.doctor._schedule.map(sch => {
+            return  {
+                group: 'availableHour',
+                data: [
+                    {name: 'daysOfWeek', prompt: "Día de la semana", value: sch.dayOfWeek},
+                    {name: 'startTime', prompt: "Hora de apertura", value: sch.opens},
+                    {name: 'endTime', prompt: "Hora de cierre", value: sch.closes},
+                ]
+            }
+            availableHours.push(availableHour);
+        })
 
 
+        // Get consultations from selected period
+        // For each consultation, generate item in group 'consultations'
+        var consultations = await Consultation.findInDateRange(momentBegin.toDate(), momentEnd.toDate(), ctx.doctor._id);
 
-    // Pagination links
-    var l;
-    l = ctx.getLinkCJFormat(router.routesList["agenda"],{doctor: ctx.doctor._id},{query: {isoweekdate: cur_isoweekdate}});
-    l.rel = 'current';
-    l.prompt = ctx.i18n.__('Semana actual');
-    col.links.push(l);
+        var cons_items = consultations.map(c => {
+            var item = {};
+            item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: c._id}).href;
+            item.data = Consultation.toCJ(ctx.i18n, c);
+            item.group = 'consultation';
+            return item;
+        })
 
-    l = ctx.getLinkCJFormat(router.routesList["agenda"],{doctor: ctx.doctor._id},{query: {isoweekdate: previousisoweekdate}});
-    l.rel = 'prev';
-    l.prompt = ctx.i18n.__('Semana anterior');
-    col.links.push(l);
+        // Collection + JSON response
+        var col = {};
+        col.version = "1.0";
 
-    l = ctx.getLinkCJFormat(router.routesList["agenda"],{doctor: ctx.doctor._id},{query: {isoweekdate: nextisoweekdate}});
-    l.rel = 'next';
-    l.prompt = ctx.i18n.__('Semana siguiente');
-    col.links.push(l);
+        // Col type
+        col.type = "agenda";
 
-	  // Template
-    // col.template = {};
-	  // col.template.data = Consultation.getTemplate(ctx.i18n);
+        // Queries: change view (day, week, month)
+        col.queries = [];
+	      col.queries.push(
+	          {
+		            href: ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).href,
+		            rel: "search",
+		            name: "searchdate",
+		            prompt: ctx.i18n.__("Buscar fechas"),
+		            data: [
+		                {
+			                  name: "dateBegin",
+			                  value: "",
+			                  prompt: ctx.i18n.__("Fecha de inicio"),
+                        type: 'date'
+		                },
+		                {
+			                  name: "dateEnd",
+			                  value: "",
+			                  prompt: ctx.i18n.__("Fecha de fin"),
+                        type: 'date'
+		                }
+		            ]
+	          },
+	          {
+		            href: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id}).href,
+		            rel: "searchpatient",
+		            name: "searchpatient",
+		            prompt: ctx.i18n.__("Seleccionar paciente"),
+		            data: [
+		                {
+			                  name: "date",
+			                  value: "",
+			                  prompt: ctx.i18n.__("Fecha de consulta"),
+                        type: 'date'
+		                }
+		            ]
+	          }
+	      );
 
-    // Meta
 
-    col.meta = {};
-    col.meta.listOfDays = listOfDays;
-    col.meta.availableHours = availableHours;
+	      // Collection Links
+        col.links = [];
+        col.links.push(ctx.getLinkCJFormat(router.routesList["patients"]));
+        col.links.push(ctx.getLinkCJFormat(router.routesList["doctors"]));
+        col.links.push(ctx.getLinkCJFormat(router.routesList["config"]));
 
-    ctx.body = {collection: col};
-    return next();
+        // col items
+        col.items = [];
+        col.items = col.items.concat(cons_items).concat(availableHours);
 
-  });
+        // Collection href
+        col.href= ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).href;
+
+	      // Collection title
+        col.title = ctx.i18n.__("Agenda de ") + ctx.doctor.fullName;
+
+	      // Doctor Link
+        col.links.push(ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}));
+        var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
+        doctor_link.prompt = ctx.i18n.__("Datos personales");
+        col.links.push(doctor_link);
+        col.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}));
+        col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: ctx.doctor._id}));
+
+	      // Template
+        col.template = {};
+        col.template.data = [
+            {
+                name: 'date',
+                value: '',
+			          prompt: ctx.i18n.__("Fecha de consulta"),
+                type: 'date',
+                required: true
+            }
+        ]
+
+        ctx.body = {collection: col};
+        return next();
+
+    });
 
 };

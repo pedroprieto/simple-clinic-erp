@@ -72,6 +72,20 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     value: obj.date,
     text: obj.dateLocalized
   };
+  var start = {
+    name: 'start',
+    prompt: i18n.__('Comienzo'),
+    type: 'datetime',
+    value: obj.date,
+    text: obj.dateLocalized
+  };
+  var end = {
+    name: 'end',
+    prompt: i18n.__('Fin'),
+    type: 'datetime',
+    value: Moment(obj.date).add(Moment.duration(obj.medicalProcedure.duration)),
+    text: obj.dateLocalized
+  };
   var medicalProcedure = {
     name: 'medicalProcedure',
     prompt: i18n.__('Tipo de sesión'),
@@ -81,6 +95,13 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
   };
   var patient = {
     name: 'patient',
+    prompt: i18n.__('Paciente'),
+    type: 'select',
+    value: obj.patient.fullName,
+    text: obj.patient.fullName
+  };
+  var title = {
+    name: 'title',
     prompt: i18n.__('Paciente'),
     type: 'select',
     value: obj.patient.fullName,
@@ -98,6 +119,9 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
   data.push(medicalProcedure);
   data.push(patient);
   data.push(doctor);
+  data.push(title);
+  data.push(start);
+  data.push(end);
 
   return data;
 }

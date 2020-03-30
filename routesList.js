@@ -109,7 +109,7 @@ module.exports = {
   },
   consultations_select_patient: {
     name: "consultations_select_patient",
-    href: "/api/doctors/:doctor/consultations/select/:date",
+    href: "/api/doctors/:doctor/consultations/select/",
     rel: "collection",
     prompt: "Seleccionar paciente"
   },
