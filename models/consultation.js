@@ -160,8 +160,10 @@ ConsultationSchema.statics.updateById = function (id, data) {
 
 // Get consultation list by date range and doctor
 ConsultationSchema.statics.findInDateRange = function (dateStart, dateEnd, doctor) {
+  const start = new Date(dateStart).setHours(0,0,0,0);
+  const end = new Date(dateEnd).setHours(23,59,59,9990);
   return this.find({
-    date: {$gte: dateStart, $lte: dateEnd},
+    date: {$gte: start, $lte: end},
     doctor: doctor
   }).
     sort({date: -1}).
