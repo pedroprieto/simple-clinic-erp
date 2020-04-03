@@ -63,6 +63,8 @@ module.exports = function(router) {
 
         var cons_items = consultations.map(c => {
             var item = {};
+            if (c.invoice || c.associatedVoucher)
+                item.readOnly = true;
             item.href = ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: c._id}).href;
             item.data = Consultation.toCJ(ctx.i18n, c);
             item.group = 'consultation';
@@ -81,7 +83,7 @@ module.exports = function(router) {
 	      col.queries.push(
 	          {
 		            href: ctx.getLinkCJFormat(router.routesList["agenda"], {doctor: ctx.doctor._id}).href,
-		            rel: "search",
+		            rel: "search specific",
 		            name: "searchdate",
 		            prompt: ctx.i18n.__("Buscar fechas"),
 		            data: [
@@ -96,12 +98,18 @@ module.exports = function(router) {
 			                  value: "",
 			                  prompt: ctx.i18n.__("Fecha de fin"),
                         type: 'date'
+		                },
+		                {
+			                  name: "view",
+			                  value: "",
+			                  prompt: ctx.i18n.__("Vista"),
+                        type: 'string'
 		                }
 		            ]
 	          },
 	          {
 		            href: ctx.getLinkCJFormat(router.routesList["consultations_select_patient"], {doctor: ctx.doctor._id}).href,
-		            rel: "searchpatient",
+		            rel: "searchpatient specific",
 		            name: "searchpatient",
 		            prompt: ctx.i18n.__("Seleccionar paciente"),
 		            data: [
@@ -142,6 +150,7 @@ module.exports = function(router) {
 
 	      // Template
         col.template = {};
+        col.template.type = 'edit-only';
         col.template.data = [
             {
                 name: 'date',

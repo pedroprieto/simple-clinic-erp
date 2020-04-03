@@ -114,12 +114,20 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     value: obj.doctor.fullName,
     text: obj.doctor.fullName
   };
+  var kind = {
+    name: 'kind',
+    prompt: i18n.__('Tipo'),
+    type: 'hidden',
+    value: (obj.invoice ? 'invoice' : '') + ' ' + (obj.associatedVoucher ? 'voucher' : ''),
+    text: (obj.invoice ? 'invoice' : '') + ' ' + (obj.associatedVoucher ? 'voucher' : '')
+  };
 
   data.push(date);
   data.push(medicalProcedure);
   data.push(patient);
   data.push(doctor);
   data.push(title);
+  data.push(kind);
   data.push(start);
   data.push(end);
 
