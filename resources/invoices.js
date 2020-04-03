@@ -61,7 +61,7 @@ module.exports = function(router) {
 
   // Parameter invoice
   router.param('invoice', async (id, ctx, next) => {
-    ctx.invoice = await Invoice.findOne({_id: id}).populate(['seller', 'customer', 'orderItems']).exec();
+    ctx.invoice = await Invoice.findOne({_id: id}).populate(['seller', 'customer']).exec();
     return next();
   });
 
@@ -148,7 +148,7 @@ module.exports = function(router) {
   router.get(router.routesList["invoiceHTML"].name, router.routesList["invoiceHTML"].href, async (ctx, next) => {
 
     await ctx.render('invoice', {
-      invoice: ctx.invoice
+      invoice: ctx.invoice.toObject({getters: true})
     });
 
   });
