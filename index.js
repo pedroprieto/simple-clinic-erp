@@ -58,7 +58,8 @@ app.context.getLinkCJFormat = function(link, ...params) {
 // If 'accept' header asks for HTML, return HTML client
 // else, proceed
 app.use(async (ctx, next) => {
-    if (ctx.get('accept').indexOf('text/html') > -1) {
+    const isHTMLpage = ctx.request.url.indexOf('html') > -1;
+    if ((ctx.get('accept').indexOf('text/html') > -1) && (!isHTMLpage)) {
         await koaSend(ctx, '/assets/client/index.html' );
     } else {
         return next();
