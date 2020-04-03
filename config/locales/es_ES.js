@@ -107,5 +107,21 @@
 	"No se encuentra el adjunto fileData.": "No se encuentra el adjunto fileData.",
 	"No se encuentra el parámetro name.": "No se encuentra el parámetro name.",
 	"IVA": "IVA",
-	"IVA (%)": "IVA (%)"
+	"IVA (%)": "IVA (%)",
+	"La consulta ya tiene una factura asociada. No se puede crear la factura.": "La consulta ya tiene una factura asociada. No se puede crear la factura.",
+	"Precio final (con impuestos)": "Precio final (con impuestos)",
+	"Precio final (con IVA)": "Precio final (con IVA)",
+	"Retención IRPF": "Retención IRPF",
+	"Actual": "Actual",
+	"Anterior": "Anterior",
+	"Siguiente": "Siguiente",
+	"Buscar fechas": "Buscar fechas",
+	"Fecha de inicio": "Fecha de inicio",
+	"Fecha de fin": "Fecha de fin",
+	"Color de fondo": "Color de fondo",
+	"Fecha de consulta": "Fecha de consulta",
+	"Comienzo": "Comienzo",
+	"Fin": "Fin",
+	"Tipo": "Tipo",
+	"Vista": "Vista"
 }
