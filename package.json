@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/pedroprieto/simple-clinic-erp#readme",
   "dependencies": {
-    "handlebars": "^4.3.0",
+    "handlebars": "^4.7.5",
     "koa": "^2.5.0",
     "koa-body": "^4.0.4",
     "koa-i18n": "^2.1.0",
