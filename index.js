@@ -3,6 +3,7 @@ var Router = require('koa-router');
 var bodyParser = require('koa-body');
 var views = require('koa-views');
 var koaStatic = require('koa-static');
+var koaSend = require('koa-send');
 const locale = require('koa-locale'); //  detect the locale
 const i18n = require('koa-i18n');
 const mongoose = require('mongoose');
@@ -52,6 +53,17 @@ app.context.getLinkCJFormat = function(link, ...params) {
     prompt: this.i18n.__(link.prompt)
   }
 };
+
+// HTML requests serve static
+// If 'accept' header asks for HTML, return HTML client
+// else, proceed
+app.use(async (ctx, next) => {
+    if (ctx.get('accept').indexOf('text/html') > -1) {
+        await koaSend(ctx, '/assets/client/index.html' );
+    } else {
+        return next();
+    }
+});
 
 // Resources
 require('./resources/root')(router);
@@ -106,7 +118,7 @@ app.use(async (ctx, next) => {
 });
 
 // Static
-app.use(koaStatic('./assets'));
+app.use(koaStatic('./assets/client'));
 
 // i18n
 // app.use(async (ctx, next) => {
