@@ -1,4 +1,5 @@
 var Invoice = require('../models/invoice');
+var Moment = require('moment');
 
 module.exports = function(router) {
 
@@ -49,7 +50,7 @@ module.exports = function(router) {
 	    var d = {};
 	    d.name = "message";
       d.prompt = "Mensaje";
-	    d.value= ctx.i18n.__("No hay facturas");
+	    d.value= ctx.i18n.__("No hay facturas en el período seleccionado");
 	    item.data.push(d);
 	    col.items.push(item);
 	  }
@@ -113,9 +114,39 @@ module.exports = function(router) {
   // GET doctor invoices
   router.get(router.routesList["doctorInvoices"].name, router.routesList["doctorInvoices"].href, async (ctx, next) => {
 
+    var dateStart = ctx.query.dateStart || (new Moment()).startOf('month').format('YYYY-MM-DD');
+    var dateEnd = ctx.query.dateEnd || (new Moment()).endOf('month').format('YYYY-MM-DD');
+
     // Get invoices
-    var invoices = await Invoice.listBySeller(ctx.doctor._id);
+    var invoices = await Invoice.listBySeller(ctx.doctor._id, dateStart, dateEnd);
     var col= await renderCollectionInvoices(ctx, invoices);
+
+
+	    // Queries
+      col.queries = [];
+	    col.queries.push(
+	        {
+              href: ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: ctx.doctor._id}).href,
+		          rel: "search",
+		          name: "searchdate",
+		          prompt: ctx.i18n.__("Buscar fechas"),
+		          data: [
+		              {
+			                name: "dateStart",
+			                value: ctx.query.dateStart || (new Moment()).startOf('month').format('YYYY-MM-DD') ,
+			                prompt: ctx.i18n.__("Fecha de inicio"),
+                      type: 'date'
+		              },
+		              {
+			                name: "dateEnd",
+			                value: ctx.query.dateEnd || (new Moment()).endOf('month').format('YYYY-MM-DD'),
+			                prompt: ctx.i18n.__("Fecha de fin"),
+                      type: 'date'
+		              }
+		          ]
+	        }
+	    );
+
 
     // Doctor link
     // var doctor_link = ctx.getLinkCJFormat(router.routesList["doctor"], {doctor: ctx.doctor._id});
