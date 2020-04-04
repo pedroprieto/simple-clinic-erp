@@ -82,9 +82,39 @@ module.exports = function(router) {
     // GET patient invoices
     router.get(router.routesList["patientInvoices"].name, router.routesList["patientInvoices"].href, async (ctx, next) => {
 
+        var dateStart = ctx.query.dateStart || (new Moment()).startOf('month').format('YYYY-MM-DD');
+        var dateEnd = ctx.query.dateEnd || (new Moment()).endOf('month').format('YYYY-MM-DD');
+
         // Get invoices
-        var invoices = await Invoice.listByCustomer(ctx.patient._id);
+        var invoices = await Invoice.listByCustomer(ctx.patient._id, dateStart, dateEnd);
         var col= await renderCollectionInvoices(ctx, invoices);
+
+
+	      // Queries
+        col.queries = [];
+	      col.queries.push(
+	          {
+                href: ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: ctx.patient._id}).href,
+		            rel: "search",
+		            name: "searchdate",
+		            prompt: ctx.i18n.__("Buscar fechas"),
+		            data: [
+		                {
+			                  name: "dateStart",
+			                  value: ctx.query.dateStart || (new Moment()).startOf('month').format('YYYY-MM-DD') ,
+			                  prompt: ctx.i18n.__("Fecha de inicio"),
+                        type: 'date'
+		                },
+		                {
+			                  name: "dateEnd",
+			                  value: ctx.query.dateEnd || (new Moment()).endOf('month').format('YYYY-MM-DD'),
+			                  prompt: ctx.i18n.__("Fecha de fin"),
+                        type: 'date'
+		                }
+		            ]
+	          }
+	      );
+
 
 	      // Patient Link
         var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.patient._id});

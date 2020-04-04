@@ -203,8 +203,12 @@ InvoiceSchema.statics.list = function () {
   return this.find().populate('orderItems.item').exec();
 }
 
-InvoiceSchema.statics.listByCustomer = function (patient) {
-  return this.find({customer: patient}).sort({invoiceNumber: 1}).populate('orderItems.item').exec();
+InvoiceSchema.statics.listByCustomer = function (patient, dateStart, dateEnd) {
+    return this.find(
+        {
+            customer: patient,
+            date: {$gte: dateStart, $lte: dateEnd},
+        }).sort({invoiceNumber: -1}).populate('orderItems.item').exec();
 }
 
 InvoiceSchema.statics.listBySeller = function (doctor, dateStart, dateEnd) {
