@@ -46,13 +46,13 @@ module.exports = function(router) {
 		                {
 			                  name: "dateStart",
 			                  value: dateStart,
-			                  prompt: ctx.i18n.__("Fecha de inicio"),
+			                  prompt: ctx.i18n.__("Inicio"),
                         type: 'date'
 		                },
 		                {
 			                  name: "dateEnd",
 			                  value: dateEnd,
-			                  prompt: ctx.i18n.__("Fecha de fin"),
+			                  prompt: ctx.i18n.__("Fin"),
                         type: 'date'
 		                },
 		                {
