@@ -81,6 +81,7 @@ require('./resources/patientAttachments')(router);
 require('./resources/config')(router);
 require('./resources/invoices')(router);
 require('./resources/agenda')(router);
+require('./resources/stats')(router);
 
 // Error processing
 app.use(async (ctx, next) => {

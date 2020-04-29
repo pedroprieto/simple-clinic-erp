@@ -190,6 +190,7 @@ module.exports = function(router) {
         col.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}));
         col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: ctx.doctor._id}));
         col.title = ctx.i18n.__("Facturas de ") + ctx.doctor.fullName;
+        col.links.push(ctx.getLinkCJFormat(router.routesList["doctorStats"], {doctor: ctx.doctor._id}));
 
         ctx.body = {collection: col};
         return next();

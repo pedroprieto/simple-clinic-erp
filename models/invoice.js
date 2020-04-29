@@ -112,6 +112,12 @@ InvoiceSchema.virtual('netTotal').get(function () {
   }, 0);
 });
 
+InvoiceSchema.virtual('taxTotal').get(function () {
+    return this.orderItemsCalc.reduce(function(res, el) {
+        return (res + el.taxPrice);
+    }, 0);
+});
+
 InvoiceSchema.virtual('incomeTaxTotal').get(function () {
   return Math.round(this.netTotal * this.incomeTax) / 100;
 });
@@ -218,6 +224,81 @@ InvoiceSchema.statics.listBySeller = function (doctor, dateStart, dateEnd) {
             date: {$gte: dateStart, $lte: dateEnd},
         }).sort({invoiceNumber: -1}).populate('orderItems.item').exec();
 }
+
+InvoiceSchema.statics.incomeStats = async function (doctor, period, dateStart, dateEnd) {
+    var periodString;
+    switch (period) {
+    case 'day':
+        periodString = "YYYY-MM-DD";
+        break;
+    case 'week':
+        periodString = "GGGG-[W]WW";
+        break;
+    case 'year':
+        periodString = "YYYY";
+        break;
+    case 'quarter':
+        periodString = "YYYY-[Q]Q";
+        break;
+    case 'month':
+    default:
+        periodString = "YYYY-MM";
+        break;
+    };
+    var invoiceList = await this.find(
+        {
+            seller: doctor,
+            date: {$gte: new Date(dateStart), $lte: new Date(dateEnd)},
+        });
+
+    var grouped = invoiceList.reduce(function(acc, el) {
+        var d = moment(el.date).format(periodString);
+        if (!acc[d])
+            acc[d] = {
+                gross:0,
+                incomeTax: 0,
+                net: 0,
+                tax: 0,
+                benefits: 0
+            };
+        acc[d].gross += el.amountDue;
+        acc[d].incomeTax += el.incomeTaxTotal;
+        acc[d].net += el.netTotal;
+        acc[d].tax += el.taxTotal;
+        acc[d].benefits += (el.netTotal - el.incomeTaxTotal);
+        return acc;
+    }, {});
+
+    var dates = [];
+    var gross = [];
+    var incomeTax = [];
+    var net = [];
+    var tax = [];
+    var benefits = [];
+    Object.keys(grouped).sort().forEach(function(g) {
+        if (period== "quarter") {
+            var nd = moment(g,"YYYY-[Q]Q");
+            dates.push(nd.format("YYYY-MM"));
+        } else {
+            dates.push(g);
+        }
+        gross.push(grouped[g].gross);
+        incomeTax.push(grouped[g].incomeTax);
+        net.push(grouped[g].net);
+        tax.push(grouped[g].tax);
+        benefits.push(grouped[g].benefits);
+    });
+
+    return {
+        x: dates,
+        gross: gross,
+        incomeTax: incomeTax,
+        net: net,
+        tax: tax,
+        benefits: benefits
+    }
+}
+
 
 var Invoice = mongoose.model('Invoice', InvoiceSchema);
 

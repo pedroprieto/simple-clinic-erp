@@ -203,6 +203,12 @@ module.exports = {
     rel: "collection secondary",
     prompt: "Lista de facturas del médico"
   },
+  doctorStats: {
+    name: "doctorStats",
+    href: "/api/doctors/:doctor/stats",
+    rel: "collection secondary",
+    prompt: "Estadísticas"
+  },
   config: {
     name: "config",
     href: "/api/config",

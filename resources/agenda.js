@@ -147,6 +147,7 @@ module.exports = function(router) {
         col.links.push(doctor_link);
         col.links.push(ctx.getLinkCJFormat(router.routesList["doctorSchedule"], {doctor: ctx.doctor._id}));
         col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: ctx.doctor._id}));
+        col.links.push(ctx.getLinkCJFormat(router.routesList["doctorStats"], {doctor: ctx.doctor._id}));
 
 	      // Template
         col.template = {};

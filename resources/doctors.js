@@ -40,6 +40,7 @@ module.exports = function(router) {
                 // item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
                 // Doctor invoices
                 item.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: p._id}));
+                item.links.push(ctx.getLinkCJFormat(router.routesList["doctorStats"], {doctor: p._id}));
             } else {
                 // Put links in col instead
 	              // Doctor Link
@@ -52,6 +53,7 @@ module.exports = function(router) {
                 // item.links.push(ctx.getLinkCJFormat(router.routesList["consultations"], {doctor: p._id}));
                 // Doctor invoices
                 col.links.push(ctx.getLinkCJFormat(router.routesList["doctorInvoices"], {doctor: p._id}));
+                col.links.push(ctx.getLinkCJFormat(router.routesList["doctorStats"], {doctor: p._id}));
             }
 
 	          return item;

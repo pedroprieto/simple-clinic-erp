@@ -187,6 +187,65 @@ ConsultationSchema.statics.findByPatient = function (patient) {
     populate(['doctor', 'patient', 'medicalProcedure', 'associatedVoucher']).exec();
 }
 
+ConsultationSchema.statics.getConsDoctorNumberByPeriod = function(doctor, period, dateStart, dateEnd) {
+    var periodString;
+    switch (period) {
+    case 'day':
+        periodString = "%Y-%m-%d";
+        break;
+    case 'week':
+        periodString = "%G-W%V";
+        break;
+    case 'quarter':
+        // TODO
+        periodString = "%Y-%m";
+        break;
+    case 'year':
+        periodString = "%Y";
+        break;
+    case 'month':
+    default:
+        periodString = "%Y-%m";
+        break;
+    };
+
+    return this.aggregate(
+        [
+            {
+                $match : {
+                    $and: [
+                        {doctor: { $eq: doctor._id }},
+                        {date: {$gte: new Date(dateStart), $lte: new Date(dateEnd)}}
+                    ]
+                }
+            },
+            {
+                $project:{
+                    _id: 0,
+                    period: {$dateToString: {format: periodString, date: "$date"}}
+                }
+            },
+            {
+                $group :
+                {
+                    _id: "$period",
+                    y: { $sum: 1 }
+                }
+            },
+            {
+                $sort : { _id: 1  }
+            },
+            {
+                $project:{
+                    _id: 0,
+                    x: "$_id",
+                    y: 1
+                }
+            },
+        ]
+    )
+}
+
 var Consultation = mongoose.model('Consultation', ConsultationSchema);
 
 module.exports = Consultation;
