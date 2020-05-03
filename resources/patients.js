@@ -113,7 +113,10 @@ module.exports = function(router) {
 
     // GET Patient list
     router.get(router.routesList["patients"].name, router.routesList["patients"].href, async (ctx, next) => {
-        var patients = await Patient.list(ctx.query);
+        var patients = [];
+	      if ((typeof ctx.query.patientData !== 'undefined') && ctx.query.patientData !== '') {
+            patients = await Patient.list(ctx.query);
+        }
         var col= renderCollectionPatients(ctx, patients);
         ctx.body = {collection: col};
         return next();
