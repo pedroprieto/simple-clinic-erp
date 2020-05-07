@@ -74,6 +74,7 @@ module.exports = function(router) {
         // Collection + JSON response
         var col = {};
         col.version = "1.0";
+        col.href = router.routesList["agenda"].name, router.routesList["agenda"].href;
 
         // Col type
         col.type = "agenda";
@@ -159,10 +160,42 @@ module.exports = function(router) {
 			          prompt: ctx.i18n.__("Fecha de consulta"),
                 type: 'date',
                 required: true
-            }
+            },
+            {
+                name: 'medicalProcedure',
+                prompt: ctx.i18n.__('Tipo de sesión'),
+                type: 'text',
+                value: "",
+                text: ""
+            },
+            {
+                name: 'patient',
+                prompt: ctx.i18n.__('Paciente'),
+                type: 'text',
+                value: "",
+                text: ""
+            },
+            {
+                name: 'doctor',
+                prompt: ctx.i18n.__('Médico'),
+                type: 'text',
+                value: "",
+                text: ""
+            },
         ]
 
         ctx.body = {collection: col};
+        return next();
+
+    });
+
+    router.post(router.routesList["agenda"].href, async (ctx,next) => {
+
+        var data = CJUtils.parseTemplate(ctx);
+        var p = new Consultation(data);
+        var psaved = await p.save();
+        ctx.status = 201;
+        ctx.set('location', ctx.getLinkCJFormat(router.routesList["consultation"], {consultation: psaved._id}).href);
         return next();
 
     });

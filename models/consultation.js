@@ -90,14 +90,14 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     name: 'medicalProcedure',
     prompt: i18n.__('Tipo de sesión'),
     type: 'select',
-    value: obj.medicalProcedure.name,
+    value: obj.medicalProcedure._id,
     text: obj.medicalProcedure.name
   };
   var patient = {
     name: 'patient',
     prompt: i18n.__('Paciente'),
     type: 'select',
-    value: obj.patient.fullName,
+    value: obj.patient._id,
     text: obj.patient.fullName
   };
   var title = {
@@ -111,7 +111,7 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     name: 'doctor',
     prompt: i18n.__('Médico'),
     type: 'select',
-    value: obj.doctor.fullName,
+    value: obj.doctor._id,
     text: obj.doctor.fullName
   };
   var kind = {
