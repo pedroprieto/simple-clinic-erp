@@ -104,7 +104,7 @@ ConsultationSchema.statics.toCJ = function(i18n, obj) {
     name: 'title',
     prompt: i18n.__('Paciente'),
     type: 'select',
-    value: obj.patient.fullName,
+    value: `${obj.patient.fullName} ${obj.invoice ? "(" + i18n.__("Facturada") + ")" : ""}${obj.associatedVoucher? "(" + i18n.__("Bono") + ")" : ""}`,
     text: obj.patient.fullName
   };
   var doctor = {
