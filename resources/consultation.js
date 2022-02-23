@@ -552,7 +552,11 @@ module.exports = function(router) {
         col.template.data.push({prompt: ctx.i18n.__('Precio final (con IVA)'), name: 'price', value: ctx.consultation.medicalProcedure.price, type: 'number', step: '0.01'});
         col.template.data.push({prompt: ctx.i18n.__('IVA') + ' %', name: 'vat', value: ctx.consultation.medicalProcedure.vat, type: 'number'});
         col.template.data.push({prompt: ctx.i18n.__('Retención IRPF') + ' %', name: 'incomeTax', value: 0, type: 'number'});
+        col.template.data.push({prompt: ctx.i18n.__('Médico que factura'), name: 'seller', value: "", type: 'select', suggest: {related: 'doctorList', value: '_id', text: 'fullName'}});
 
+        // Related
+        col.related = {};
+        col.related.doctorList = (await Doctor.list()).map(d => {return {_id: d._id, fullName: d.fullName};});
         ctx.body = {collection: col};
         return next();
 
@@ -574,8 +578,9 @@ module.exports = function(router) {
         p.date = data.date;
         p.customer= ctx.consultation.patient._id;
         p.customerName = ctx.consultation.patient.fullName;
-        p.seller = ctx.consultation.doctor._id;
-        p.sellerName = ctx.consultation.doctor.fullName;
+        p.seller = data.seller;
+        var doc = await Doctor.findById(data.seller);
+        p.sellerName = doc.fullName;
         p.incomeTax = data.incomeTax;
         p.orderItems = [];
         p.orderItems.push(
