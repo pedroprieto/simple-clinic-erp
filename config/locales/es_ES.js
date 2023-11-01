@@ -123,5 +123,12 @@
 	"Comienzo": "Comienzo",
 	"Fin": "Fin",
 	"Tipo": "Tipo",
-	"Vista": "Vista"
+	"Vista": "Vista",
+	"Estadísticas": "Estadísticas",
+	"No hay facturas en el período seleccionado": "No hay facturas en el período seleccionado",
+	"Firma": "Firma",
+	"Firma autorización": "Firma autorización",
+	"Facturada": "Facturada",
+	"Acepta términos": "Acepta términos",
+	"Acepta consentimiento datos": "Acepta consentimiento datos"
 }
