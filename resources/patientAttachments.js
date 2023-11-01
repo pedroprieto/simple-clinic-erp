@@ -35,6 +35,12 @@ module.exports = function(router) {
         col.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: ctx.patient._id}));
         // Patient Attachments
         col.links.push(ctx.getLinkCJFormat(router.routesList["patientAttachments"], {patient: ctx.patient._id}));
+      // Patient Signature
+      col.links.push(
+        ctx.getLinkCJFormat(router.routesList["patientSignature"], {
+          patient: ctx.patient._id,
+        }),
+      );
 
 	      // Items
 	      col.items = patientAttachmentList.map(function(p) {

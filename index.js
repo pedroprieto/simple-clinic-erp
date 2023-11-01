@@ -78,6 +78,7 @@ require('./resources/consultationVoucherTypes')(router);
 
 require('./resources/patientVouchers')(router);
 require('./resources/patientAttachments')(router);
+require('./resources/patientSignature')(router);
 require('./resources/config')(router);
 require('./resources/invoices')(router);
 require('./resources/agenda')(router);

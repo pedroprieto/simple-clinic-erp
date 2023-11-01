@@ -42,6 +42,9 @@ module.exports = function(router) {
                 item.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: p._id}));
                 // Patient attachments
                 item.links.push(ctx.getLinkCJFormat(router.routesList["patientAttachments"], {patient: p._id}));
+
+                // Patient signature
+                item.links.push(ctx.getLinkCJFormat(router.routesList["patientSignature"], {patient: p._id}));
             } else {
 	              // Patient Link
                 var patient_link = ctx.getLinkCJFormat(router.routesList["patient"], {patient: ctx.patient._id});
@@ -55,6 +58,8 @@ module.exports = function(router) {
                 col.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: p._id}));
                 // Patient attachments
                 col.links.push(ctx.getLinkCJFormat(router.routesList["patientAttachments"], {patient: p._id}));
+                // Patient signature
+                col.links.push(ctx.getLinkCJFormat(router.routesList["patientSignature"], {patient: p._id}));
             }
 
 	          return item;

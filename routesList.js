@@ -47,6 +47,12 @@ module.exports = {
     rel: "external",
     prompt: "Archivo adjunto"
   },
+  patientSignature: {
+    name: "patientSignature",
+    href: "/api/patients/:patient/signature",
+    rel: "collection secondary",
+    prompt: "Firma"
+  },
   doctors: {
     name: "doctors",
     href: "/api/doctors",

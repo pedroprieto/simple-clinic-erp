@@ -215,6 +215,12 @@ module.exports = function(router) {
         col.links.push(ctx.getLinkCJFormat(router.routesList["patientInvoices"], {patient: ctx.patient._id}));
         // Patient attachments
         col.links.push(ctx.getLinkCJFormat(router.routesList["patientAttachments"], {patient: ctx.patient._id}));
+      // Patient Signature
+      col.links.push(
+        ctx.getLinkCJFormat(router.routesList["patientSignature"], {
+          patient: ctx.patient._id,
+        }),
+      );
 
         ctx.body = {collection: col};
         return next();
