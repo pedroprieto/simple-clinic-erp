@@ -2,28 +2,10 @@
 var CJUtils = require("../aux/CJUtils");
 
 module.exports = function (router) {
-  // // PUT item
-  // router.put(
-  //   router.routesList["patientVoucher"].name,
-  //   router.routesList["patientVoucher"].href,
-  //   async (ctx, next) => {
-  //     var patientVoucherData = CJUtils.parseTemplate(ctx);
-  //     var updatedVoucher = await ctx.patientVoucher.updatePatientVoucher(
-  //       patientVoucherData
-  //     );
-  //     var vouchers = [];
-  //     vouchers.push(updatedVoucher);
-  //     var col = await renderCollectionPatientVouchers(ctx, vouchers);
-  //     ctx.body = { collection: col };
-  //     return next();
-  //   }
-  // );
-
   router.get(
     router.routesList["patientSignature"].name,
     router.routesList["patientSignature"].href,
     async (ctx, next) => {
-      console.log(ctx.patient);
       var col = {};
       col.version = "1.0";
 
@@ -99,11 +81,9 @@ module.exports = function (router) {
 
   router.post(router.routesList["patientSignature"].href, async (ctx, next) => {
     var data = CJUtils.parseTemplate(ctx);
-    console.log(data);
     try {
       ctx.patient.signature = data.signature;
       await ctx.patient.save();
-      console.log("ey");
       ctx.status = 201;
       ctx.set(
         "location",
